@@ -44,6 +44,7 @@ setup(name='BuildStream-external',
       entry_points={
           'buildstream.plugins': [
               'dpkg_build = elements.dpkg_build',
-              'dpkg_deploy = elements.dpkg_deploy'
+              'dpkg_deploy = elements.dpkg_deploy',
+              'x86image = elements.x86image'
           ]
       })
