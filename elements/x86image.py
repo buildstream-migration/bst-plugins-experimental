@@ -42,7 +42,8 @@ class X86ImageElement(ScriptElement):
             "final-commands"
         ]
 
-        self.node_validate(node, (prefix + group for group in groups for prefix in prefixes))
+        self.node_validate(node, 
+            [prefix + group for group in groups for prefix in prefixes] + ["base", "input"])
 
         for group in groups:
             cmds = []
