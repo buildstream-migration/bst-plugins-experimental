@@ -27,7 +27,7 @@ Default Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
 The dpkg_deploy default configuration:
-  .. literalinclude:: ../../../buildstream/plugins/elements/dpkg_deploy.yaml
+  .. literalinclude:: ../../elements/dpkg_deploy.yaml
      :language: yaml
 
 Public Data
