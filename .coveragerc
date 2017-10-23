@@ -1,0 +1,22 @@
+[run]
+concurrency = multiprocessing
+include =
+  */buildstream/*
+  */bst-external/*
+
+omit =
+  # Omit profiling helper module
+  */buildstream/_profile.py
+
+[report]
+show_missing = True
+precision = 2
+
+[paths]
+buildstream =
+    buildstream/
+    */site-packages/buildstream/
+    */buildstream/buildstream/
+bst-external-elements =
+    elements/
+    */site-packages/elements
