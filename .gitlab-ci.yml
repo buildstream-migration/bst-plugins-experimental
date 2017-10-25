@@ -6,6 +6,7 @@ cache:
 
 stages:
   - test
+  - docs
 
 before_script:
   # Diagnostics
@@ -58,4 +59,25 @@ integration_unix:
     paths:
     - coverage-unix/
     - logs-unix/
+
+# Automatically build documentation, only for merges which land
+# on master branch.
+#
+# Note: We still do not enforce a consistent installation of python2
+#       or sphinx, as python2 will significantly grow the backing image.
+#
+pages:
+  stage: docs
+  script:
+  - dnf install -y python2
+  - pip3 install sphinx
+  - pip3 install sphinx-click
+  - pip3 install --user .
+  - make -C doc
+  - mv doc/build/html public
+  artifacts:
+    paths:
+    - public/
+  only:
+  - master
 
