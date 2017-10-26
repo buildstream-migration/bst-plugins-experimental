@@ -8,6 +8,7 @@ cache:
 stages:
   - prepare
   - test
+  - coverage
   - docs
 
 before_script:
@@ -119,6 +120,26 @@ integration_unix:
 
   dependencies:
   - source_dist
+
+#####################################################
+#                Coverage stage                     #
+#####################################################
+
+# Collate coverage reports
+#
+coverage:
+  stage: coverage
+  script:
+    - pip3 install --no-index .
+    - mkdir report
+    - cd report
+    - cp ../coverage-linux/coverage.linux .coverage
+    - cp ../coverage-unix/coverage.unix .
+    - coverage combine --rcfile=../.coveragerc -a ../coverage-unix/coverage.unix
+    - coverage report --rcfile=../.coveragerc -m
+  dependencies:
+  - integration_linux
+  - integration_unix
 
 # Automatically build documentation, only for merges which land
 # on master branch.
