@@ -34,8 +34,7 @@ from buildstream import ScriptElement
 # Element implementation for the 'x86image' kind.
 class X86ImageElement(ScriptElement):
     def configure(self, node):
-        prefixes = ["pre-", "", "post-"]
-        groups = [
+        command_steps = [
             "filesystem-tree-setup-commands",
             "filesystem-image-creation-commands",
             "partition-commands",
@@ -43,16 +42,13 @@ class X86ImageElement(ScriptElement):
         ]
 
         self.node_validate(node, 
-            [prefix + group for group in groups for prefix in prefixes] + ["base", "input"])
+            commands + ["base", "input"])
 
-        for group in groups:
-            cmds = []
-            if group not in node:
-                raise ElementError("{}: Unexpectedly missing command group '{}'"
-                                   .format(self, group))
-            for prefix in prefixes:
-                if prefix + group in node:
-                    cmds += self.node_subst_list(node, prefix + group)
+        for step in command_steps:
+            if step not in node:
+                raise ElementError("{}: Unexpectedly missing command step '{}'"
+                                   .format(self, step))
+            cmds = self.node_subst_list(node, step)
             self.add_commands(group, cmds)
 
         self.layout_add(self.node_subst_member(node, 'base'), "/")
