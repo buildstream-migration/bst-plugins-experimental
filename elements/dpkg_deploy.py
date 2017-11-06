@@ -138,12 +138,8 @@ def md5sum_file(path):
 # Element implementation for the 'dpkg_deploy' kind.
 class DpkgDeployElement(ScriptElement):
     def configure(self, node):
-        prefixes = ["pre-", "", "post-"]
-        groups = ["build-commands"]
-
         self.node_validate(node, [
-            'pre-build-commands', 'build-commands', 'post-build-commands',
-            'base', 'input'
+            'build-commands', 'base', 'input'
         ])
 
         self.__input = self.node_subst_member(node, 'input')
@@ -152,15 +148,11 @@ class DpkgDeployElement(ScriptElement):
         self.layout_add(self.__input,
                         self.get_variable('build-root'))
         self.unedited_cmds = {}
-        for group in groups:
-            cmds = []
-            if group not in node:
-                raise ElementError("{}: Unexpectedly missing command group '{}'"
-                                   .format(self, group))
-            for prefix in prefixes:
-                if prefix + group in node:
-                    cmds += self.node_subst_list(node, prefix + group)
-            self.unedited_cmds[group] = cmds
+        if 'build-commands' not in node:
+            raise ElementError("{}: Unexpectedly missing command group '{}'"
+                               .format(self, group))
+        cmds = self.node_subst_list(node, 'build-commands')
+        self.unedited_cmds['build-commands'] = cmds
 
         self.set_work_dir()
         self.set_install_root()
