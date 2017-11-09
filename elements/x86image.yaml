@@ -12,6 +12,8 @@ variables:
   swap-size: 1G
   sector-size: 512
 
+  kernel-args: root=/dev/sda2 rootfstype=ext4 rootdelay=20 init=/sbin/init
+
 config:
   # The element that should be staged into "/". It must contain
   # all the tools required to generate the image
@@ -59,7 +61,7 @@ config:
     KERNEL /vmlinuz
     INITRD /initramfs.gz
   
-    APPEND root=/dev/sda2 rootfstype=ext4 rootdelay=20 init=/sbin/init
+    APPEND %{kernel-args}
     EOF
   filesystem-image-creation-commands:
   - |
@@ -85,6 +87,7 @@ config:
     # Create swap
     truncate -s %{swap-size} /buildstream/sda3.img
     mkswap -L swap /buildstream/sda3.img
+
   partition-commands:
   - |
     ########################################
