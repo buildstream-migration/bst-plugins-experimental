@@ -42,14 +42,14 @@ class X86ImageElement(ScriptElement):
         ]
 
         self.node_validate(node, 
-            commands + ["base", "input"])
+            command_steps + ["base", "input"])
 
         for step in command_steps:
             if step not in node:
                 raise ElementError("{}: Unexpectedly missing command step '{}'"
                                    .format(self, step))
             cmds = self.node_subst_list(node, step)
-            self.add_commands(group, cmds)
+            self.add_commands(step, cmds)
 
         self.layout_add(self.node_subst_member(node, 'base'), "/")
         self.layout_add(None, '/buildstream')
