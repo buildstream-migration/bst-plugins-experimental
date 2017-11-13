@@ -18,5 +18,5 @@ buildstream =
     */site-packages/buildstream/
     */buildstream/buildstream/
 bst-external-elements =
-    elements/
-    */site-packages/elements
+    bst_external/elements/
+    */site-packages/bst_external/elements
