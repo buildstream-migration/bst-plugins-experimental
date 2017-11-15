@@ -39,13 +39,13 @@ setup(name='BuildStream-external',
       ],
       package_data={
           'buildstream': [
-              'elements/**.yaml'
+              'bst_external/elements/**.yaml'
           ]
       },
       entry_points={
           'buildstream.plugins': [
-              'dpkg_build = elements.dpkg_build',
-              'dpkg_deploy = elements.dpkg_deploy',
-              'x86image = elements.x86image'
+              'dpkg_build = bst_external.elements.dpkg_build',
+              'dpkg_deploy = bst_external.elements.dpkg_deploy',
+              'x86image = bst_external.elements.x86image'
           ]
       })
