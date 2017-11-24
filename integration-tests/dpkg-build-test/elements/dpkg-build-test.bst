@@ -1,4 +1,4 @@
-kind: "buildstream-external:dpkg_build"
+kind: dpkg_build
 description: dpkg-build test
 
 depends:

@@ -1,4 +1,4 @@
-kind: "buildstream-external:dpkg_deploy"
+kind: dpkg_deploy
 description: dpkg-deploy test
 
 depends:
