@@ -35,6 +35,7 @@ setup(name='BuildStream-external',
       packages=find_packages(),
       include_package_data=True,
       install_requires=[
+          'requests',
           'setuptools'
       ],
       package_data={
@@ -44,6 +45,7 @@ setup(name='BuildStream-external',
       },
       entry_points={
           'buildstream.plugins': [
+              'docker = bst_external.sources.docker',
               'dpkg_build = bst_external.elements.dpkg_build',
               'dpkg_deploy = bst_external.elements.dpkg_deploy',
               'x86image = bst_external.elements.x86image'
