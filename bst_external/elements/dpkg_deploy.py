@@ -188,7 +188,7 @@ class DpkgDeployElement(ScriptElement):
                                self.get_variable("build-root").lstrip(os.sep))
             dst = os.path.join(src, package)
             os.makedirs(dst, exist_ok=True)
-            utils.link_files(src, dst, package_splits)
+            utils.link_files(src, dst, files=package_splits)
 
             # Create this dir. If it already exists,
             # something unexpected has happened.
