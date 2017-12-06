@@ -13,6 +13,7 @@ variables:
   sector-size: 512
 
   kernel-args: root=/dev/sda2 rootfstype=ext4 rootdelay=20 init=/sbin/init
+  kernel-name: vmlinuz
 
 config:
   # The element that should be staged into "/". It must contain
@@ -58,7 +59,7 @@ config:
     DEFAULT boot
     LABEL boot
   
-    KERNEL /vmlinuz
+    KERNEL /%{kernel-name}
     INITRD /initramfs.gz
   
     APPEND %{kernel-args}
