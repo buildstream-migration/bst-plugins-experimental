@@ -46,17 +46,19 @@ endif
 #   from how sphinx does it, allowing us to get what we want
 #   from plugin documentation.
 #
-define create-element-skeletons
-	@ls source
-	@for file in source/elements.*.rst; do 			\
-		base=$$(basename $$file);                       \
-		module=$${base%.rst};                           \
-		modname=$${base#elements.};                     \
-	    sed -e "s|@@MODULENAME@@|$${modname}|g" 		\
-	        -e "s|@@MODULE@@|$${module}|g" 			\
-		source/plugin.rsttemplate > $${file}.tmp && 	\
-		mv $${file}.tmp $${file} || exit 1; 		\
-	done
+define plugin-doc-skeleton
+    @for file in $$(find ${1}/${2} -name "*.py" ! -name "__init__.py"); do \
+        base=$$(basename $$file);                                   \
+        module=${2}.$${base%.py};                                        \
+        modname=$${base%.py};                                       \
+        echo -n "Generating source/${2}/$${modname}.rst... ";       \
+        sed -e "s|@@MODULENAME@@|$${modname}|g"                     \
+            -e "s|@@MODULE@@|$${module}|g"                          \
+            source/plugin.rsttemplate >                             \
+            source/${2}/$${modname}.rst.tmp &&                      \
+            mv source/${2}/$${modname}.rst.tmp source/${2}/$${modname}.rst || exit 1; \
+        echo "Done."; \
+    done
 endef
 
 # We set PYTHONPATH here because source/conf.py sys.modules hacks dont seem to help sphinx-build import the plugins
@@ -67,17 +69,19 @@ all: html devhelp
 templates:
 	mkdir -p source/elements
 	mkdir -p source/sources
-	sphinx-apidoc --force --separate --module-first --no-headings -o source $(CURDIR)/..
-	$(call create-element-skeletons)
+	$(call plugin-doc-skeleton,$(CURDIR)/../bst_external,elements)
+	$(call plugin-doc-skeleton,$(CURDIR)/../bst_external,sources)
 
 # Targets which generate docs with sphinx build
 #
 #
 html devhelp: templates
 	@echo "Building $@..."
-	PYTHONPATH=$(CURDIR)/.. \
+	PYTHONPATH=$(CURDIR)/../bst_external \
 	    $(SPHINXBUILD) -b $@ $(ALLSPHINXOPTS) "$(BUILDDIR)/$@" \
-	    $(wildcard source/*.rst)
+	    $(wildcard source/*.rst) \
+	    $(wildcard source/elements/*.rst) \
+	    $(wildcard source/sources/*.rst)
 	@echo
 	@echo "Build of $@ finished, output: $(CURDIR)/$(BUILDDIR)/$@"
 
