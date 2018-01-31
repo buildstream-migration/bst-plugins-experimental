@@ -114,7 +114,7 @@ import filecmp
 import os
 import re
 
-from buildstream import BuildElement, utils
+from buildstream import BuildElement, utils, ElementError
 
 
 # Element implementation for the 'dpkg' kind.
@@ -190,8 +190,8 @@ class DpkgElement(BuildElement):
             # DEBIAN/control goes into bst.dpkg-data.<package>.control
             controlpath = os.path.join(package_path, "DEBIAN", "control")
             if not os.path.exists(controlpath):
-                self.error("{}: package {} doesn't have a DEBIAN/control in {}!"
-                           .format(self.name, package, package_path))
+                raise ElementError("{}: package {} doesn't have a DEBIAN/control in {}!"
+                                   .format(self.name, package, package_path))
             with open(controlpath, "r") as f:
                 controldata = f.read()
             new_dpkg_data[package] = {"control": controldata, "name": package}
