@@ -45,12 +45,13 @@ goes in which package, e.g.
 .. code:: yaml
 
    public:
-     split-rules:
-       foo:
-       - /sbin/foo
-       - /usr/bin/bar
-       bar:
-       - /etc/quux
+     bst:
+       split-rules:
+         foo:
+         - /sbin/foo
+         - /usr/bin/bar
+         bar:
+         - /etc/quux
 
 dpkg-data
 ---------
@@ -63,13 +64,14 @@ The control field is used to generate the control file for each package, e.g.
 .. code:: yaml
 
    public:
-     dpkg-data:
-       foo:
-         control: |
-           Source: foo
-           Section: blah
-           Build-depends: bar (>= 1337), baz
-           ...
+     bst:
+       dpkg-data:
+         foo:
+           control: |
+             Source: foo
+             Section: blah
+             Build-depends: bar (>= 1337), baz
+             ...
 
 name
 ''''
@@ -84,18 +86,20 @@ i.e. in an element named foo:
 .. code:: yaml
 
    public:
-     dpkg-data:
-       bar:
-         name: foobar
+     bst:
+       dpkg-data:
+         bar:
+           name: foobar
 
 will be named "foobar", while the following data:
 
 .. code:: yaml
 
    public:
-     dpkg-data:
-       bar:
-         ...
+     bst:
+       dpkg-data:
+         bar:
+           ...
 
 will create a package named "foo-bar"
 
@@ -109,15 +113,16 @@ raw text, e.g.
 .. code:: yaml
 
    public:
-     package-scripts:
-       foo:
-         preinst: |
-           #!/usr/bin/bash
-           /sbin/ldconfig
-       bar:
-         postinst: |
-           #!/usr/bin/bash
-           /usr/share/fonts/generate_fonts.sh
+     bst:
+       package-scripts:
+         foo:
+           preinst: |
+             #!/usr/bin/bash
+             /sbin/ldconfig
+         bar:
+           postinst: |
+             #!/usr/bin/bash
+             /usr/share/fonts/generate_fonts.sh
 
 """
 

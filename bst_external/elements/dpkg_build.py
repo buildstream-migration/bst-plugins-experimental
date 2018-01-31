@@ -45,12 +45,13 @@ e.g.
 .. code:: yaml
 
    public:
-     split-rules:
-       foo:
-       - /sbin/foo
-       - /usr/bin/bar
-       bar:
-       - /etc/quux
+     bst:
+       split-rules:
+         foo:
+         - /sbin/foo
+         - /usr/bin/bar
+         bar:
+         - /etc/quux
 
 dpkg-data
 ---------
@@ -64,13 +65,14 @@ e.g.
 .. code:: yaml
 
    public:
-     dpkg-data:
-       foo:
-         control: |
-           Source: foo
-           Section: blah
-           Build-depends: bar (>= 1337), baz
-           ...
+     bst:
+       dpkg-data:
+         foo:
+           control: |
+             Source: foo
+             Section: blah
+             Build-depends: bar (>= 1337), baz
+             ...
 
 name
 ''''
@@ -81,9 +83,10 @@ e.g.
 .. code:: yaml
 
    public:
-     dpkg-data:
-       foo:
-         name: foobar
+     bst:
+       dpkg-data:
+         bar:
+           name: foobar
 
 package-scripts
 ---------------
@@ -94,15 +97,16 @@ package if they are detected. They are written as raw text. e.g.
 .. code:: yaml
 
    public:
-     package-scripts:
-       foo:
-         preinst: |
-           #!/usr/bin/bash
-           /sbin/ldconfig
-       bar:
-         postinst: |
-           #!/usr/bin/bash
-           /usr/share/fonts/generate_fonts.sh
+     bst:
+       package-scripts:
+         foo:
+           preinst: |
+             #!/usr/bin/bash
+             /sbin/ldconfig
+         bar:
+           postinst: |
+             #!/usr/bin/bash
+             /usr/share/fonts/generate_fonts.sh
 
 """
 
