@@ -129,7 +129,7 @@ raw text, e.g.
 import hashlib
 import os
 import re
-from buildstream import ScriptElement, Scope, utils
+from buildstream import ScriptElement, Scope, utils, ElementError
 
 
 def md5sum_file(path):
@@ -175,19 +175,19 @@ class DpkgDeployElement(ScriptElement):
         # then reconstitute the /DEBIAN files.
         input_elm = self.search(Scope.BUILD, self.__input)
         if not input_elm:
-            self.error("{}: Failed to find input element {} in build-depends"
-                       .format(self.name, self.__input))
+            raise ElementError("{}: Failed to find input element {} in build-depends"
+                               .format(self.name, self.__input))
             return
         bstdata = input_elm.get_public_data('bst')
         if "dpkg-data" not in bstdata:
-            self.error("{}: input element {} does not have any bst.dpkg-data public data"
-                       .format(self.name, self.__input))
+            raise ElementError("{}: input element {} does not have any bst.dpkg-data public data"
+                               .format(self.name, self.__input))
         for package, package_data in self.node_items(bstdata['dpkg-data']):
             package_name = package_data.get("name", "{}-{}".format(input_elm.normal_name, package))
             if not ("split-rules" in bstdata and
                     package in bstdata["split-rules"]):
-                self.error("{}: Input element {} does not have bst.split-rules.{}"
-                           .format(self.name, self.__input.name, package))
+                raise ElementError("{}: Input element {} does not have bst.split-rules.{}"
+                                   .format(self.name, self.__input.name, package))
             package_splits = bstdata['split-rules'][package]
             src = os.path.join(sandbox.get_directory(),
                                self.get_variable("build-root").lstrip(os.sep))
@@ -203,8 +203,8 @@ class DpkgDeployElement(ScriptElement):
             # Recreate the DEBIAN files.
             # control is extracted verbatim, and is mandatory.
             if "control" not in package_data:
-                self.error("{}: Cannot reconstitute package {}".format(self.name, package),
-                           detail="There is no public.bst.dpkg-data.{}.control".format(package))
+                raise ElementError("{}: Cannot reconstitute package {}".format(self.name, package),
+                                   detail="There is no public.bst.dpkg-data.{}.control".format(package))
             controlpath = os.path.join(debiandir, "control")
             controltext = package_data["control"]
             # Slightly ugly way of renaming the package
@@ -240,13 +240,13 @@ class DpkgDeployElement(ScriptElement):
         if not input_elm:
             detail = ("Available elements are {}"
                       .format("\n".join([x.name for x in self.dependencies(Scope.BUILD)])))
-            self.error("{} Failed to find element {}".format(self.name, self.__input),
-                       detail=detail)
+            raise ElementError("{} Failed to find element {}".format(self.name, self.__input),
+                               detail=detail)
 
         bstdata = input_elm.get_public_data("bst")
         if "dpkg-data" not in bstdata:
-            self.error("{}: Can't get package list for {}, no bst.dpkg-data"
-                       .format(self.name, self.__input))
+            raise ElementError("{}: Can't get package list for {}, no bst.dpkg-data"
+                               .format(self.name, self.__input))
         return " ".join([k for k, v in self.node_items(bstdata["dpkg-data"])])
 
     def _sub_packages_list(self, cmdlist):
