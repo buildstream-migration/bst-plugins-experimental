@@ -189,11 +189,12 @@ class DpkgDeployElement(ScriptElement):
                 raise ElementError("{}: Input element {} does not have bst.split-rules.{}"
                                    .format(self.name, self.__input.name, package))
             package_splits = bstdata['split-rules'][package]
+            package_files = input_elm.compute_manifest(include=[package])
             src = os.path.join(sandbox.get_directory(),
                                self.get_variable("build-root").lstrip(os.sep))
             dst = os.path.join(src, package)
             os.makedirs(dst, exist_ok=True)
-            utils.link_files(src, dst, files=package_splits)
+            utils.link_files(src, dst, files=package_files)
 
             # Create this dir. If it already exists,
             # something unexpected has happened.
@@ -216,7 +217,7 @@ class DpkgDeployElement(ScriptElement):
 
             # Generate a DEBIAN/md5sums file from the artifact
             md5sums = {}
-            for split in package_splits:
+            for split in package_files:
                 filepath = os.path.join(src, split.lstrip(os.sep))
                 if os.path.isfile(filepath):
                     md5sums[split] = md5sum_file(filepath)
