@@ -19,6 +19,8 @@ before_script:
   - adduser -m buildstream
   - chown -R buildstream:buildstream .
 
+  - pip3 install requests
+
 integration_linux:
   stage: test
 
@@ -80,4 +82,3 @@ pages:
     - public/
   only:
   - master
-
