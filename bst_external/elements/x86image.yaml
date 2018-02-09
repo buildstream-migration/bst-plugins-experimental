@@ -81,7 +81,7 @@ config:
   - |
     # Now create the root filesys on sda2
     truncate -s %{rootfs-size} /buildstream/sda2.img
-    mkfs.ext4 -F -i 8192 /buildstream/sda2.img -L root -d /buildstream/sda2
+    mkfs.ext4 -F -i 8192 -L root -d /buildstream/sda2 /buildstream/sda2.img
 
   - |
     # Create swap
@@ -95,9 +95,9 @@ config:
     ########################################
 
     # First get the size in bytes
-    sda1size=$(stat --printf="%s" /buildstream/sda1.img)
-    sda2size=$(stat --printf="%s" /buildstream/sda2.img)
-    sda3size=$(stat --printf="%s" /buildstream/sda3.img)
+    sda1size=$(stat -c "%s" /buildstream/sda1.img | head -c -1)
+    sda2size=$(stat -c "%s" /buildstream/sda2.img | head -c -1)
+    sda3size=$(stat -c "%s" /buildstream/sda3.img | head -c -1)
 
     # Now convert to sectors
     sda1sec=$(( ${sda1size} / %{sector-size} ))
