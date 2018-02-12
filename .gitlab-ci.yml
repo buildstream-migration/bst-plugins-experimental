@@ -1,4 +1,4 @@
-image: buildstream/buildstream-fedora:master-26-3fd7fe1
+image: buildstream/buildstream-fedora:master-46-dbed35e
 
 cache:
   paths:
@@ -18,6 +18,8 @@ before_script:
   - export XDG_CACHE_HOME="$(pwd)/cache"
   - adduser -m buildstream
   - chown -R buildstream:buildstream .
+
+  - pip3 install requests
 
 integration_linux:
   stage: test
@@ -80,4 +82,3 @@ pages:
     - public/
   only:
   - master
-
