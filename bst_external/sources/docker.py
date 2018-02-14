@@ -102,7 +102,7 @@ def default_os():
 # registry.
 #
 class DockerManifestError(SourceError):
-    def __init__(self, message, manifest):
+    def __init__(self, message, manifest=None):
         super(DockerManifestError, self).__init__(message)
         self.manifest = manifest
 
@@ -198,7 +198,11 @@ class DockerRegistryV2Client():
             image_path + '/manifests/' + urllib.parse.quote(reference),
             extra_headers={'Accept': ','.join(accept_types)})
 
-        manifest = response.json()
+        try:
+            manifest = json.loads(response.text)
+        except json.JSONDecodeError as e:
+            raise DockerManifestError("Server did not return a valid manifest: {}".format(e),
+                                      manifest=response.text)
 
         schema_version = manifest.get('schemaVersion')
         if schema_version == 1:
@@ -327,7 +331,7 @@ class DockerSource(Source):
             try:
                 manifest, digest = self.client.manifest(self.image, self.tag)
             except DockerManifestError as e:
-                self.log("Unexpected manifest", detail=e.manifest)
+                self.log("Problem downloading manifest", detail=e.manifest)
                 raise
             except (OSError, requests.RequestException) as e:
                 raise SourceError(e) from e
