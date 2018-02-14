@@ -48,6 +48,7 @@ setup(name='BuildStream-external',
               'docker = bst_external.sources.docker',
               'dpkg_build = bst_external.elements.dpkg_build',
               'dpkg_deploy = bst_external.elements.dpkg_deploy',
+              'flatpak_image = bst_external.elements.flatpak_image',
               'x86image = bst_external.elements.x86image'
           ]
       })

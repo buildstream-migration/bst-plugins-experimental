@@ -51,12 +51,12 @@ class FlatpakImageElement(Element):
     def preflight(self):
         runtime_deps = list(self.dependencies(Scope.RUN, recurse=False))
         if runtime_deps:
-            raise ElementError("{}: Only build type dependencies supported by flatpak-image elements"
+            raise ElementError("{}: Only build type dependencies supported by flatpak_image elements"
                                .format(self))
 
         sources = list(self.sources())
         if sources:
-            raise ElementError("{}: flatpak-image elements may not have sources".format(self))
+            raise ElementError("{}: flatpak_image elements may not have sources".format(self))
 
     def get_unique_key(self):
         key = {}
