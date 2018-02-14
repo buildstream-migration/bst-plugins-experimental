@@ -96,6 +96,15 @@ def default_os():
     return platform.system().lower()
 
 
+# Variant of urllib.parse.urljoin() allowing multiple path components at once.
+def urljoin(url, *args):
+    for arg in args:
+        if not url.endswith('/'):
+            url += '/'
+        url = urllib.parse.urljoin(url, arg.lstrip('/'))
+    return url
+
+
 # DockerManifestError
 #
 # Raised if something goes wrong while querying an image manifest from a remote
@@ -126,7 +135,7 @@ class DockerRegistryV2Client():
         if self.token:
             headers['Authorization'] = 'Bearer {}'.format(self.token)
 
-        url = self.endpoint + '/v2/' + subpath
+        url = urljoin(self.endpoint, 'v2', subpath)
         response = requests.get(url, headers=headers, stream=stream,
                                 timeout=self.api_timeout)
 
@@ -194,9 +203,9 @@ class DockerRegistryV2Client():
         accept_types = ['application/vnd.docker.distribution.manifest.v2+json',
                         'application/vnd.docker.distribution.manifest.list.v2+json']
 
+        manifest_url = urljoin(image_path, 'manifests', urllib.parse.quote(reference))
         response = self._request(
-            image_path + '/manifests/' + urllib.parse.quote(reference),
-            extra_headers={'Accept': ','.join(accept_types)})
+            manifest_url, extra_headers={'Accept': ','.join(accept_types)})
 
         try:
             manifest = json.loads(response.text)
@@ -255,8 +264,9 @@ class DockerRegistryV2Client():
     #    blob_digest (str): Content hash of the blob.
     #    download_to (str): Path to a file where the content will be written.
     def blob(self, image_path, blob_digest, download_to):
-        response = self._request(
-            image_path + '/blobs/' + urllib.parse.quote(blob_digest), stream=True)
+        blob_url = urljoin(image_path, 'blobs', urllib.parse.quote(blob_digest))
+
+        response = self._request(blob_url, stream=True)
 
         with save_file_atomic(download_to, 'wb') as f:
             shutil.copyfileobj(response.raw, f)
