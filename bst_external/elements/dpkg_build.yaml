@@ -21,22 +21,12 @@ variables:
     done
   clear-debian: |
     rm -r %{install-root}/DEBIAN
-  patch: |
-    if grep -q "3.0 (quilt)" debian/source/format; then
-      quilt push -a
-    fi
 
   # Set this if the sources cannot handle parallelization.
   #
   # notparallel: True
 
 config:
-
-  # Commands for configuring the software
-  #
-  configure-commands:
-  - |
-    %{patch}
 
   # Commands for building the software
   #

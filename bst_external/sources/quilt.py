@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+#
+#  Copyright (C) 2018 Codethink Limited
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2 of the License, or (at your option) any later version.
+#
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public
+#  License along with this library. If not, see <http://www.gnu.org/licenses/>.
+#
+#  Authors:
+#        Phillip Smyth <phillip.smyth@codethink.co.uk>
+
+import os
+from buildstream import Source, SourceError, Consistency
+from buildstream import utils
+
+class QuiltSource(Source):
+
+    def configure(self, node):
+        self.path = self.node_get_member(node, str, "path", "")
+
+    def preflight(self):
+        # Check if patch is installed, get the binary at the same time
+        self.host_quilt = utils.get_host_tool("quilt")
+
+    def get_unique_key(self):
+        return [self.path]
+
+    def get_consistency(self):
+        return Consistency.CACHED
+
+    def get_ref(self):
+        return None  # pragma: nocover
+
+    def set_ref(self, ref, node):
+        pass  # pragma: nocover
+
+    def fetch(self):
+        pass  # pragma: nocover
+
+    def stage(self, directory):
+        patch_dir = os.path.join(directory, self.path)
+        with self.timed_activity("quilt: Applying patches: {}".format(patch_dir)):
+            if not os.path.isdir(patch_dir):
+                raise SourceError("Directory does not exist '{}'".format(patch_dir),
+                                  reason="no-dir-found")
+            # Call quilt command
+            self.command = [self.host_quilt, "push", "-a"]
+            self.call(self.command, cwd=patch_dir, fail="Error occurred while calling {}".format(self.command))
+
+# Plugin entry point
+def setup():
+    return QuiltSource
