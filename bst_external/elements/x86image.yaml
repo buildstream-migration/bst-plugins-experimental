@@ -31,15 +31,12 @@ config:
     # is created separately.
   
     cd /buildstream
-    mkdir -p /buildstream/sda1
-    mkdir -p /buildstream/sda2
-  
-    mv %{build-root}/boot/* /buildstream/sda1
-    mv %{build-root}/* /buildstream/sda2
+    mkdir -p /buildstream/boot
+    mv %{build-root}/boot/* /buildstream/boot
   
   - |
     # Generate an fstab
-    cat > /buildstream/sda2/etc/fstab << EOF
+    cat > %{build-root}/etc/fstab << EOF
     /dev/sda2   /       ext4   defaults,rw,noatime   0 1
     /dev/sda1   /boot   vfat   defaults              0 2
     /dev/sda3   none    swap   defaults              0 0
@@ -47,8 +44,8 @@ config:
   
   - |
     # Create the syslinux config
-    mkdir -p /buildstream/sda1/syslinux
-    cat > /buildstream/sda1/syslinux/syslinux.cfg << EOF
+    mkdir -p /buildstream/boot/syslinux
+    cat > /buildstream/boot/syslinux/syslinux.cfg << EOF
     PROMPT 0
     TIMEOUT 5
   
@@ -71,7 +68,7 @@ config:
 
   - |
     # Copy all that stuff into the image
-    mcopy -D s -i /buildstream/sda1.img -s /buildstream/sda1/* ::/
+    mcopy -D s -i /buildstream/sda1.img -s /buildstream/boot/* ::/
 
   - |
     # Install the bootloader on the image, it should get the config file
@@ -81,7 +78,7 @@ config:
   - |
     # Now create the root filesys on sda2
     truncate -s %{rootfs-size} /buildstream/sda2.img
-    mkfs.ext4 -F -i 8192 -L root -d /buildstream/sda2 /buildstream/sda2.img
+    mkfs.ext4 -F -i 8192 -L root -d %{build-root} /buildstream/sda2.img
 
   - |
     # Create swap
