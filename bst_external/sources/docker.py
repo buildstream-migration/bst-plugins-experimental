@@ -62,7 +62,7 @@ import tarfile
 import urllib.parse
 
 from buildstream import Source, SourceError, Consistency
-from buildstream.utils import save_file_atomic, sha256sum
+from buildstream.utils import save_file_atomic, sha256sum, link_files
 
 _DOCKER_HUB_URL = 'https://registry.hub.docker.com'
 
@@ -434,7 +434,10 @@ class DockerSource(Source):
 
                 with tarfile.open(blob_path) as tar:
                     members = filter(tar_filter, tar.getmembers())
-                    tar.extractall(path=directory, members=members)
+                    with self.tempdir() as td:
+                        tar.extractall(path=td, members=members)
+                        link_files(td, directory)
+
         except (OSError, SourceError, tarfile.TarError) as e:
             raise SourceError("{}: Error staging source: {}".format(self, e)) from e
 
