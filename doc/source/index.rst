@@ -23,4 +23,4 @@ Contained Sources
 -----------------
 
 * :mod:`docker <sources.docker>`
-* :mod:`quild <sources.quilt>`
+* :mod:`quilt <sources.quilt>`

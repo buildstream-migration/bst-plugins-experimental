@@ -17,6 +17,21 @@
 #
 #  Authors:
 #        Phillip Smyth <phillip.smyth@codethink.co.uk>
+"""A source implementation for using quilt to add patches.
+
+**Usage:**
+
+.. code:: yaml
+
+   # Specify the docker source kind
+   kind: quilt
+
+   # Specify the directory containing the series file
+   path: patches
+
+   # The directory containing the series file should also contain all patches.
+   # This would ideally be located within the `files` directory.
+"""
 
 import os
 from buildstream import Source, SourceError, Consistency
