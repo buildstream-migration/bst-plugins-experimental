@@ -2,9 +2,10 @@ image: buildstream/buildstream-fedora:master-51-3d94bd2
 
 cache:
   paths:
-    - cache/buildstream/sources/
+    - cache/
 
 stages:
+  - prepare
   - test
   - docs
 
@@ -13,54 +14,110 @@ before_script:
   - mount
   - df -h
 
-  # Store cache in the project directory
-  - if [ -d "$(pwd)/cache" ]; then chmod -R a+rw "$(pwd)/cache"; fi
-  - export XDG_CACHE_HOME="$(pwd)/cache"
   - adduser -m buildstream
   - chown -R buildstream:buildstream .
 
+  - pip3 install pytest
   - pip3 install requests
+
+#####################################################
+#                  Prepare stage                    #
+#####################################################
+
+# Create a source distribution
+#
+source_dist:
+  stage: prepare
+  script:
+
+  # Generate the source distribution tarball
+  #
+  - python3 setup.py sdist
+  - tar -ztf dist/*
+  - tarball=$(cd dist && echo $(ls *))
+
+  # Create an installer script
+  - |
+    cat > dist/install.sh << EOF
+    #!/bin/sh
+    tar -zxf ${tarball}
+    cd ${tarball%.tar.gz}
+    pip3 install --no-index .
+    EOF
+
+  # unpack tarball as `dist/bst-external` directory
+  - |
+    cat > dist/unpack.sh << EOF
+    #!/bin/sh
+    tar -zxf ${tarball}
+    mv ${tarball%.tar.gz} bst-external
+    EOF
+
+  # Make our helpers executable
+  - chmod +x dist/install.sh
+  - chmod +x dist/unpack.sh
+  artifacts:
+    paths:
+    - dist/
+
+#####################################################
+#                    Test stage                     #
+#####################################################
 
 integration_linux:
   stage: test
-
+  variables:
+    PYTEST_ADDOPTS: "--color=yes"
   script:
-    - pip3 install --no-index .
-    - cd integration-tests
 
-    # We run as a simple user to test for permission issues
-    - su buildstream -c './run-test.sh --arg --colors --cov ../.coveragerc --sources ${XDG_CACHE_HOME}/buildstream/sources test'
+    - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
+    
+    # Unpack and get into dist/bst-external
+    - cd dist && ./unpack.sh
+    - chown -R buildstream:buildstream bst-external
+    - cd bst-external
 
-    - cd ..
+    # Run the trsts from the source distribution.
+    # We run as a simple user to test for permission issues.
+    - su buildstream -c 'python3 setup.py test --index-url invalid://uri'
+
+    # Go back top level and collect our reports
+    - cd ../.. #you may only have to go back one level here...
     - mkdir -p coverage-linux/
-    - cp integration-tests/.coverage coverage-linux/coverage.linux
-    - cp -a integration-tests/tmp/logs logs-linux
-
+    - cp dist/bst-external/.coverage.* coverage-linux/coverage.linux
   artifacts:
     paths:
     - coverage-linux/
-    - logs-linux/
+  dependencies:
+  - source_dist
 
 integration_unix:
   stage: test
   variables:
     BST_FORCE_BACKEND: "unix"
+    PYTEST_ADDOPTS: "--color=yes"
   script:
-    - pip3 install --no-index .
-    - cd integration-tests
+
+    - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
+
+    # Unpack and get into dist/bst-external
+    - cd dist && ./unpack.sh && cd bst-external
 
     # Since the unix platform is required to run as root, no user change required
-    - ./run-test.sh --arg --colors --cov ../.coveragerc --sources ${XDG_CACHE_HOME}/buildstream/sources test
+    - python3 setup.py test --index-url invalid://uri
 
-    - cd ..
+    # Go back top level and collect our reports
+    - cd ../..
     - mkdir -p coverage-unix/
-    - cp integration-tests/.coverage coverage-unix/coverage.unix
-    - cp -a integration-tests/tmp/logs logs-unix
+    - cp dist/bst-external/.coverage.* coverage-unix/coverage.unix
 
   artifacts:
     paths:
     - coverage-unix/
     - logs-unix/
+
+  dependencies:
+  - source_dist
 
 # Automatically build documentation, only for merges which land
 # on master branch.
@@ -68,6 +125,11 @@ integration_unix:
 # Note: We still do not enforce a consistent installation of python2
 #       or sphinx, as python2 will significantly grow the backing image.
 #
+
+#####################################################
+#                  Docs stage                       #
+#####################################################
+
 pages:
   stage: docs
   script:
