@@ -303,7 +303,7 @@ class DockerSource(Source):
         return [self.original_url, self.digest]
 
     def get_ref(self):
-        return self._digest_to_ref(self.digest)
+        return None if self.digest is None else self._digest_to_ref(self.digest)
 
     def set_ref(self, ref, node):
         node['ref'] = ref
