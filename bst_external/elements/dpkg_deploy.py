@@ -154,8 +154,8 @@ class DpkgDeployElement(ScriptElement):
                         self.get_variable('build-root'))
         self.unedited_cmds = {}
         if 'build-commands' not in node:
-            raise ElementError("{}: Unexpectedly missing command group '{}'"
-                               .format(self, group))
+            raise ElementError("{}: Unexpectedly missing command: 'build-commands'"
+                               .format(self))
         cmds = self.node_subst_list(node, 'build-commands')
         self.unedited_cmds['build-commands'] = cmds
 

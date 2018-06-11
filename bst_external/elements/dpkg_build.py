@@ -216,7 +216,8 @@ class DpkgElement(BuildElement):
         self.set_public_data("bst", bstdata)
 
         if bad_overlaps:
-            self.warn("Destructive overlaps found in some files!", "\n".join(bad_overlaps))
+            self.warn('Destructive overlaps found in some files',
+                      detail='\n'.join(bad_overlaps))
 
         return collectdir
 
