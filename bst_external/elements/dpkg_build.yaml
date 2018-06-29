@@ -2,9 +2,16 @@
 
 variables:
 
+  dpkg-workdir: "dpkg-build-area"
   rulesfile: "debian/rules"
-  build: "%{rulesfile} build"
-  binary: "env DH_OPTIONS='--destdir=.' %{rulesfile} binary"
+  clean: "cd %{dpkg-workdir} && %{rulesfile} clean"
+  build: "cd %{dpkg-workdir} && /usr/bin/make $MAKEFLAGS -f %{rulesfile} build"
+  binary: "cd %{dpkg-workdir} && %{rulesfile} binary"
+  prepare-dpkg-dir: |
+    /bin/chmod +x debian/rules
+    /bin/rm -rf .git || true
+    /bin/mkdir -p %{dpkg-workdir}
+    /bin/bash -O extglob -O dotglob -c "/bin/mv !(dpkg-build-area) dpkg-build-area"
 
   # packages' default value will be automatically replaced with
   # defaults calculated from debian/control. Replace this with a
@@ -15,12 +22,17 @@ variables:
   # packages: "foo foo-dev foo-doc"
   #
   packages: <PACKAGES>
+  extract-archives: |
+    for package in %{packages}; do
+      deb=$(echo ${package}_*.deb)
+      package_dir="debian/$package"
+      mkdir -p "$package_dir"
+      dpkg-deb --raw-extract "$deb" "$package_dir" || true
+    done
   install-packages: |
     for pkg in %{packages}; do
       cp -a debian/${pkg}/* %{install-root}
     done
-  clear-debian: |
-    rm -r %{install-root}/DEBIAN
 
   # Set this if the sources cannot handle parallelization.
   #
@@ -32,6 +44,10 @@ config:
   #
   build-commands:
   - |
+    %{prepare-dpkg-dir}
+  - |
+    %{clean}
+  - |
     %{build}
   - |
     %{binary}
@@ -41,9 +57,9 @@ config:
   #
   install-commands:
   - |
-    %{install-packages}
+    %{extract-archives}
   - |
-    %{clear-debian}
+    %{install-packages}
 
   # Commands for stripping debugging information out of
   # installed binaries
