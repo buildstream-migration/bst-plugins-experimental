@@ -1,4 +1,3 @@
-#
 # Copyright (c) 2017 freedesktop-sdk
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
