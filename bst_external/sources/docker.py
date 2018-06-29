@@ -25,8 +25,11 @@
    # Specify the docker source kind
    kind: docker
 
-   # Specify the registry endpoint, and the image path
-   url: https://registry.hub.docker.com/library/alpine
+   # Specify the registry endpoint, defaults to Docker Hub (optional)
+   registry-url: https://registry.hub.docker.com
+
+   # Image path (required)
+   image: library/alpine
 
    # Image tag to follow (optional)
    track: latest
@@ -58,6 +61,8 @@ import urllib.parse
 
 from buildstream import Source, SourceError, Consistency
 from buildstream.utils import save_file_atomic, sha256sum
+
+_DOCKER_HUB_URL = 'https://registry.hub.docker.com'
 
 
 def parse_bearer_authorization_challenge(text):
@@ -119,7 +124,7 @@ class DockerRegistryV2Client():
         if self.token:
             headers['Authorization'] = 'Bearer {}'.format(self.token)
 
-        url = self.endpoint + '/v2' + subpath
+        url = self.endpoint + '/v2/' + subpath
         response = requests.get(url, headers=headers, stream=stream,
                                 timeout=self.api_timeout)
 
@@ -269,11 +274,17 @@ class DockerSource(Source):
         return 'sha256:' + ref
 
     def configure(self, node):
+        # url is deprecated, but accept it as a valid key so that we can raise
+        # a nicer warning.
+        self.node_validate(node, ['registry-url', 'image', 'ref', 'track', 'url'] + Source.COMMON_CONFIG_KEYS)
 
-        self.node_validate(node, ['url', 'ref', 'track'] + Source.COMMON_CONFIG_KEYS)
+        if 'url' in node:
+            raise SourceError("{}: 'url' parameter is now deprecated, "
+                              "use 'registry-url' and 'image' instead.".format(self))
 
-        self.original_url = self.node_get_member(node, str, 'url')
-        self.url = self.translate_url(self.original_url)
+        self.image = self.node_get_member(node, str, 'image')
+        self.original_registry_url = self.node_get_member(node, str, 'registry-url', _DOCKER_HUB_URL)
+        self.registry_url = self.translate_url(self.original_registry_url)
 
         if 'ref' in node:
             self.digest = self._ref_to_digest(self.node_get_member(node, str, 'ref'))
@@ -287,11 +298,7 @@ class DockerSource(Source):
         if not (self.digest or self.tag):
             raise SourceError("{}: Must specify either 'ref' or 'track' parameters".format(self))
 
-        scheme, netloc, path, query, fragment = urllib.parse.urlsplit(self.url)
-        self.endpoint = urllib.parse.urlunsplit((scheme, netloc, '', '', ''))
-        self.image = path
-
-        self.client = DockerRegistryV2Client(self.endpoint)
+        self.client = DockerRegistryV2Client(self.registry_url)
 
         self.manifest = None
 
@@ -299,7 +306,7 @@ class DockerSource(Source):
         return
 
     def get_unique_key(self):
-        return [self.original_url, self.digest]
+        return [self.original_registry_url, self.image, self.digest]
 
     def get_ref(self):
         return None if self.digest is None else self._digest_to_ref(self.digest)
@@ -313,8 +320,8 @@ class DockerSource(Source):
         if not self.tag:
             return None
 
-        with self.timed_activity("Fetching image manifest for tag '{}' from : {}"
-                                 .format(self.tag, self.url)):
+        with self.timed_activity("Fetching image manifest for image: '{}:{}' from: {}"
+                                 .format(self.image, self.tag, self.registry_url)):
             try:
                 manifest, digest = self.client.manifest(self.image, self.tag)
             except DockerManifestError as e:
@@ -350,14 +357,18 @@ class DockerSource(Source):
                               format(path, blob_digest))
 
     def fetch(self):
-        with self.timed_activity("Fetching image {} with digest {}".format(self.image, self.digest),
+        with self.timed_activity("Fetching image {}:{} with digest {}".format(self.image, self.tag, self.digest),
                                  silent_nested=True):
             mirror_dir = self.get_mirror_directory()
 
             try:
                 manifest = self._load_manifest()
             except FileNotFoundError:
-                manifest_text, digest = self.client.manifest(self.image, self.digest)
+                try:
+                    manifest_text, digest = self.client.manifest(self.image, self.digest)
+                except requests.RequestException as e:
+                    raise SourceError(e) from e
+
                 if digest != self.digest:
                     raise SourceError("Requested image {}, got manifest with digest {}".
                                       format(self.digest, digest))
