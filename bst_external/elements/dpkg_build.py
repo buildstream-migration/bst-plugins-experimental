@@ -164,7 +164,7 @@ class DpkgElement(BuildElement):
                                         'debian', package)
 
             # Exclude DEBIAN files because they're pulled in as public metadata
-            contents = [x for x in utils.list_relative_paths(package_path)
+            contents = ['/'+x for x in utils.list_relative_paths(package_path)
                         if x != "." and not x.startswith("DEBIAN")]
             new_split_rules[package] = contents
 
