@@ -21,7 +21,7 @@
 
 .. code:: yaml
 
-   # Specify the docker source kind
+   # Specify the quilt source kind
    kind: quilt
 
    # Specify the directory containing the series file
