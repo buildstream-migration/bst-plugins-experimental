@@ -12,4 +12,4 @@ depends:
 config:
   commands:
   - mkdir -p %{install-root}/etc
-  - cp /etc/os-release %{install-root}/etc/os-release
+  - cp /etc/os-release %{install-root}/etc/
