@@ -87,6 +87,10 @@ class FlatpakImageElement(Element):
         if self.metadata.has_section('Application'):
             os.makedirs(os.path.join(installdir, 'export'), exist_ok=True)
 
+        for section in self.metadata.sections():
+            if section.startswith('Extension'):
+                os.makedirs(os.path.join(installdir, self.metadata.get(section)['directory'], exist_ok=True))
+
         with self.timed_activity("Creating flatpak image", silent_nested=True):
             self.stage_dependency_artifacts(sandbox, Scope.BUILD,
                                             path=stagedir,
