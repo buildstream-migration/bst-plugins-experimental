@@ -91,7 +91,7 @@ class FlatpakImageElement(Element):
             if section.startswith('Extension'):
                 try:
                     extensiondir = self.metadata.get(section, 'directory')
-                    os.makedirs(os.path.join(installdir, extensiondir), exist_ok=True)
+                    os.makedirs(os.path.join(installdir, 'files', extensiondir), exist_ok=True)
                 except PermissionError as e:
                     raise ElementError("Permission denied: Cannot create {}".format(extensiondir))
 
