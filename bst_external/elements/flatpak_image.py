@@ -89,7 +89,11 @@ class FlatpakImageElement(Element):
 
         for section in self.metadata.sections():
             if section.startswith('Extension'):
-                os.makedirs(os.path.join(installdir, self.metadata.get(section)['directory'], exist_ok=True))
+                try:
+                    extensiondir = self.metadata.get(section, 'directory')
+                    os.makedirs(os.path.join(installdir, extensiondir), exist_ok=True)
+                except PermissionError as e:
+                    raise ElementError("Permission denied: Cannot create {}".format(extensiondir))
 
         with self.timed_activity("Creating flatpak image", silent_nested=True):
             self.stage_dependency_artifacts(sandbox, Scope.BUILD,
