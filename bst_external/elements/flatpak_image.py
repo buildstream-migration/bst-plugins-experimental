@@ -88,7 +88,7 @@ class FlatpakImageElement(Element):
             os.makedirs(os.path.join(installdir, 'export'), exist_ok=True)
 
         for section in self.metadata.sections():
-            if section.startswith('Extension'):
+            if section.startswith('Extension '):
                 try:
                     extensiondir = self.metadata.get(section, 'directory')
                     os.makedirs(os.path.join(installdir, 'files', extensiondir), exist_ok=True)
