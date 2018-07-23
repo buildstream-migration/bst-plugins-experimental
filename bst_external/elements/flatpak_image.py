@@ -63,6 +63,7 @@ class FlatpakImageElement(Element):
         key['include'] = sorted(self.include)
         key['exclude'] = sorted(self.exclude)
         key['metadata'] = self.metadata
+        key['version'] = 1              # Used to force rebuilds after editing the plugin
         return key
 
     def configure_sandbox(self, sandbox):
@@ -86,6 +87,14 @@ class FlatpakImageElement(Element):
         os.makedirs(filesdir, exist_ok=True)
         if self.metadata.has_section('Application'):
             os.makedirs(os.path.join(installdir, 'export'), exist_ok=True)
+
+        for section in self.metadata.sections():
+            if section.startswith('Extension '):
+                try:
+                    extensiondir = self.metadata.get(section, 'directory')
+                    os.makedirs(os.path.join(installdir, 'files', extensiondir), exist_ok=True)
+                except PermissionError as e:
+                    raise ElementError("Permission denied: Cannot create {}".format(extensiondir))
 
         with self.timed_activity("Creating flatpak image", silent_nested=True):
             self.stage_dependency_artifacts(sandbox, Scope.BUILD,
