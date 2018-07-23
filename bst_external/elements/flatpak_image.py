@@ -63,6 +63,7 @@ class FlatpakImageElement(Element):
         key['include'] = sorted(self.include)
         key['exclude'] = sorted(self.exclude)
         key['metadata'] = self.metadata
+        key['extensions'] = [section for section in self.metadata.sections() if section.startswith('Extension ')]
         return key
 
     def configure_sandbox(self, sandbox):
