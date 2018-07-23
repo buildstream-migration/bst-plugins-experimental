@@ -63,7 +63,7 @@ class FlatpakImageElement(Element):
         key['include'] = sorted(self.include)
         key['exclude'] = sorted(self.exclude)
         key['metadata'] = self.metadata
-        key['extensions'] = [section for section in self.metadata.sections() if section.startswith('Extension ')]
+        key['version'] = 1              # Used to force rebuilds after editing the plugin
         return key
 
     def configure_sandbox(self, sandbox):
