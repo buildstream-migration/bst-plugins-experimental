@@ -1,4 +1,5 @@
 # Copyright (c) 2017 freedesktop-sdk
+# Copyright (c) 2018 Codethink Limited
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +21,7 @@
 #
 # Authors:
 #        Valentin David <valentin.david@gmail.com>
+#        Thomas Coldrick <thomas.coldrick@codethink.co.uk>
 
 
 import os

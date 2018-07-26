@@ -1,4 +1,5 @@
 #  Copyright (C) 2017 Codethink Limited
+#  Copyright (C) 2018 Bloomberg Finance LP
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU Lesser General Public
@@ -15,6 +16,7 @@
 #
 #  Authors:
 #        Jonathan Maw <jonathan.maw@codethink.co.uk>
+#        James Ennis <james.ennis@codethink.co.uk>
 
 """Dpkg deployment element
 
