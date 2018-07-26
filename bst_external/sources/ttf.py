@@ -20,6 +20,12 @@
 ttf - stage ttf files from remote sources
 =========================================
 
+Note: most of the methods implemented here are
+copied from buildstream's DownloadableFileSource,
+if this niche plugin is ever added to buildstream
+then it should be refactored into a subclass of
+DownloadableFileSource
+
 **Usage:**
 
 .. code:: yaml
