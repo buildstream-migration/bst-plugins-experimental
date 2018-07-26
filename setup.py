@@ -50,8 +50,9 @@ setup(name='BuildStream-external',
               'dpkg_build = bst_external.elements.dpkg_build',
               'dpkg_deploy = bst_external.elements.dpkg_deploy',
               'flatpak_image = bst_external.elements.flatpak_image',
-              'x86image = bst_external.elements.x86image'
-          ]
+              'x86image = bst_external.elements.x86image',
+              'ttf = bst_external.sources.ttf'
+              ]
       },
       setup_requires=['pytest-runner', 'setuptools_scm'],
       tests_require=['pep8',
