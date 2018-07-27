@@ -8,6 +8,7 @@ cache:
 stages:
   - prepare
   - test
+  - coverage
   - docs
 
 before_script:
@@ -119,6 +120,29 @@ integration_unix:
 
   dependencies:
   - source_dist
+
+#####################################################
+#                Coverage stage                     #
+#####################################################
+
+# Collate coverage reports
+#
+coverage:
+  stage: coverage
+  coverage: '/TOTAL +\d+ +\d+ +(\d+\.\d+)%/'
+  script:
+    - cd dist && ./unpack.sh && cd bst-external
+    - pip3 install --no-index .
+    - mkdir report
+    - cd report
+    - cp ../../../coverage-linux/coverage.linux .
+    - cp ../../../coverage-unix/coverage.unix .
+    - coverage combine --rcfile=../.coveragerc -a coverage.*
+    - coverage report --rcfile=../.coveragerc -m
+  dependencies:
+  - source_dist
+  - integration_linux
+  - integration_unix
 
 # Automatically build documentation, only for merges which land
 # on master branch.
