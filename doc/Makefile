@@ -80,6 +80,7 @@ html devhelp: templates
 	PYTHONPATH=$(CURDIR)/../bst_external \
 	    $(SPHINXBUILD) -b $@ $(ALLSPHINXOPTS) "$(BUILDDIR)/$@" \
 	    $(wildcard source/*.rst) \
+	    $(wildcard source/examples/*.rst) \
 	    $(wildcard source/elements/*.rst) \
 	    $(wildcard source/sources/*.rst)
 	@echo
