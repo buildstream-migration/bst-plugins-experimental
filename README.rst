@@ -38,8 +38,15 @@ Before submitting for review, please check the following:
 Release Policy
 ==============
 
-The maintainer will create a new tag in response to changes that are
-significant to users, and create a new release number in NEWS.
+The maintainer will create a new release in response to changes that are
+significant to users.
+The steps to do this are:
+1. Check for changese between releases that do not have a NEWS entry.
+2. Create a new release number in NEWS.
+3. Update the version in setup.py
+4. Create and push an annotated tag for this version, containing all the
+   items from the latest NEWS entry.
+
 
 Significant changes include:
 * important bugfixes
