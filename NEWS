@@ -2,6 +2,13 @@
 Next Version
 ================
 
+==================
+bst-external 0.3.1
+==================
+
+  o Updated the version in setup.py for the latest version, and updated the
+    release process so this is less likely to happen again.
+
 ================
 bst-external 0.3
 ================
