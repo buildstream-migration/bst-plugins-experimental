@@ -2,6 +2,12 @@
 Next Version
 ================
 
+================
+bst-external 0.3
+================
+
+  o The FlatPak Image Element now creates directories for each extension
+    defined in the metadata when built.
 
 ================
 bst-external 0.2
