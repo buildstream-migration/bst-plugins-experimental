@@ -2,10 +2,13 @@
 
 variables:
 
+  # build-commands
   rulesfile: "debian/rules"
   build: "%{rulesfile} build"
   binary: "env DH_OPTIONS='--destdir=.' %{rulesfile} binary"
 
+  # install-commands
+  #
   # packages' default value will be automatically replaced with
   # defaults calculated from debian/control. Replace this with a
   # space-separated list of packages to have more control over
