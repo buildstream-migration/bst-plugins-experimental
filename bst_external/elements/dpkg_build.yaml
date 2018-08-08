@@ -4,6 +4,8 @@ variables:
 
   # build-commands
   rulesfile: "debian/rules"
+  prepare-dir: "/bin/chmod +x debian/rules"
+  clean: "%{rulesfile} clean"
   build: "%{rulesfile} build"
   binary: "env DH_OPTIONS='--destdir=.' %{rulesfile} binary"
 
@@ -34,6 +36,10 @@ config:
   # Commands for building the software
   #
   build-commands:
+  - |
+    %{prepare-dir}
+  - |
+    %{clean}
   - |
     %{build}
   - |
