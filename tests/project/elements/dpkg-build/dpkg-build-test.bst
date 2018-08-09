@@ -8,8 +8,3 @@ depends:
 sources:
 - kind: local
   path: src
-
-config:
-  build-commands:
-    (<):
-    - chmod +x debian/rules
