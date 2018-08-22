@@ -33,7 +33,7 @@ setup(name='BuildStream-external',
       version="0.3.1",
       description="A collection of BuildStream plugins that don't fit in with the core plugins for whatever reason.",
       license='LGPL',
-      packages=find_packages(),
+      packages=find_packages(exclude=['tests', 'tests.*']),
       include_package_data=True,
       install_requires=[
           'requests',
