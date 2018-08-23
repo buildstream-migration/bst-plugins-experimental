@@ -79,7 +79,7 @@ integration_linux:
     - chown -R buildstream:buildstream bst-external
     - cd bst-external
 
-    # Run the trsts from the source distribution.
+    # Run the tests from the source distribution.
     # We run as a simple user to test for permission issues.
     - su buildstream -c 'python3 setup.py test --index-url invalid://uri'
 

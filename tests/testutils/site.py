@@ -1,5 +1,5 @@
 # Some things resolved about the execution site,
-# so we dont have to repeat this everywhere
+# so we don't have to repeat this everywhere
 #
 import os
 import sys

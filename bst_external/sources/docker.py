@@ -153,7 +153,7 @@ class DockerRegistryV2Client():
 
     # digest():
     #
-    # Calculate a Docker-compatible digest of an arbitary string of bytes.
+    # Calculate a Docker-compatible digest of an arbitrary string of bytes.
     #
     # Args:
     #    content (bytes): Content to hash

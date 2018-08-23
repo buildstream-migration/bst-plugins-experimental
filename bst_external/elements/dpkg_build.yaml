@@ -68,7 +68,7 @@ environment:
   DH_VERBOSE: 1
   QUILT_PATCHES: debian/patches
 
-# And dont consider MAKEFLAGS or V as something which may
+# And don't consider MAKEFLAGS or V as something which may
 # effect build output.
 environment-nocache:
 - MAKEFLAGS
