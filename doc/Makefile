@@ -37,7 +37,7 @@ endif
 # Explanation:
 #
 #   Sphinx does not have any option for skipping documentation,
-#   we dont want to document plugin code because nobody uses that
+#   we don't want to document plugin code because nobody uses that
 #   but we do want to use module-level docstrings in plugins in
 #   order to explain how plugins work.
 #
@@ -61,7 +61,7 @@ define plugin-doc-skeleton
     done
 endef
 
-# We set PYTHONPATH here because source/conf.py sys.modules hacks dont seem to help sphinx-build import the plugins
+# We set PYTHONPATH here because source/conf.py sys.modules hacks don't seem to help sphinx-build import the plugins
 all: html devhelp
 
 # Generate rst templates for the docs using a mix of sphinx-apidoc and
