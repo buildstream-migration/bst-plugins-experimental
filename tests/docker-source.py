@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from tests.testutils import cli_integration, cli
+from tests.testutils import cli_integration, cli, plugin_import
 from tests.testutils.integration import assert_contains
 
 
@@ -11,7 +11,7 @@ DATA_DIR = os.path.join(
 )
 
 @pytest.mark.datafiles(DATA_DIR)
-def test_docker_fetch(cli, datafiles):
+def test_docker_fetch(cli, datafiles, plugin_import):
 
     project = os.path.join(datafiles.dirname, datafiles.basename)
     docker_alpine_base = 'docker-source/dependencies/dockerhub-alpine.bst'
@@ -21,7 +21,7 @@ def test_docker_fetch(cli, datafiles):
 
 @pytest.mark.integration
 @pytest.mark.datafiles(DATA_DIR)
-def test_docker_source_build(cli_integration, datafiles):
+def test_docker_source_build(cli_integration, datafiles, plugin_import):
 
     project = os.path.join(datafiles.dirname, datafiles.basename)
     checkout = os.path.join(cli_integration.directory, 'checkout')
