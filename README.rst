@@ -13,6 +13,40 @@ which explicitly don't yet have strong API guarantees.
 Therefore, for the time being we recommend use bst-external as a submodule
 for your buildstream projects.
 
+Using the plugins locally within a project
+------------------------------------------
+To use the bst-external plugins locally within a
+`BuildStream <https://gitlab.com/BuildStream/buildstream>`_
+project, you will first need to clone the repo to a location **within your
+project**::
+
+    git clone https://gitlab.com/BuildStream/bst-external.git
+
+The plugins must be declared in *project.conf*. To do this, please refer
+to BuildStream's
+`Local plugins documentation <https://buildstream.gitlab.io/buildstream/format_project.html#local-plugins>`_.
+
+Using the plugins as a Python package
+-------------------------------------
+To use the bst-external plugins as a Python package within a
+`BuildStream <https://gitlab.com/BuildStream/buildstream>`_
+project, you will first need to install bst-external via pip::
+
+    git clone https://gitlab.com/BuildStream/bst-external.git
+    cd bst-external
+    pip install --user -e .
+
+To ensure it's installed, try: ``pip show BuildStream-external``, this should
+show information about the package.
+
+.. note::
+   The -e option ensures that changes made to the git repository are reflected
+   in the Python package's behaviour.
+
+Then, the plugins must be declared in the *project.conf*. The implementation of
+this is explained in BuildStream's
+`Pip plugins documentation <https://buildstream.gitlab.io/buildstream/format_project.html#pip-plugins>`_
+
 Pre-review checklist
 ====================
 
@@ -41,7 +75,8 @@ Release Policy
 The maintainer will create a new release in response to changes that are
 significant to users.
 The steps to do this are:
-1. Check for changese between releases that do not have a NEWS entry.
+
+1. Check for changes between releases that do not have a NEWS entry.
 2. Create a new release number in NEWS.
 3. Update the version in setup.py
 4. Create and push an annotated tag for this version, containing all the
@@ -49,6 +84,7 @@ The steps to do this are:
 
 
 Significant changes include:
-* important bugfixes
-* non-backward-compatible changes
-* specifically-requested changes.
+
+* Important bugfixes
+* Non-backward-compatible changes
+* Specifically-requested changes.
