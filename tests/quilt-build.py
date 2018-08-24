@@ -2,6 +2,7 @@ import os
 import pytest
 
 from tests.testutils import cli_integration as cli
+from tests.testutils import plugin_import
 from tests.testutils.integration import assert_contains
 
 #pytestmark = pytest.mark.integration
@@ -12,7 +13,7 @@ DATA_DIR = os.path.join(
 )
 
 @pytest.mark.datafiles(DATA_DIR)
-def test_quilt_build(cli, datafiles):
+def test_quilt_build(cli, datafiles, plugin_import):
     project = os.path.join(datafiles.dirname, datafiles.basename)
     checkout = os.path.join(cli.directory, 'checkout')
     element_name = 'quilt-build/quilt-build-test.bst'
