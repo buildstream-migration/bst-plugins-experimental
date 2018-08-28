@@ -2,6 +2,21 @@
 Next Version
 ================
 
+================
+bst-external 0.4
+================
+
+  o Introducing James Ennis as co-maintainer
+  o dpkg-build: The debian/rules file no longer has to be made executable
+  o Installation no longer erroneously installs the tests
+  o README.md includes documentation for how to use and install it
+  o The test suite can now be run in versions of buildstream that forbid paths
+    leading outside the project.
+  o The Collect Integration Element has been imported from the freedesktop-sdk
+    project. This plugin collects the integration commands of all its
+    dependencies into a single shell script.
+
+
 ==================
 bst-external 0.3.1
 ==================
