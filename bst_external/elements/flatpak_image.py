@@ -38,6 +38,7 @@ class FlatpakImageElement(Element):
         self.include = self.node_get_member(node, list, 'include')
         self.exclude = self.node_get_member(node, list, 'exclude')
         self.metadata = configparser.ConfigParser()
+        self.metadata.optionxform = str
         metadata_dict = {}
         for section, pairs in node.get('metadata').items():
             if not section.startswith('__bst'):
