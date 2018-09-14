@@ -3,6 +3,12 @@ Next Version
 ================
 
 ================
+bst-external 0.5
+================
+
+  o flatpak-image: Preserve case-sensitivity of flatpak metadata.
+
+================
 bst-external 0.4
 ================
 
