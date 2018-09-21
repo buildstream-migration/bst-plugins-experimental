@@ -2,6 +2,13 @@
 Next Version
 ================
 
+==================
+bst-external 0.5.1
+==================
+
+  o collect-integration: Fix the collect-integration plugin not being loadable
+    via pip
+
 ================
 bst-external 0.5
 ================
