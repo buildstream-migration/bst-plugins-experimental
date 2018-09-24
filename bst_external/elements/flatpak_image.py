@@ -24,6 +24,11 @@
 #        Thomas Coldrick <thomas.coldrick@codethink.co.uk>
 
 
+"""Flatpak Image Element
+
+A buildstream plugin used to stage its build-dependencies, and metadata
+provided by the 'metadata' field in a format useful to generate flatpaks.
+"""
 import os
 from buildstream import utils
 from buildstream import Element, ElementError, Scope
