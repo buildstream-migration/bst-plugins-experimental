@@ -18,6 +18,8 @@ Contained Elements
 * :mod:`dpkg_build <elements.dpkg_build>`
 * :mod:`dpkg_deploy <elements.dpkg_deploy>`
 * :mod:`x86image <elements.x86image>`
+* :mod:`flatpak_image <elements.flatpak_image>`
+* :mod:`collect_integration <elements.collect_integration>`
 
 Contained Sources
 -----------------
