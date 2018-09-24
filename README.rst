@@ -77,6 +77,7 @@ significant to users.
 The steps to do this are:
 
 1. Check for changes between releases that do not have a NEWS entry.
+   1.1. Add any new plugins to the documentation.
 2. Create a new release number in NEWS.
 3. Update the version in setup.py
 4. Create and push an annotated tag for this version, containing all the
