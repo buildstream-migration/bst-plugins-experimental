@@ -161,6 +161,7 @@ pages:
   - dnf install -y python2
   - pip3 install sphinx
   - pip3 install sphinx-click
+  - pip3 install sphinx_rtd_theme
   - pip3 install --user .
   - make -C doc
   - mv doc/build/html public

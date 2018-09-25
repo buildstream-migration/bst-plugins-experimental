@@ -12,17 +12,19 @@ To use one of these plugins in your project you need to have installed the
 bst-external package and enabled it in your `project configuration file
 <https://buildstream.gitlab.io/buildstream/projectconf.html#plugin-origins-and-versions>`_.
 
-Contained Elements
-------------------
+.. toctree::
+   :maxdepth: 1
+   :caption: Contained Elements
 
-* :mod:`dpkg_build <elements.dpkg_build>`
-* :mod:`dpkg_deploy <elements.dpkg_deploy>`
-* :mod:`x86image <elements.x86image>`
-* :mod:`flatpak_image <elements.flatpak_image>`
-* :mod:`collect_integration <elements.collect_integration>`
+   elements/dpkg_build
+   elements/dpkg_deploy
+   elements/x86image
+   elements/flatpak_image
+   elements/collect_integration
 
-Contained Sources
------------------
+.. toctree::
+   :maxdepth: 1
+   :caption: Contained Sources
 
-* :mod:`docker <sources.docker>`
-* :mod:`quilt <sources.quilt>`
+   sources/docker
+   sources/quilt
