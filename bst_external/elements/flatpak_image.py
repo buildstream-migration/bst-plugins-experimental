@@ -35,6 +35,9 @@ from buildstream import Element, ElementError, Scope
 import configparser
 
 class FlatpakImageElement(Element):
+
+    BST_STRICT_REBUILD = True
+
     def configure(self, node):
         self.node_validate(node, [
             'directory', 'include', 'exclude', 'metadata'
