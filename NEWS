@@ -2,6 +2,13 @@
 Next Version
 ================
 
+================
+bst-external 0.6
+================
+
+  o New git-tag plugin: An extension to the BuildStream git plugin
+    which allows automatic tracking of the latest tag in a branch.
+
 ==================
 bst-external 0.5.1
 ==================
