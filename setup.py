@@ -30,7 +30,7 @@ except ImportError:
     sys.exit(1)
 
 setup(name='BuildStream-external',
-      version="0.5.1",
+      version="0.6.0",
       description="A collection of BuildStream plugins that don't fit in with the core plugins for whatever reason.",
       license='LGPL',
       packages=find_packages(exclude=['tests', 'tests.*']),
