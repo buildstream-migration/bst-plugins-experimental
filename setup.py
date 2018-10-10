@@ -51,6 +51,8 @@ setup(name='BuildStream-external',
               'dpkg_deploy = bst_external.elements.dpkg_deploy',
               'flatpak_image = bst_external.elements.flatpak_image',
               'x86image = bst_external.elements.x86image',
+              'fastbootBootImage = bst_external.elements.fastboot_bootimg',
+              'fastbootExt4Image = bst_external.elements.fastboot_ext4',
               'collect_integration = bst_external.elements.collect_integration'
           ]
       },

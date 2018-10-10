@@ -1,0 +1,35 @@
+#fastboot boot image default configuration
+
+variables:
+  base: 0x80000000
+  dtb_page-size: 2048
+  kernel_page-size: 4096
+  dtb_directory: /boot
+  img_directory: /boot
+  ramdisk_directory: /boot
+  ramdisk: initrd.img
+  dtb_output: dt.img
+  img_output: boot-kernel-test.img
+  kernel-cmdline: "root=/dev/disk/by-partlabel/userdata rw rootwait console=tty0 console=ttyHSL0,115200,n8 log_buf_len=4M"
+
+config:
+  create_dtb:
+  - |
+    cd /buildstream
+    dtbTool -o %{dtb_output} -s %{dtb_page-size} %{build-root}/%{dtb_directory}
+
+  create_img:
+  - |
+    mkbootimg --kernel %{build-root}/%{img_directory}/Image \
+        --ramdisk %{build-root}/%{ramdisk_directory}/%{ramdisk} \
+        --output /buildstream/%{img_output} \
+        --dt /buildstream/%{dtb_output} \
+        --pagesize %{kernel_page-size} \
+        --base %{base} \
+        --cmdline %{kernel-cmdline}
+
+  install_img:
+  - |
+    mv /buildstream/%{img_output} %{install-root}
+    chmod 0644 %{install-root}/%{img_output}
+
