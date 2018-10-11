@@ -10,8 +10,8 @@ git-tag - extension of BuildStream git plugin to track latest tag
 
 .. code:: yaml
 
-   # Specify the git-tag source kind
-   kind: git-tag
+   # Specify the git_tag source kind
+   kind: git_tag
 
    # Optionally specify a relative staging directory
    # directory: path/to/stage
