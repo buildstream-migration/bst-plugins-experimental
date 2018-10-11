@@ -53,7 +53,8 @@ setup(name='BuildStream-external',
               'x86image = bst_external.elements.x86image',
               'fastbootBootImage = bst_external.elements.fastboot_bootimg',
               'fastbootExt4Image = bst_external.elements.fastboot_ext4',
-              'collect_integration = bst_external.elements.collect_integration'
+              'collect_integration = bst_external.elements.collect_integration',
+              'git_tag = bst_external.sources.git_tag'
           ]
       },
       setup_requires=['pytest-runner', 'setuptools_scm'],
