@@ -78,6 +78,7 @@ The steps to do this are:
 
 1. Check for changes between releases that do not have a NEWS entry.
    1.1. Add any new plugins to the list in ``doc/source/index.rst``.
+   1.2. Check that new plugins have an entrypoint in setup.py
 2. Create a new release number in NEWS.
 3. Update the version in setup.py
 4. Update the variables ``version`` and ``release`` in ``doc/source/conf.py``
