@@ -71,10 +71,16 @@ GitSource = gitplugin.GitSource
 class GitTagMirror(GitMirror):
     def latest_commit(self, tracking, *, track_tags):
         if track_tags:
-            _, output = self.source.check_output(
-                [self.source.host_git, 'describe', '--abbrev=0', tracking],
-                fail="Unable to find annotated tag for specified branch name '{}'".format(tracking),
+            exit_code, output = self.source.check_output(
+                [self.source.host_git, 'describe', '--tags', '--abbrev=0', tracking],
                 cwd=self.mirror)
+
+            if exit_code == 128:
+                self.source.info("Unable to find tag for specified branch name '{}'".format(tracking))
+                _, output = self.source.check_output(
+                        [self.source.host_git, 'rev-parse', tracking],
+                        fail="Unable to find commit for specified branch name '{}'".format(tracking),
+                        cwd=self.mirror)
             tracking = output.rstrip('\n')
 
         _, output = self.source.check_output(
@@ -86,7 +92,7 @@ class GitTagMirror(GitMirror):
         # Prefix the ref with the closest annotated tag, if available,
         # to make the ref human readable
         exit_code, output = self.source.check_output(
-            [self.source.host_git, 'describe', '--abbrev=40', '--long', ref],
+            [self.source.host_git, 'describe', '--tags', '--abbrev=40', '--long', ref],
             cwd=self.mirror)
         if exit_code == 0:
             ref = output.rstrip('\n')
