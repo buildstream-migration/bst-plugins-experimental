@@ -3,6 +3,13 @@ Next Version
 ================
 
 ==================
+bst-external 0.6.2
+==================
+
+  o Add support for non-annotated tags in git_tag.
+  o Make git_tag plugin fall back to normal behaviour if no tags are found.
+
+==================
 bst-external 0.6.1
 ==================
 
