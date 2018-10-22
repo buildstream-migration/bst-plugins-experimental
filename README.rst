@@ -52,10 +52,15 @@ Pre-review checklist
 
 Before submitting for review, please check the following:
 
-1. It can be tested. Ideally, with automated tests. At minimum, instructions
+1. Any new plugins have:
+   1.1 Added have a copyright statement attached.
+   1.2 An entry point defined in setup.py.
+   1.3 Been added to the list in ``doc/source/index.rst``
+
+2. It can be tested. Ideally, with automated tests. At minimum, instructions
    on how the maintainer can test it for themselves.
 
-2. Any non-trivial change that is visible to the user should have a note
+3. Any non-trivial change that is visible to the user should have a note
    in NEWS describing the change.
 
    Typical changes that do not require NEWS entries:
@@ -82,7 +87,7 @@ The steps to do this are:
 2. Create a new release number in NEWS.
 3. Update the version in setup.py
 4. Update the variables ``version`` and ``release`` in ``doc/source/conf.py``
-4. Create and push an annotated tag for this version, containing all the
+5. Create and push an annotated tag for this version, containing all the
    items from the latest NEWS entry.
 
 
