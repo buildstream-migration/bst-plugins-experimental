@@ -48,6 +48,12 @@ git-tag - extension of BuildStream git plugin to track latest tag
    # will be used to update the 'ref' when refreshing the pipeline.
    track: master
 
+   # Optionally specify an additional branch to be tracked, the plugin
+   # will compare the latest tags for each branch and track to the
+   # overall latest. This is intended to keep to the latest stable
+   # branch, but then switch when a new major release appears
+   track-alt:
+
    # Optionally specify to track the latest tag of a branch,
    # rather than the latest commit when updating 'ref'.
    # If not set, this will default to 'False'
@@ -113,6 +119,10 @@ class GitTagMirror(GitMirror):
             cwd=self.mirror)
         ref = output.rstrip('\n')
 
+        _, time = self.source.check_output(
+                [self.source.host_git, 'show', '-s', '--format=%ct', ref],
+                cwd=self.mirror)
+
         # Prefix the ref with the closest annotated tag, if available,
         # to make the ref human readable
         exit_code, output = self.source.check_output(
@@ -121,7 +131,7 @@ class GitTagMirror(GitMirror):
         if exit_code == 0:
             ref = output.rstrip('\n')
 
-        return ref
+        return ref, time
 
 
 class GitTagSource(GitSource):
@@ -129,12 +139,13 @@ class GitTagSource(GitSource):
     def configure(self, node):
         ref = self.node_get_member(node, str, 'ref', '') or None
 
-        config_keys = ['url', 'track', 'track-tags', 'ref', 'submodules', 'checkout-submodules']
+        config_keys = ['url', 'track', 'track-alt', 'track-tags', 'ref', 'submodules', 'checkout-submodules']
         self.node_validate(node, config_keys + Source.COMMON_CONFIG_KEYS)
 
         self.original_url = self.node_get_member(node, str, 'url')
         self.mirror = GitTagMirror(self, '', self.original_url, ref, primary=True)
         self.tracking = self.node_get_member(node, str, 'track', None)
+        self.alt_tracking = self.node_get_member(node, str, 'track-alt', None)
         self.track_tags = self.node_get_member(node, bool, 'track-tags', False)
 
         # At this point we now know if the source has a ref and/or a track.
@@ -181,7 +192,12 @@ class GitTagSource(GitSource):
             self.mirror.fetch()
 
             # Update self.mirror.ref and node.ref from the self.tracking branch
-            ret = self.mirror.latest_commit(self.tracking, track_tags=self.track_tags)
+            ret, time = self.mirror.latest_commit(self.tracking, track_tags=self.track_tags)
+            if self.track_tags and self.alt_tracking != None:
+                alt_ret, alt_time = self.mirror.latest_commit(self.alt_tracking, track_tags=self.track_tags)
+
+                if alt_time > time:
+                    ret = alt_ret
 
         return ret
 
