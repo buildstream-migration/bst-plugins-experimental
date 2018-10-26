@@ -23,6 +23,7 @@ bst-external package and enabled it in your `project configuration file
    elements/collect_integration
    elements/fastboot_bootimg
    elements/fastboot_ext4
+   elements/tar_element
 
 .. toctree::
    :maxdepth: 1
