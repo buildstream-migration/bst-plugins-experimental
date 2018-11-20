@@ -165,6 +165,7 @@ class GitTagSource(GitSource):
                 self.submodule_checkout_overrides[path] = checkout
 
         self.mark_download_url(self.original_url)
+        self.tracked = False
 
     def track(self):
 
@@ -183,6 +184,8 @@ class GitTagSource(GitSource):
             # Update self.mirror.ref and node.ref from the self.tracking branch
             ret = self.mirror.latest_commit(self.tracking, track_tags=self.track_tags)
 
+        # Set tracked attribute, parameter for if self.mirror.assert_ref_in_track is needed
+        self.tracked = True
         return ret
 
 def setup():
