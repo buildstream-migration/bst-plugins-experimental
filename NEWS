@@ -2,7 +2,12 @@
 Next Version
 ================
 
-  0 Add tar_element plugin for creating tarballs
+==================
+bst-external 0.7.0
+==================
+
+  o Add tar_element plugin for creating tarballs
+  o Make git_tag plugin resilient to changes in buildstream's built-in git plugin.
 
 ==================
 bst-external 0.6.2
