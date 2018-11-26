@@ -78,8 +78,8 @@ git-tag - extension of BuildStream git plugin to track latest tag
    ref: d63cbb6fdc0bbdadc4a1b92284826a6d63a7ebcd
 
    # Optionally specify whether submodules should be checked-out.
-   # If not set, this will default to 'True'
-   checkout-submodules: True
+   # If not set, this will default to 'False'
+   checkout-submodules: False
 
    # If your repository has submodules, explicitly specifying the
    # url from which they are to be fetched allows you to easily
@@ -368,7 +368,7 @@ class GitTagSource(Source):
             raise SourceError("{}: Git sources require a ref and/or track".format(self),
                               reason="missing-track-and-ref")
 
-        self.checkout_submodules = self.node_get_member(node, bool, 'checkout-submodules', True)
+        self.checkout_submodules = self.node_get_member(node, bool, 'checkout-submodules', False)
         self.submodules = []
 
         # Parse a dict of submodule overrides, stored in the submodule_overrides

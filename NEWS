@@ -3,6 +3,12 @@ Next Version
 ================
 
 ==================
+bst-external x.x.x
+==================
+
+  o The git_tag plugin does not checkout submodules by default anymore
+
+==================
 bst-external 0.7.0
 ==================
 
