@@ -13,6 +13,8 @@ variables:
   sector-size: 512
 
   kernel-args: root=/dev/sda2 rootfstype=ext4 rootdelay=20 init=/sbin/init
+  
+  name: sda
 
 config:
   # The element that should be staged into "/". It must contain
@@ -111,29 +113,29 @@ config:
     sdabytes=$(( ${sdasectors} * %{sector-size} ))
 
     # Create the main disk and do the partitioning
-    truncate -s ${sdabytes} /buildstream/sda.img
-    parted -s /buildstream/sda.img mklabel msdos
-    parted -s /buildstream/sda.img unit s mkpart primary fat32 ${sda1offset} $(( ${sda1offset} + ${sda1sec} - 1 ))
-    parted -s /buildstream/sda.img unit s mkpart primary ext2 ${sda2offset} $(( ${sda2offset} + ${sda2sec} - 1 ))
-    parted -s /buildstream/sda.img unit s mkpart primary linux-swap ${sda3offset} $(( ${sda3offset} + ${sda3sec} - 1 ))
+    truncate -s ${sdabytes} /buildstream/%{name}.img
+    parted -s /buildstream/%{name}.img mklabel msdos
+    parted -s /buildstream/%{name}.img unit s mkpart primary fat32 ${sda1offset} $(( ${sda1offset} + ${sda1sec} - 1 ))
+    parted -s /buildstream/%{name}.img unit s mkpart primary ext2 ${sda2offset} $(( ${sda2offset} + ${sda2sec} - 1 ))
+    parted -s /buildstream/%{name}.img unit s mkpart primary linux-swap ${sda3offset} $(( ${sda3offset} + ${sda3sec} - 1 ))
 
     # Make partition 1 the boot partition
-    parted -s /buildstream/sda.img set 1 boot on
+    parted -s /buildstream/%{name}.img set 1 boot on
 
     # Now splice the existing filesystems directly into the image
-    dd if=/buildstream/sda1.img of=/buildstream/sda.img \
+    dd if=/buildstream/sda1.img of=/buildstream/%{name}.img \
         ibs=%{sector-size} obs=%{sector-size} conv=notrunc \
         count=${sda1sec} seek=${sda1offset}
 
-    dd if=/buildstream/sda2.img of=/buildstream/sda.img \
+    dd if=/buildstream/sda2.img of=/buildstream/%{name}.img \
         ibs=%{sector-size} obs=%{sector-size} conv=notrunc \
         count=${sda2sec} seek=${sda2offset}
 
-    dd if=/buildstream/sda3.img of=/buildstream/sda.img \
+    dd if=/buildstream/sda3.img of=/buildstream/%{name}.img \
         ibs=%{sector-size} obs=%{sector-size} conv=notrunc \
         count=${sda3sec} seek=${sda3offset}
   final-commands:
   - |
     # Move the image where it will be collected
-    mv /buildstream/sda.img %{install-root}
-    chmod 0644 %{install-root}/sda.img
+    mv /buildstream/%{name}.img %{install-root}
+    chmod 0644 %{install-root}/%{name}.img

@@ -2,6 +2,8 @@
 Next Version
 ================
 
+  o Set a variable in x86_image to allow easy naming of output image
+
 ===================
 bst-external 0.10.0
 ===================
