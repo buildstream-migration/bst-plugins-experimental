@@ -27,6 +27,12 @@ bst-external 0.7.0
   o Make git_tag plugin resilient to changes in buildstream's built-in git plugin.
 
 ==================
+bst-external 0.6.3
+==================
+
+  o Add the ability to generate manifest files using the collect_manifest plugin.
+
+==================
 bst-external 0.6.2
 ==================
 
