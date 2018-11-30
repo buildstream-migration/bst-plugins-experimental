@@ -1,9 +1,3 @@
-import os
-import re
-import json
-from collections import OrderedDict
-from buildstream import Element, ElementError, Scope
-
 # Copyright (c) 2018 freedesktop-sdk
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,6 +22,11 @@ from buildstream import Element, ElementError, Scope
 #        Valentin David <valentin.david@gmail.com>
 #        Adam Jones <adam.jones@codethink.co.uk>
 
+import os
+import re
+import json
+from collections import OrderedDict
+from buildstream import Element, ElementError, Scope
 
 """
 Collect Manifest Element
