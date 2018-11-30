@@ -55,6 +55,7 @@ setup(name='BuildStream-external',
               'fastbootBootImage = bst_external.elements.fastboot_bootimg',
               'fastbootExt4Image = bst_external.elements.fastboot_ext4',
               'collect_integration = bst_external.elements.collect_integration',
+              'collect_manifest = bst_external.elements.collect_manifest',
               'git_tag = bst_external.sources.git_tag',
               'tar_element = bst_external.elements.tar_element'
           ]
