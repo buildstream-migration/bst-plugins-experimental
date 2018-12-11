@@ -187,7 +187,7 @@ class GitTagMirror(SourceFetcher):
         else:
             remote_name = "origin"
 
-        self.source.call([self.source.host_git, 'fetch', remote_name, '--prune'],
+        self.source.call([self.source.host_git, 'fetch', remote_name, '--prune', '--tags', '--force'],
                          fail="Failed to fetch from remote git repository: {}".format(url),
                          fail_temporarily=True,
                          cwd=self.mirror)
