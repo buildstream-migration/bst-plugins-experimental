@@ -74,7 +74,7 @@ class FlatpakImageElement(Element):
         key['include'] = sorted(self.include)
         key['exclude'] = sorted(self.exclude)
         key['metadata'] = self.metadata
-        key['version'] = 1              # Used to force rebuilds after editing the plugin
+        key['version'] = 2              # Used to force rebuilds after editing the plugin
         return key
 
     def configure_sandbox(self, sandbox):
@@ -90,8 +90,10 @@ class FlatpakImageElement(Element):
         allfiles = os.path.join(basedir, 'buildstream', 'allfiles')
         reldirectory = os.path.relpath(self.directory, '/')
         subdir = os.path.join(allfiles, reldirectory)
+        etcdir = os.path.join(allfiles, 'etc')
         installdir = os.path.join(basedir, 'buildstream', 'install')
         filesdir = os.path.join(installdir, 'files')
+        filesetcdir = os.path.join(filesdir, 'etc')
         stagedir = os.path.join(os.sep, 'buildstream', 'allfiles')
 
         os.makedirs(allfiles, exist_ok=True)
@@ -113,6 +115,8 @@ class FlatpakImageElement(Element):
                                             include=self.include,
                                             exclude=self.exclude)
             utils.link_files(subdir, filesdir)
+            if os.path.exists(etcdir):
+                utils.link_files(etcdir, filesetcdir)
 
         metadatafile = os.path.join(installdir, 'metadata')
         with open(metadatafile, "w") as m:
