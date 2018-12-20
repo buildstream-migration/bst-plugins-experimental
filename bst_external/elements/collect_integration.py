@@ -37,10 +37,12 @@ from buildstream import Element, ElementError, Scope
 class ExtractIntegrationElement(Element):
     def configure(self, node):
         self.node_validate(node, [
-            'script-path'
+            'script-path',
+            'ignore'
         ])
 
         self.script_path = self.node_subst_member(node, 'script-path')
+        self.ignore = self.node_get_member(node, list, 'ignore', [])
 
     def preflight(self):
         runtime_deps = list(self.dependencies(Scope.RUN, recurse=False))
@@ -52,9 +54,14 @@ class ExtractIntegrationElement(Element):
         if sources:
             raise ElementError("{}: collect-integration elements may not have sources".format(self))
 
+        for ignore in self.ignore:
+            if self.search(Scope.BUILD, ignore) is None:
+                raise ElementError("{}: element {} is not in dependencies".format(self, ignore))
+
     def get_unique_key(self):
         key = {
-            'script-path': self.script_path
+            'script-path': self.script_path,
+            'ignore': set(self.ignore)
         }
         return key
 
@@ -72,10 +79,16 @@ class ExtractIntegrationElement(Element):
         def opener(path, flags):
             return os.open(path, flags, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
 
+        ignore_set = set()
+        for ignore in self.ignore:
+            ignore_set.add(self.search(Scope.BUILD, ignore))
+
         with open(script_path, 'w', opener=opener) as f:
             f.write('#!/bin/sh\n')
             f.write('set -e\n\n')
             for dependency in self.dependencies(Scope.BUILD):
+                if dependency in ignore_set:
+                    continue
                 bstdata = dependency.get_public_data('bst')
                 if bstdata is not None:
                     commands = dependency.node_get_member(bstdata, list, 'integration-commands', [])
