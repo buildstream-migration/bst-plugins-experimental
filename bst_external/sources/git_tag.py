@@ -444,7 +444,7 @@ class GitTagSource(Source):
                                  .format(self.tracking, resolved_url),
                                  silent_nested=True):
             self.mirror.ensure()
-            self.mirror.fetch()
+            self.mirror._fetch()
 
             # Update self.mirror.ref and node.ref from the self.tracking branch
             ret = self.mirror.latest_commit(self.tracking, track_tags=self.track_tags)
