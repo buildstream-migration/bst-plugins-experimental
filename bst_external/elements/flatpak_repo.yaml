@@ -1,0 +1,5 @@
+config:
+  # elements (from the build dependencies) that should be staged in /
+  environment: []
+  arch: '%{arch}'
+  branch: '%{branch}'

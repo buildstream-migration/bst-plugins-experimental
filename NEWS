@@ -2,6 +2,9 @@
 Next Version
 ================
 
+  o Add flatpak_repo element plugin for creating a flatpak repository from
+    flatpak_image elements.
+
 ==================
 bst-external 0.7.1
 ==================

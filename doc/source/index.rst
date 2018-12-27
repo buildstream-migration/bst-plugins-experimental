@@ -20,6 +20,7 @@ bst-external package and enabled it in your `project configuration file
    elements/dpkg_deploy
    elements/x86image
    elements/flatpak_image
+   elements/flatpak_repo
    elements/collect_integration
    elements/fastboot_bootimg
    elements/fastboot_ext4
