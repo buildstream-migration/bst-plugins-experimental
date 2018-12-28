@@ -41,7 +41,7 @@ class FlatpakRepoElement(ScriptElement):
         self.set_install_root('/buildstream/repo')
         self.set_root_read_only(True)
 
-    def stage(self, sandbox):
+    def _layout_flatpaks(self, elements):
         def staging_dir(elt):
             return '/buildstream/input/{}'.format(elt.name)
 
@@ -49,16 +49,23 @@ class FlatpakRepoElement(ScriptElement):
             return 'flatpak build-export --files=files --arch={} /buildstream/repo {} {}'\
                 .format(self._arch, staging_dir(elt), self._branch)
 
-        env = [self.search(Scope.BUILD, elt) for elt in self._env]
-
-        for elt in self.dependencies(Scope.BUILD, recurse=False):
-            if elt in env:
-                self.layout_add(elt.name, '/')
-            elif elt.get_kind() == 'flatpak_image':
+        for elt in elements:
+            if elt.get_kind() == 'flatpak_image':
                 self.layout_add(elt.name, staging_dir(elt))
                 self.add_commands('export {}'.format(elt.name), [export_command(elt)])
+            elif elt.get_kind() == 'stack':
+                self._layout_flatpaks(elt.dependencies(Scope.RUN, recurse=False))
             else:
                 raise ElementError('Dependency {} is not of kind flatpak_image'.format(elt.name))
+
+    def stage(self, sandbox):
+        env = [self.search(Scope.BUILD, elt) for elt in self._env]
+        flatpaks = [elt for elt in self.dependencies(Scope.BUILD, recurse=False) if elt not in env]
+
+        for elt in env:
+            self.layout_add(elt.name, '/')
+
+        self._layout_flatpaks(flatpaks)
 
         super(FlatpakRepoElement, self).stage(sandbox)
 
