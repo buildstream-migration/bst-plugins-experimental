@@ -3,6 +3,13 @@ Next Version
 ================
 
 ==================
+bst-external 0.7.1
+==================
+
+  o Fix git_tag plugin not updating tags if the source fetches from multiple
+    repositories
+
+==================
 bst-external 0.7.0
 ==================
 
