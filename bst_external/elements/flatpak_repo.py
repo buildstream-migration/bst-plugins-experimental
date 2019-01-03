@@ -30,9 +30,15 @@ from buildstream import ScriptElement, Scope, ElementError
 
 class FlatpakRepoElement(ScriptElement):
     def configure(self, node):
-        self.node_validate(node, ['environment', 'arch', 'branch'])
+        self.node_validate(node, ['environment', 'copy-refs', 'arch', 'branch'])
 
         self._env = self.node_get_member(node, list, 'environment')
+
+        self._copy_refs = []
+        for subnode in self.node_get_member(node, list, 'copy-refs'):
+            self.node_validate(subnode, ['src', 'dest'])
+            self._copy_refs.append((self.node_subst_member(subnode, 'src'),
+                                    self.node_subst_member(subnode, 'dest')))
 
         self._arch = self.node_subst_member(node, 'arch')
         self._branch = self.node_subst_member(node, 'branch')
@@ -66,6 +72,10 @@ class FlatpakRepoElement(ScriptElement):
             self.layout_add(elt.name, '/')
 
         self._layout_flatpaks(flatpaks)
+
+        for src, dest in self._copy_refs:
+            self.add_commands('copy ref {} -> {}'.format(src, dest),
+                              ['flatpak build-commit-from --src-ref={} /buildstream/repo {}'.format(src, dest)])
 
         super(FlatpakRepoElement, self).stage(sandbox)
 
