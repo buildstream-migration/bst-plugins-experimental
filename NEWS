@@ -2,6 +2,13 @@
 Next Version
 ================
 
+==================
+bst-external 0.8.0
+==================
+  o flatpak_image plugin now automatically moves all files in /etc into
+    /files/etc
+  o git_tag: Fixed tracking not picking up new changes if the ref is already
+    set
   o Add flatpak_repo element plugin for creating a flatpak repository from
     flatpak_image elements.
 
