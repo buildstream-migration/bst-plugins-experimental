@@ -2,6 +2,8 @@
 Next Version
 ================
 
+  o Add the ability to generate manifest files using the collect_manifest plugin.
+
 ==================
 bst-external 0.8.0
 ==================
