@@ -37,11 +37,15 @@ import configparser
 class FlatpakImageElement(Element):
 
     BST_STRICT_REBUILD = True
+    BST_FORMAT_VERSION = 1
 
     def configure(self, node):
         self.node_validate(node, [
-            'directory', 'include', 'exclude', 'metadata'
+            'directory', 'include', 'exclude', 'metadata',
+            'branch'
         ])
+
+        self.branch = self.node_subst_member(node, 'branch')
         self.directory = self.node_subst_member(node, 'directory')
         self.include = self.node_get_member(node, list, 'include')
         self.exclude = self.node_get_member(node, list, 'exclude')
@@ -74,7 +78,7 @@ class FlatpakImageElement(Element):
         key['include'] = sorted(self.include)
         key['exclude'] = sorted(self.exclude)
         key['metadata'] = self.metadata
-        key['version'] = 2              # Used to force rebuilds after editing the plugin
+        key['version'] = 3              # Used to force rebuilds after editing the plugin
         return key
 
     def configure_sandbox(self, sandbox):
@@ -121,6 +125,14 @@ class FlatpakImageElement(Element):
         metadatafile = os.path.join(installdir, 'metadata')
         with open(metadatafile, "w") as m:
             self.metadata.write(m)
+
+        if self.branch:
+            public_data = self.get_public_data('flatpak')
+            if not public_data:
+                public_data = {}
+            public_data['branch'] = self.branch
+            self.set_public_data('flatpak', public_data)
+
         return os.path.join(os.sep, 'buildstream', 'install')
 
 def setup():

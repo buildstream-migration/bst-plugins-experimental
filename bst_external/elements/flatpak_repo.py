@@ -29,6 +29,9 @@ The flatpak_repo default configuration:
 from buildstream import ScriptElement, Scope, ElementError
 
 class FlatpakRepoElement(ScriptElement):
+
+    BST_FORMAT_VERSION = 1
+
     def configure(self, node):
         self.node_validate(node, ['environment', 'copy-refs', 'arch', 'branch'])
 
@@ -47,13 +50,23 @@ class FlatpakRepoElement(ScriptElement):
         self.set_install_root('/buildstream/repo')
         self.set_root_read_only(True)
 
+    def get_unique_key(self):
+        key = {}
+        key['version'] = 1              # Used to force rebuilds after editing t
+        return key
+
     def _layout_flatpaks(self, elements):
         def staging_dir(elt):
             return '/buildstream/input/{}'.format(elt.name)
 
         def export_command(elt):
+            public_data = elt.get_public_data('flatpak')
+            if public_data and 'branch' in public_data:
+                branch = public_data['branch']
+            else:
+                branch = self._branch
             return 'flatpak build-export --files=files --arch={} /buildstream/repo {} {}'\
-                .format(self._arch, staging_dir(elt), self._branch)
+                .format(self._arch, staging_dir(elt), branch)
 
         for elt in elements:
             if elt.get_kind() == 'flatpak_image':
