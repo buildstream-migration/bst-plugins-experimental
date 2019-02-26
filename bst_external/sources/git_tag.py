@@ -72,6 +72,16 @@ git-tag - extension of BuildStream git plugin to track latest tag
    # If not set, this will default to 'False'
    track-tags: False
 
+   # Optionally match the tracked tag to a list of glob patterns
+   # NOTE: This does nothing if the 'track-tags' attribute is
+   # not set to True
+   match:
+
+   # Optionally exclude a list of glob patterns from tracked tags
+   # NOTE: This does nothing if the 'track-tags' attribute is
+   # not set to True
+   exclude:
+
    # Specify the commit ref, this must be specified in order to
    # checkout sources and build, but can be automatically updated
    # if the 'track' attribute was specified.
@@ -223,10 +233,10 @@ class GitTagMirror(SourceFetcher):
             raise SourceError("{}: expected ref '{}' was not found in git repository: '{}'"
                               .format(self.source, self.ref, self.url))
 
-    def latest_commit(self, tracking, *, track_tags):
+    def latest_commit(self, tracking, *, track_tags, track_args):
         if track_tags:
             exit_code, output = self.source.check_output(
-                [self.source.host_git, 'describe', '--tags', '--abbrev=0', tracking],
+                [self.source.host_git, "describe", "--tags", "--abbrev=0", *track_args, tracking],
                 cwd=self.mirror)
 
             if exit_code == 128:
@@ -237,10 +247,12 @@ class GitTagMirror(SourceFetcher):
                         cwd=self.mirror)
             tracking = output.rstrip('\n')
 
-        _, output = self.source.check_output(
-            [self.source.host_git, 'rev-parse', tracking],
-            fail="Unable to find commit for specified branch name '{}'".format(tracking),
-            cwd=self.mirror)
+        else:
+            _, output = self.source.check_output(
+                [self.source.host_git, 'rev-parse', tracking],
+                fail="Unable to find commit for specified branch name '{}'".format(tracking),
+                cwd=self.mirror)
+
         ref = output.rstrip('\n')
 
         # Prefix the ref with the closest annotated tag, if available,
@@ -354,13 +366,15 @@ class GitTagSource(Source):
     def configure(self, node):
         ref = self.node_get_member(node, str, 'ref', '') or None
 
-        config_keys = ['url', 'track', 'track-tags', 'ref', 'submodules', 'checkout-submodules']
+        config_keys = ['url', 'track', 'track-tags', 'ref', 'submodules', 'checkout-submodules', 'match', 'exclude']
         self.node_validate(node, config_keys + Source.COMMON_CONFIG_KEYS)
 
         self.original_url = self.node_get_member(node, str, 'url')
         self.mirror = GitTagMirror(self, '', self.original_url, ref, primary=True)
         self.tracking = self.node_get_member(node, str, 'track', None)
         self.track_tags = self.node_get_member(node, bool, 'track-tags', False)
+        self.match = self.node_get_member(node, list, 'match', [])
+        self.exclude = self.node_get_member(node, list, 'exclude', [])
 
         # At this point we now know if the source has a ref and/or a track.
         # If it is missing both then we will be unable to track or build.
@@ -446,8 +460,14 @@ class GitTagSource(Source):
             self.mirror.ensure()
             self.mirror._fetch()
 
+            track_args = []
+            for i in range(len(self.match)):
+                track_args.append("--match={}".format(self.match[i]))
+            for i in range(len(self.exclude)):
+                track_args.append("--exclude={}".format(self.exclude[i]))
+
             # Update self.mirror.ref and node.ref from the self.tracking branch
-            ret = self.mirror.latest_commit(self.tracking, track_tags=self.track_tags)
+            ret = self.mirror.latest_commit(self.tracking, track_tags=self.track_tags, track_args=track_args)
 
         return ret
 
