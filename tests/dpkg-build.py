@@ -20,7 +20,7 @@ def test_dpkg_build(cli, datafiles, plugin_import):
     result = cli.run(project=project, args=['build', element_name])
     assert result.exit_code == 0
 
-    result = cli.run(project=project, args=['checkout', element_name, checkout])
+    result = cli.run(project=project, args=['artifact', 'checkout', element_name, '--directory', checkout])
     assert result.exit_code == 0
 
     assert_contains(checkout, ['/usr/share/foo', '/usr/share/doc/test/changelog.gz'])

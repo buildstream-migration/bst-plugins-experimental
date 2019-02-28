@@ -16,7 +16,7 @@ def test_docker_fetch(cli, datafiles, plugin_import):
     project = os.path.join(datafiles.dirname, datafiles.basename)
     docker_alpine_base = 'docker-source/dependencies/dockerhub-alpine.bst'
 
-    result = cli.run(project=project, args=['fetch', docker_alpine_base])
+    result = cli.run(project=project, args=['source', 'fetch', docker_alpine_base])
     result.assert_success()
 
 @pytest.mark.integration
@@ -30,7 +30,7 @@ def test_docker_source_build(cli_integration, datafiles, plugin_import):
     result = cli_integration.run(project=project, args=['build', element_name])
     result.assert_success()
 
-    result = cli_integration.run(project=project, args=['checkout', element_name, checkout])
+    result = cli_integration.run(project=project, args=['artifact', 'checkout', element_name, '--directory', checkout])
     result.assert_success()
 
     assert_contains(checkout, ['/etc/os-release'])
