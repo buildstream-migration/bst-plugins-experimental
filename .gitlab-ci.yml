@@ -77,6 +77,10 @@ integration_linux:
     - git clone https://gitlab.com/BuildStream/buildstream.git
     - cd buildstream && pip3 install . && cd ..
 
+    # FIXME: For some reason we need pygobject still...
+    - pip3 install pygobject
+
+
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
     
     # Unpack and get into dist/bst-external
@@ -111,6 +115,9 @@ integration_unix:
     # First install bst
     - git clone https://gitlab.com/BuildStream/buildstream.git
     - cd buildstream && pip3 install . && cd ..
+
+    # FIXME: For some reason we need pygobject still...
+    - pip3 install pygobject
 
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
 
