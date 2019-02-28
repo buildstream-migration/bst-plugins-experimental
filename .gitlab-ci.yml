@@ -84,7 +84,7 @@ integration_linux:
 
     # Run the tests from the source distribution.
     # We run as a simple user to test for permission issues.
-    - su buildstream -c 'python3 setup.py test --index-url invalid://uri'
+    - su buildstream -c 'python3 setup.py test'
 
     # Go back top level and collect our reports
     - cd ../.. #you may only have to go back one level here...
@@ -112,7 +112,7 @@ integration_unix:
     - pip3 install .
 
     # Since the unix platform is required to run as root, no user change required
-    - python3 setup.py test --index-url invalid://uri
+    - python3 setup.py test
 
     # Go back top level and collect our reports
     - cd ../..
