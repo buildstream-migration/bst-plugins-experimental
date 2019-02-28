@@ -1,5 +1,5 @@
-image: buildstream/buildstream-fedora:master-89-4d92c106
-
+# Use BuildStream's nightly image
+image: buildstream/buildstream:nightly
 
 cache:
   paths:
@@ -79,6 +79,9 @@ integration_linux:
     - chown -R buildstream:buildstream bst-external
     - cd bst-external
 
+    # Install bst-external
+    - pip3 install .
+
     # Run the tests from the source distribution.
     # We run as a simple user to test for permission issues.
     - su buildstream -c 'python3 setup.py test --index-url invalid://uri'
@@ -104,6 +107,9 @@ integration_unix:
 
     # Unpack and get into dist/bst-external
     - cd dist && ./unpack.sh && cd bst-external
+
+    # Install bst-external
+    - pip3 install .
 
     # Since the unix platform is required to run as root, no user change required
     - python3 setup.py test --index-url invalid://uri
