@@ -1,5 +1,6 @@
 # Use BuildStream's nightly image
-image: buildstream/buildstream:nightly
+#image: buildstream/buildstream:nightly
+image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:29-master-47052095
 
 cache:
   paths:
@@ -72,6 +73,10 @@ integration_linux:
     PYTEST_ADDOPTS: "--color=yes"
   script:
 
+    # First install bst
+    - git clone https://gitlab.com/BuildStream/buildstream.git
+    - cd buildstream && pip3 install . && cd ..
+
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
     
     # Unpack and get into dist/bst-external
@@ -80,7 +85,7 @@ integration_linux:
     - cd bst-external
 
     # Install bst-external
-    - pip3 install --user .
+    - pip3 install .
 
     # Run the tests from the source distribution.
     # We run as a simple user to test for permission issues.
@@ -102,6 +107,10 @@ integration_unix:
     BST_FORCE_BACKEND: "unix"
     PYTEST_ADDOPTS: "--color=yes"
   script:
+
+    # First install bst
+    - git clone https://gitlab.com/BuildStream/buildstream.git
+    - cd buildstream && pip3 install . && cd ..
 
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
 
