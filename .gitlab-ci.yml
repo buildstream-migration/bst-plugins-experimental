@@ -80,7 +80,7 @@ integration_linux:
     - cd bst-external
 
     # Install bst-external
-    - pip3 install .
+    - pip3 install --user .
 
     # Run the tests from the source distribution.
     # We run as a simple user to test for permission issues.
