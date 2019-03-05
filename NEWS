@@ -2,6 +2,12 @@
 Next Version
 ================
 
+===================
+bst-external 0.10.0
+===================
+
+  o Add quilt source plugin for applying patch series.
+
 ==================
 bst-external 0.9.0
 ==================
