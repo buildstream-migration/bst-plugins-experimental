@@ -474,13 +474,7 @@ class GitTagSource(Source):
         with self.timed_activity("Staging {}".format(self.mirror.url), silent_nested=True):
             self.mirror.stage(directory)
             for mirror in self.submodules:
-                if mirror.path in self.submodule_checkout_overrides:
-                    checkout = self.submodule_checkout_overrides[mirror.path]
-                else:
-                    checkout = self.checkout_submodules
-
-                if checkout:
-                    mirror.stage(directory)
+                mirror.stage(directory)
 
     def get_source_fetchers(self):
         yield self.mirror
@@ -518,6 +512,10 @@ class GitTagSource(Source):
         #
         for path, url in self.mirror.submodule_list():
 
+            # Completely ignore submodules which are disabled for checkout
+            if self.ignore_submodule(path):
+                continue
+
             # Allow configuration to override the upstream
             # location of the submodules.
             override_url = self.submodule_overrides.get(path)
@@ -530,6 +528,15 @@ class GitTagSource(Source):
                 submodules.append(mirror)
 
         self.submodules = submodules
+
+    # Checks whether the plugin configuration has explicitly
+    # configured this submodule to be ignored
+    def ignore_submodule(self, path):
+        try:
+            checkout = self.submodule_checkout_overrides[path]
+        except KeyError:
+            checkout = self.checkout_submodules
+        return not checkout
 
 
 # Plugin entry point
