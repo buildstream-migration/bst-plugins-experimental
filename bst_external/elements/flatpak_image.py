@@ -45,18 +45,22 @@ class FlatpakImageElement(Element):
         self.directory = self.node_subst_member(node, 'directory')
         self.include = self.node_get_member(node, list, 'include')
         self.exclude = self.node_get_member(node, list, 'exclude')
-        self.metadata = configparser.ConfigParser()
-        self.metadata.optionxform = str
-        metadata_dict = {}
-        for section, pairs in node.get('metadata').items():
-            if not section.startswith('__bst'):
-                section_dict = {}
-                for key in pairs.keys():
-                    if not key.startswith('__bst'):
-                        section_dict[key] = self.node_subst_member(pairs, key)
-                metadata_dict[section] = section_dict
+        # TODO: HELP
+        self.metadata = None
+        #self.metadata = configparser.ConfigParser()
+        #self.metadata.optionxform = str
+        self.metadata_dict = self.new_empty_node()
 
-        self.metadata.read_dict(metadata_dict)
+        for section, pairs in self.node_items(self.node_get_member(node, dict, 'metadata')):
+            if not section.startswith('__bst'):
+                section_dict = self.new_empty_node()
+                for key, _ in self.node_items(pairs):
+                    thing = self.node_subst_member(pairs, key)
+                    if not key.startswith('__bst'):
+                        self.node_set_member(section_dict, key, self.node_subst_member(pairs, key))
+                self.node_set_member(self.metadata_dict, section, section_dict)
+
+        #self.metadata.read_dict(metadata_dict)
 
     def preflight(self):
         runtime_deps = list(self.dependencies(Scope.RUN, recurse=False))
@@ -73,7 +77,7 @@ class FlatpakImageElement(Element):
         key['directory'] = self.directory
         key['include'] = sorted(self.include)
         key['exclude'] = sorted(self.exclude)
-        key['metadata'] = self.metadata
+        key['metadata'] = self.metadata_dict
         key['version'] = 2              # Used to force rebuilds after editing the plugin
         return key
 
@@ -98,13 +102,13 @@ class FlatpakImageElement(Element):
 
         os.makedirs(allfiles, exist_ok=True)
         os.makedirs(filesdir, exist_ok=True)
-        if self.metadata.has_section('Application'):
+        if self.metadata_dict.has_section('Application'):
             os.makedirs(os.path.join(installdir, 'export'), exist_ok=True)
 
-        for section in self.metadata.sections():
+        for section in self.metadata_dict.sections():
             if section.startswith('Extension '):
                 try:
-                    extensiondir = self.metadata.get(section, 'directory')
+                    extensiondir = self.metadata_dict.get(section, 'directory')
                     os.makedirs(os.path.join(installdir, 'files', extensiondir), exist_ok=True)
                 except PermissionError as e:
                     raise ElementError("Permission denied: Cannot create {}".format(extensiondir))
@@ -120,7 +124,7 @@ class FlatpakImageElement(Element):
 
         metadatafile = os.path.join(installdir, 'metadata')
         with open(metadatafile, "w") as m:
-            self.metadata.write(m)
+            self.metadata_dict.write(m)
         return os.path.join(os.sep, 'buildstream', 'install')
 
 def setup():
