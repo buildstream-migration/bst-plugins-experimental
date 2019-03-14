@@ -67,6 +67,13 @@ git-tag - extension of BuildStream git plugin to track latest tag
    # will be used to update the 'ref' when refreshing the pipeline.
    track: master
 
+   # Optionally specify an additional list of symbolic tracking branches,
+   # this will be used to update the 'ref' when refreshing the pipeline
+   # n.b. Tracks to the latest overall commit on any of the branches
+   track-extra:
+   - foo
+   - bar
+
    # Optionally specify to track the latest tag of a branch,
    # rather than the latest commit when updating 'ref'.
    # If not set, this will default to 'False'
@@ -255,6 +262,12 @@ class GitTagMirror(SourceFetcher):
 
         ref = output.rstrip('\n')
 
+        # Find the time of the commit to avoid stepping onto an older tag
+        # on a different branch
+        _, time = self.source.check_output(
+                [self.source.host_git, 'show', '-s', '--format=%ct', ref],
+                cwd=self.mirror)
+
         # Prefix the ref with the closest annotated tag, if available,
         # to make the ref human readable
         exit_code, output = self.source.check_output(
@@ -263,7 +276,7 @@ class GitTagMirror(SourceFetcher):
         if exit_code == 0:
             ref = output.rstrip('\n')
 
-        return ref
+        return ref, time
 
     def stage(self, directory):
         fullpath = os.path.join(directory, self.path)
@@ -372,6 +385,7 @@ class GitTagSource(Source):
         self.original_url = self.node_get_member(node, str, 'url')
         self.mirror = GitTagMirror(self, '', self.original_url, ref, primary=True)
         self.tracking = self.node_get_member(node, str, 'track', None)
+        self.track_extra = self.node_get_member(node, list, 'track-extra', default=[])
         self.track_tags = self.node_get_member(node, bool, 'track-tags', False)
         self.match = self.node_get_member(node, list, 'match', [])
         self.exclude = self.node_get_member(node, list, 'exclude', [])
@@ -461,13 +475,21 @@ class GitTagSource(Source):
             self.mirror._fetch()
 
             track_args = []
-            for i in range(len(self.match)):
-                track_args.append("--match={}".format(self.match[i]))
-            for i in range(len(self.exclude)):
-                track_args.append("--exclude={}".format(self.exclude[i]))
+            for pattern in self.match:
+                track_args.append("--match={}".format(pattern))
+            for pattern in self.exclude:
+                track_args.append("--exclude={}".format(pattern))
 
-            # Update self.mirror.ref and node.ref from the self.tracking branch
-            ret = self.mirror.latest_commit(self.tracking, track_tags=self.track_tags, track_args=track_args)
+            branches = [self.tracking] +  self.track_extra
+
+            # Find new candidate refs from self.tracking branches
+            candidates = dict([self.mirror.latest_commit(
+                       branch, track_tags=self.track_tags, track_args=track_args)
+                       for branch in branches])
+
+            # Find latest candidate ref from all branches
+            # Update self.mirror.ref, node.ref
+            ret = max(candidates, key=candidates.get)
 
         return ret
 
