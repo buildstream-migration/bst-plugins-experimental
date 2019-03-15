@@ -29,6 +29,9 @@ The flatpak_repo default configuration:
 from buildstream import ScriptElement, Scope, ElementError
 
 class FlatpakRepoElement(ScriptElement):
+
+    BST_FORMAT_VERSION = 1
+
     def configure(self, node):
         self.node_validate(node, ['environment', 'copy-refs', 'arch', 'branch'])
 
@@ -46,6 +49,9 @@ class FlatpakRepoElement(ScriptElement):
         self.set_work_dir()
         self.set_install_root('/buildstream/repo')
         self.set_root_read_only(True)
+
+        self.add_commands('Initializing the repository',
+                          ['ostree init --mode=bare-user --repo=/buildstream/repo'])
 
     def _layout_flatpaks(self, elements):
         def staging_dir(elt):
