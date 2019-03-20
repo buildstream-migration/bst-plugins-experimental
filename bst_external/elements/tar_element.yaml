@@ -12,3 +12,7 @@ config:
   #   * xz
   #   * bzip2
   compression: gzip
+
+  # Optionally include a sha256sum of the generated 
+  # artifact
+  include-sha: True

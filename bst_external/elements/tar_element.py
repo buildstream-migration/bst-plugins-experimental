@@ -39,8 +39,12 @@ The tarball_element default configuration:
 
 import tarfile
 import os
+import hashlib
 
 from buildstream import Element, Scope, ElementError
+
+# Block size for reading tarball when hashing
+BLOCKSIZE = 65536
 
 class TarElement(Element):
 
@@ -57,10 +61,11 @@ class TarElement(Element):
 
     def configure(self, node):
         self.node_validate(node, [
-            'filename', 'compression'
+            'filename', 'compression', 'include-sha'
         ])
         self.filename = self.node_subst_member(node, 'filename')
         self.compression = self.node_get_member(node, str, 'compression')
+        self.include_sha = self.node_get_member(node, str, 'include-sha')
 
         if self.compression not in ['none', 'gzip', 'xz', 'bzip2']:
             raise ElementError("{}: Invalid compression option {}".format(self, self.compression))
@@ -72,6 +77,7 @@ class TarElement(Element):
         key = {}
         key['filename'] = self.filename
         key['compression'] = self.compression
+        key['include-sha'] = self.include_sha
         return key
 
     def configure_sandbox(self, sandbox):
@@ -101,6 +107,18 @@ class TarElement(Element):
             with tarfile.TarFile.open(name=tarname, mode=mode) as tar:
                 for f in os.listdir(inputdir):
                     tar.add(os.path.join(inputdir, f), arcname=f)
+
+            if self.include_sha:
+                sha_path = os.path.join(outputdir, self.filename + '.sha256sum')
+                with open(sha_path, 'w') as sha_file:
+                    sha = hashlib.sha256()
+                    with open(tarname, 'rb') as f:
+                        while True:
+                            buf = f.read(BLOCKSIZE)
+                            if not buf:
+                                break
+                            sha.update(buf)
+                    sha_file.write(sha.hexdigest())
 
         return '/output'
 

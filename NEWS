@@ -2,6 +2,8 @@
 Next Version
 ================
 
+  o tar_element: Allow generation of a sha256sum along with tarball
+
 ===================
 bst-external 0.10.0
 ===================
