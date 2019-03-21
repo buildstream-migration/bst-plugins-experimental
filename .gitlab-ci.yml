@@ -1,4 +1,4 @@
-image: buildstream/buildstream-fedora:master-89-4d92c106
+image: buildstream/buildstream:latest-master-52125390
 
 
 cache:
