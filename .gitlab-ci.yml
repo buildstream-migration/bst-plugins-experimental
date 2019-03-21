@@ -95,7 +95,7 @@ integration_linux:
     # Go back top level and collect our reports
     - cd ../.. #you may only have to go back one level here...
     - mkdir -p coverage-linux/
-    - cp dist/bst-external/.coverage.* coverage-linux/coverage.linux
+    - cp dist/bst-external/.coverage coverage-linux/coverage.linux
   artifacts:
     paths:
     - coverage-linux/
@@ -120,7 +120,7 @@ integration_unix:
     # Go back top level and collect our reports
     - cd ../..
     - mkdir -p coverage-unix/
-    - cp dist/bst-external/.coverage.* coverage-unix/coverage.unix
+    - cp dist/bst-external/.coverage coverage-unix/coverage.unix
 
   artifacts:
     paths:
