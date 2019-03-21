@@ -20,6 +20,13 @@ before_script:
   - chown -R buildstream:buildstream .
 
   - pip3 install pytest
+  - pip3 install pytest-cov
+  - pip3 install pytest-datafiles
+  - pip3 install pytest-env
+  - pip3 install pytest-pep8
+  - pip3 install pytest-xdist
+  - pip3 install coverage==4.4.0
+  - pip3 install pep8
   - pip3 install requests
 
 #####################################################
