@@ -1,4 +1,4 @@
-image: buildstream/buildstream-fedora:master-89-4d92c106
+image: buildstream/buildstream:latest-master-52125390
 
 
 cache:
@@ -19,7 +19,16 @@ before_script:
   - adduser -m buildstream
   - chown -R buildstream:buildstream .
 
+  - dnf install -y quilt
+
   - pip3 install pytest
+  - pip3 install pytest-cov
+  - pip3 install pytest-datafiles
+  - pip3 install pytest-env
+  - pip3 install pytest-pep8
+  - pip3 install pytest-xdist
+  - pip3 install coverage==4.4.0
+  - pip3 install pep8
   - pip3 install requests
 
 #####################################################
@@ -81,12 +90,12 @@ integration_linux:
 
     # Run the tests from the source distribution.
     # We run as a simple user to test for permission issues.
-    - su buildstream -c 'python3 setup.py test --index-url invalid://uri'
+    - su buildstream -c 'python3 setup.py test --index-url file:///dev/null'
 
     # Go back top level and collect our reports
     - cd ../.. #you may only have to go back one level here...
     - mkdir -p coverage-linux/
-    - cp dist/bst-external/.coverage.* coverage-linux/coverage.linux
+    - cp dist/bst-external/.coverage coverage-linux/coverage.linux
   artifacts:
     paths:
     - coverage-linux/
@@ -106,12 +115,12 @@ integration_unix:
     - cd dist && ./unpack.sh && cd bst-external
 
     # Since the unix platform is required to run as root, no user change required
-    - python3 setup.py test --index-url invalid://uri
+    - python3 setup.py test --index-url file:///dev/null
 
     # Go back top level and collect our reports
     - cd ../..
     - mkdir -p coverage-unix/
-    - cp dist/bst-external/.coverage.* coverage-unix/coverage.unix
+    - cp dist/bst-external/.coverage coverage-unix/coverage.unix
 
   artifacts:
     paths:
