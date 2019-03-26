@@ -6,7 +6,7 @@ description: |
   just copy out the /etc/os-release file so that can be sanity checked.
 
 depends:
-- filename: docker-source/dependencies/dockerhub-alpine.bst
+- filename: dockerhub-alpine.bst
   type: build
 
 config:
