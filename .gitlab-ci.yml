@@ -10,6 +10,7 @@ stages:
   - test
   - coverage
   - docs
+  - upload
 
 before_script:
   # Diagnostics
@@ -30,6 +31,7 @@ before_script:
   - pip3 install coverage==4.4.0
   - pip3 install pep8
   - pip3 install requests
+  - pip3 install twine
 
 #####################################################
 #                  Prepare stage                    #
@@ -179,3 +181,21 @@ pages:
     - public/
   only:
   - master
+
+
+# Automatically upload to PyPI when a release is tagged.
+
+#####################################################
+#               Upload stage                        #
+#####################################################
+
+upload:
+  stage: upload
+  script:
+  - twine upload dist/*.tar.gz
+  dependencies:
+  - source_dist
+  only:
+  - /[0-9]+\.[0-9]+\.[0-9]+/
+  except:
+  - branches
