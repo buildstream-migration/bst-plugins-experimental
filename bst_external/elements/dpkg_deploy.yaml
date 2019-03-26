@@ -9,6 +9,7 @@ variables:
   packages: <PACKAGES>
   buildpkg: |
             for package in %{packages}; do
+              /bin/chmod 0755 %{build-root}/$package/DEBIAN
               dpkg-deb --build %{build-root}/$package %{install-root}
             done
 
