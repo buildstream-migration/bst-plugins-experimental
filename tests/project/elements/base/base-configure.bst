@@ -1,6 +1,6 @@
 kind: script
 depends:
-- filename: base/base-system.bst
+- filename: base/install-dpkg.bst
   type: build
 
 variables:
