@@ -21,3 +21,18 @@ def test_dpkg_build(cli, datafiles):
     assert result.exit_code == 0
 
     assert_contains(checkout_dir, ['/usr/share/foo', '/usr/share/doc/test/changelog.gz'])
+
+
+@pytest.mark.datafiles(DATA_DIR)
+def test_dpkg_deploy(cli, datafiles):
+    project = os.path.join(datafiles.dirname, datafiles.basename)
+    checkout_dir = os.path.join(cli.directory, 'debian_package')
+
+    result = cli.run(project=project, args=['build', 'dpkg-deploy-test.bst'])
+    assert result.exit_code == 0
+
+    result = cli.run(project=project, args=['checkout', 'dpkg-deploy-test.bst', checkout_dir])
+    assert result.exit_code == 0
+
+    # FIXME: assert_contains() doesn't seem to like this .deb file
+    assert os.listdir(checkout_dir) == ['test_0.1_amd64.deb']
