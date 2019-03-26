@@ -1,9 +1,8 @@
 import os
 import pytest
 
-from tests.testutils import cli_integration, cli, plugin_import
+from tests.testutils import cli
 from tests.testutils.integration import assert_contains
-
 
 DATA_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
@@ -11,26 +10,21 @@ DATA_DIR = os.path.join(
 )
 
 @pytest.mark.datafiles(DATA_DIR)
-def test_docker_fetch(cli, datafiles, plugin_import):
-
+def test_docker_fetch(cli, datafiles):
     project = os.path.join(datafiles.dirname, datafiles.basename)
-    docker_alpine_base = 'docker-source/dependencies/dockerhub-alpine.bst'
-
-    result = cli.run(project=project, args=['fetch', docker_alpine_base])
+    result = cli.run(project=project, args=['fetch', 'dockerhub-alpine.bst'])
     result.assert_success()
 
-@pytest.mark.integration
 @pytest.mark.datafiles(DATA_DIR)
-def test_docker_source_build(cli_integration, datafiles, plugin_import):
-
+def test_docker_source_build(cli, datafiles):
     project = os.path.join(datafiles.dirname, datafiles.basename)
-    checkout = os.path.join(cli_integration.directory, 'checkout')
-    element_name = 'docker-source/docker-source-test.bst'
+    # Perhaps this needs to be in the project...?
+    checkout = os.path.join(cli.directory, 'checkout')
 
-    result = cli_integration.run(project=project, args=['build', element_name])
+    result = cli.run(project=project, args=['build', 'docker-source-test.bst'])
     result.assert_success()
 
-    result = cli_integration.run(project=project, args=['checkout', element_name, checkout])
+    result = cli.run(project=project, args=['checkout', 'docker-source-test.bst', checkout])
     result.assert_success()
 
     assert_contains(checkout, ['/etc/os-release'])
