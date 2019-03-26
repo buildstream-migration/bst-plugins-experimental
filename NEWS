@@ -2,8 +2,12 @@
 Next Version
 ================
 
-o Allow pattern matching of tags and tracking multiple branches on git_tag
-    plugin
+===================
+bst-external 0.11.0
+===================
+
+o git_tag: Allow pattern matching of tags and tracking multiple branches.
+o git_tag: Don't download unused submodules
 
 ===================
 bst-external 0.10.0
