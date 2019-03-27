@@ -165,18 +165,23 @@ class CollectManifestElement(Element):
 
         return source_locations
 
+    def get_dependencies(self, dep, visited):
+        if dep in visited:
+            return
+        visited.add(dep)
+        for subdep in dep.dependencies(Scope.RUN, recurse=False):
+            yield from self.get_dependencies(subdep, visited)
+        yield dep
+
     def assemble(self, sandbox):
         manifest = OrderedDict()
         manifest['//NOTE'] = 'This is a generated manifest from buildstream files and not usable by flatpak-builder'
         manifest['modules'] = []
 
-        visited = {}
+        visited = set()
         for top_dep in self.dependencies(Scope.BUILD,
                                          recurse=False):
-            for dep in top_dep.dependencies(Scope.RUN,
-                                            visited=visited,
-                                            recursed=True,
-                                            recurse=True):
+            for dep in self.get_dependencies(top_dep, visited):
                 import_manifest = dep.get_public_data('cpe-manifest')
 
                 if import_manifest:
