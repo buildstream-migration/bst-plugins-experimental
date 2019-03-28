@@ -148,7 +148,7 @@ pages:
 
 upload:
   stage: upload
-  before-script:
+  before_script:
     - pip3 install requests
     - pip3 install twine
 
