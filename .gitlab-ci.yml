@@ -11,7 +11,7 @@ stages:
   - upload
 
 before_script:
-  - adduser -m buildstream
+  - adduser -um buildstream
   - chown -R buildstream:buildstream .
 
   - dnf install -y quilt
@@ -63,8 +63,6 @@ source_dist:
   stage: test
   before_script:
     - pip3 install --upgrade pip tox tox-venv
-    - useradd -Um buildstream
-    - chown -R buildstream:buildstream .
   script:
     - su buildstream -c tox
   variables: &tox-variables
