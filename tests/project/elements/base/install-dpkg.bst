@@ -1,6 +1,6 @@
 kind: manual
 depends:
-- filename: base/base-platform.bst
+- filename: base/alpine-image.bst
   type: build
 sources:
 - kind: git
@@ -9,5 +9,7 @@ sources:
   ref: ecf14954e4298ce5495f701464339162fad73f30
 config:
   install-commands:
-  - xz -d dpkg-build-sysroot.tar.xz
-  - tar xf dpkg-build-sysroot.tar -C %{install-root} --no-same-owner
+  - tar xf dpkg-build-sysroot.tar.xz -C %{install-root} --no-same-owner
+  strip-commands:
+    # For some reason, the strip commands were hanging...
+    - echo "none"

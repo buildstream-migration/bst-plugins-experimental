@@ -1,6 +1,5 @@
 image: buildstream/buildstream:latest-master-52125390
 
-
 cache:
   paths:
     - cache/
@@ -89,6 +88,8 @@ integration_linux:
     - cd dist && ./unpack.sh
     - chown -R buildstream:buildstream bst-external
     - cd bst-external
+    # Install bst-external at this branch as the tests need it
+    - pip3 install --no-index .
 
     # Run the tests from the source distribution.
     # We run as a simple user to test for permission issues.
@@ -114,7 +115,7 @@ integration_unix:
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
 
     # Unpack and get into dist/bst-external
-    - cd dist && ./unpack.sh && cd bst-external
+    - cd dist && ./unpack.sh && cd bst-external && pip3 install --no-index .
 
     # Since the unix platform is required to run as root, no user change required
     - python3 setup.py test --index-url file:///dev/null
