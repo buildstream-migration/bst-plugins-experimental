@@ -7,30 +7,14 @@ cache:
 stages:
   - prepare
   - test
-  - coverage
   - docs
   - upload
 
 before_script:
-  # Diagnostics
-  - mount
-  - df -h
-
   - adduser -m buildstream
   - chown -R buildstream:buildstream .
 
   - dnf install -y quilt
-
-  - pip3 install pytest
-  - pip3 install pytest-cov
-  - pip3 install pytest-datafiles
-  - pip3 install pytest-env
-  - pip3 install pytest-pep8
-  - pip3 install pytest-xdist
-  - pip3 install coverage==4.4.0
-  - pip3 install pep8
-  - pip3 install requests
-  - pip3 install twine
 
 #####################################################
 #                  Prepare stage                    #
@@ -75,86 +59,62 @@ source_dist:
 #####################################################
 #                    Test stage                     #
 #####################################################
-
-integration_linux:
+.tox-template: &tox
   stage: test
-  variables:
-    PYTEST_ADDOPTS: "--color=yes"
+  before_script:
+    - pip3 install --upgrade pip tox tox-venv
+    - useradd -Um buildstream
+    - chown -R buildstream:buildstream .
   script:
+    - su buildstream -c tox
+  variables: &tox-variables
+    PY_COLORS: 1
+    PYTEST_ADDOPTS: '--color=yes'
 
-    - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
-    
-    # Unpack and get into dist/bst-external
-    - cd dist && ./unpack.sh
-    - chown -R buildstream:buildstream bst-external
-    - cd bst-external
-    # Install bst-external at this branch as the tests need it
-    - pip3 install --no-index .
+tests-py37:
+  <<: *tox
+  variables:
+    <<: *tox-variables
+    TOXENV: py37
 
-    # Run the tests from the source distribution.
-    # We run as a simple user to test for permission issues.
-    - su buildstream -c 'python3 setup.py test --index-url file:///dev/null'
+tests-py36:
+  <<: *tox
+  image: python:3.6-stretch
+  variables:
+    <<: *tox-variables
+    TOXENV: py36
 
-    # Go back top level and collect our reports
-    - cd ../.. #you may only have to go back one level here...
-    - mkdir -p coverage-linux/
-    - cp dist/bst-external/.coverage coverage-linux/coverage.linux
+tests-py35:
+  <<: *tox
+  image: python:3.5-stretch
+  script:
+    # Plugins behave weirdly inside tox on Python 3.5 only. To further the
+    # weirdness, the tests work fine when preparing the environment separately
+    # from running tests.
+    - su buildstream -c sh -c 'tox --notest'
+    - su buildstream -c tox
+  variables:
+    <<: *tox-variables
+    TOXENV: py35
+
+lint:
+  <<: *tox
+  variables:
+    <<: *tox-variables
+    TOXENV: lint rst-lint
+
+docs-test:
+  <<: *tox
+  variables:
+    <<: *tox-variables
+    TOXENV: docs
+  script:
+    - su buildstream -c tox
+    - mv doc/build/html public
   artifacts:
     paths:
-    - coverage-linux/
-  dependencies:
-  - source_dist
+    - public/
 
-integration_unix:
-  stage: test
-  variables:
-    BST_FORCE_BACKEND: "unix"
-    PYTEST_ADDOPTS: "--color=yes"
-  script:
-
-    - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
-
-    # Unpack and get into dist/bst-external
-    - cd dist && ./unpack.sh && cd bst-external && pip3 install --no-index .
-
-    # Since the unix platform is required to run as root, no user change required
-    - python3 setup.py test --index-url file:///dev/null
-
-    # Go back top level and collect our reports
-    - cd ../..
-    - mkdir -p coverage-unix/
-    - cp dist/bst-external/.coverage coverage-unix/coverage.unix
-
-  artifacts:
-    paths:
-    - coverage-unix/
-    - logs-unix/
-
-  dependencies:
-  - source_dist
-
-#####################################################
-#                Coverage stage                     #
-#####################################################
-
-# Collate coverage reports
-#
-coverage:
-  stage: coverage
-  coverage: '/TOTAL +\d+ +\d+ +(\d+\.\d+)%/'
-  script:
-    - cd dist && ./unpack.sh && cd bst-external
-    - pip3 install --no-index .
-    - mkdir report
-    - cd report
-    - cp ../../../coverage-linux/coverage.linux .
-    - cp ../../../coverage-unix/coverage.unix .
-    - coverage combine --rcfile=../.coveragerc -a coverage.*
-    - coverage report --rcfile=../.coveragerc -m
-  dependencies:
-  - source_dist
-  - integration_linux
-  - integration_unix
 
 # Automatically build documentation, only for merges which land
 # on master branch.
@@ -170,18 +130,14 @@ coverage:
 pages:
   stage: docs
   script:
-  - dnf install -y python2
-  - pip3 install sphinx
-  - pip3 install sphinx-click
-  - pip3 install sphinx_rtd_theme
-  - pip3 install --user .
-  - make -C doc
-  - mv doc/build/html public
+    - find public/
   artifacts:
     paths:
     - public/
   only:
   - master
+  dependencies:
+    - docs-test
 
 
 # Automatically upload to PyPI when a release is tagged.
@@ -192,6 +148,10 @@ pages:
 
 upload:
   stage: upload
+  before-script:
+    - pip3 install requests
+    - pip3 install twine
+
   script:
   - twine upload dist/*.tar.gz
   dependencies:
