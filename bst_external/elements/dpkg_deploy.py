@@ -188,7 +188,7 @@ class DpkgDeployElement(ScriptElement):
                     package in bstdata["split-rules"]):
                 raise ElementError("{}: Input element {} does not have bst.split-rules.{}"
                                    .format(self.name, self.__input.name, package))
-            package_splits = bstdata['split-rules'][package]
+
             package_files = input_elm.compute_manifest(include=[package])
             src = os.path.join(sandbox.get_directory(),
                                self.get_variable("build-root").lstrip(os.sep))
