@@ -97,8 +97,8 @@ tests-py35:
 tests-unix:
   stage: test
   variables:
-    BST_FORCE_BACKEND = "unix"
-    PYTEST_ADDOPTS = "--color=yes"
+    BST_FORCE_BACKEND: "unix"
+    PYTEST_ADDOPTS: "--color=yes"
   before_script:
     - pip3 install --upgrade pip tox tox-venv
     - dnf install -y quilt
