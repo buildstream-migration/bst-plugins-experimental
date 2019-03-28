@@ -3,6 +3,13 @@ Next Version
 ================
 
 ===================
+bst-external 0.12.0
+===================
+
+o collect_manifest.py: Uses its own of getting dependencies instead of relying on private APIs.
+o git_tag.py: Fixed the config field "track-extra" not being supported
+
+===================
 bst-external 0.11.0
 ===================
 
