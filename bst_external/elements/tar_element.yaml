@@ -1,7 +1,7 @@
 # tar_element default configurations
 
 config:
-  
+
   # Optionally specify a filename for the archive
   filename: files
 

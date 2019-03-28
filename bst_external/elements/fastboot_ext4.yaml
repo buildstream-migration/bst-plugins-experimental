@@ -1,4 +1,4 @@
-#fastboot ext4sparse image default configuration
+# fastboot ext4sparse image default configuration
 
 variables:
   img_output: test.img
@@ -10,18 +10,17 @@ variables:
 
 config:
   create_dev_proc_shadow:
-  - |
-    mkdir -p %{build-root}/dev
-    mkdir -p %{build-root}/proc
-    systemd-firstboot --root %{build-root} --root-password %{root_password} --locale %{locale} --timezone %{timezone}
-    chmod 400 %{build-root}/etc/shadow
+    - |
+      mkdir -p %{build-root}/dev
+      mkdir -p %{build-root}/proc
+      systemd-firstboot --root %{build-root} --root-password %{root_password} --locale %{locale} --timezone %{timezone}
+      chmod 400 %{build-root}/etc/shadow
 
   create_img:
-  - |
-    make_ext4fs -L %{img_label} -l %{img_size} -s /buildstream/%{img_output} %{build-root}
+    - |
+      make_ext4fs -L %{img_label} -l %{img_size} -s /buildstream/%{img_output} %{build-root}
 
   install_img:
-  - |
-    mv /buildstream/%{img_output} %{install-root}
-    chmod 0644 %{install-root}/%{img_output}
-
+    - |
+      mv /buildstream/%{img_output} %{install-root}
+      chmod 0644 %{install-root}/%{img_output}

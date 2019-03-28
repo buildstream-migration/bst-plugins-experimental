@@ -36,30 +36,30 @@ config:
   # Commands for building the software
   #
   build-commands:
-  - |
-    %{prepare-dir}
-  - |
-    %{clean}
-  - |
-    %{build}
-  - |
-    %{binary}
+    - |
+      %{prepare-dir}
+    - |
+      %{clean}
+    - |
+      %{build}
+    - |
+      %{binary}
 
   # Commands for installing the software into a
   # destination folder
   #
   install-commands:
-  - |
-    %{install-packages}
-  - |
-    %{clear-debian}
+    - |
+      %{install-packages}
+    - |
+      %{clear-debian}
 
   # Commands for stripping debugging information out of
   # installed binaries
   #
   strip-commands:
-  - |
-    %{strip-binaries}
+    - |
+      %{strip-binaries}
 
 # Use max-jobs CPUs for building and enable verbosity
 environment:
@@ -71,6 +71,6 @@ environment:
 # And don't consider MAKEFLAGS or V as something which may
 # effect build output.
 environment-nocache:
-- MAKEFLAGS
-- V
-- DH_VERBOSE
+  - MAKEFLAGS
+  - V
+  - DH_VERBOSE
