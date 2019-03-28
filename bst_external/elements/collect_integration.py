@@ -34,6 +34,7 @@ import os
 import stat
 from buildstream import Element, ElementError, Scope
 
+
 class ExtractIntegrationElement(Element):
     def configure(self, node):
         self.node_validate(node, [
@@ -100,6 +101,7 @@ class ExtractIntegrationElement(Element):
                         f.write('{}\n\n'.format(cmd))
 
         return os.path.sep
+
 
 def setup():
     return ExtractIntegrationElement

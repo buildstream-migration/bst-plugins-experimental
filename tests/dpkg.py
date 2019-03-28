@@ -9,6 +9,7 @@ DATA_DIR = os.path.join(
     "project"
 )
 
+
 @pytest.mark.datafiles(DATA_DIR)
 def test_dpkg_build(cli, datafiles):
     project = str(datafiles)

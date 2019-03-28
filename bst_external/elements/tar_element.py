@@ -42,6 +42,7 @@ import os
 
 from buildstream import Element, Scope, ElementError
 
+
 class TarElement(Element):
 
     # The tarball's output is its dependencies, so
@@ -94,7 +95,7 @@ class TarElement(Element):
         with self.timed_activity('Creating tarball', silent_nested=True):
 
             # Create an uncompressed tar archive
-            compress_map = {'none': '', 'gzip': 'gz', 'xz': 'xz', 'bzip2':'bz2'}
+            compress_map = {'none': '', 'gzip': 'gz', 'xz': 'xz', 'bzip2': 'bz2'}
             extension_map = {'none': '.tar', 'gzip': '.tar.gz', 'xz': '.tar.xz', 'bzip2': '.tar.bz2'}
             tarname = os.path.join(outputdir, self.filename + extension_map[self.compression])
             mode = 'w:' + compress_map[self.compression]
@@ -103,6 +104,7 @@ class TarElement(Element):
                     tar.add(os.path.join(inputdir, f), arcname=f)
 
         return '/output'
+
 
 def setup():
     return TarElement

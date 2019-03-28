@@ -28,6 +28,7 @@ The flatpak_repo default configuration:
 
 from buildstream import ScriptElement, Scope, ElementError
 
+
 class FlatpakRepoElement(ScriptElement):
     def configure(self, node):
         self.node_validate(node, ['environment', 'copy-refs', 'arch', 'branch'])

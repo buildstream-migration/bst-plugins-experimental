@@ -34,6 +34,7 @@ from buildstream import utils
 from buildstream import Element, ElementError, Scope
 import configparser
 
+
 class FlatpakImageElement(Element):
 
     BST_STRICT_REBUILD = True
@@ -106,7 +107,7 @@ class FlatpakImageElement(Element):
                 try:
                     extensiondir = self.metadata.get(section, 'directory')
                     os.makedirs(os.path.join(installdir, 'files', extensiondir), exist_ok=True)
-                except PermissionError as e:
+                except PermissionError:
                     raise ElementError("Permission denied: Cannot create {}".format(extensiondir))
 
         with self.timed_activity("Creating flatpak image", silent_nested=True):
@@ -122,6 +123,7 @@ class FlatpakImageElement(Element):
         with open(metadatafile, "w") as m:
             self.metadata.write(m)
         return os.path.join(os.sep, 'buildstream', 'install')
+
 
 def setup():
     return FlatpakImageElement

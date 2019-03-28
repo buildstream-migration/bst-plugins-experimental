@@ -9,11 +9,13 @@ DATA_DIR = os.path.join(
     "project"
 )
 
+
 @pytest.mark.datafiles(DATA_DIR)
 def test_docker_fetch(cli, datafiles):
     project = str(datafiles)
     result = cli.run(project=project, args=['fetch', 'dockerhub-alpine.bst'])
     result.assert_success()
+
 
 @pytest.mark.datafiles(DATA_DIR)
 def test_docker_source_build(cli, datafiles):

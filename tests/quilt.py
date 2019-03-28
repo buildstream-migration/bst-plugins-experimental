@@ -9,6 +9,7 @@ DATA_DIR = os.path.join(
     "project"
 )
 
+
 @pytest.mark.datafiles(DATA_DIR)
 def test_quilt_build(cli, datafiles):
     project = str(datafiles)
@@ -20,4 +21,4 @@ def test_quilt_build(cli, datafiles):
     result = cli.run(project=project, args=['checkout', "quilt-build-test.bst", checkout])
     result.assert_success()
 
-    assert_contains(checkout, ['/patches/series','/patches/test','/src/hello.c'])
+    assert_contains(checkout, ['/patches/series', '/patches/test', '/src/hello.c'])

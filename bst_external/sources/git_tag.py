@@ -381,7 +381,8 @@ class GitTagSource(Source):
     def configure(self, node):
         ref = self.node_get_member(node, str, 'ref', '') or None
 
-        config_keys = ['url', 'track', 'track-tags', 'track-extra', 'ref', 'submodules', 'checkout-submodules', 'match', 'exclude']
+        config_keys = ['url', 'track', 'track-tags', 'track-extra', 'ref',
+                       'submodules', 'checkout-submodules', 'match', 'exclude']
         self.node_validate(node, config_keys + Source.COMMON_CONFIG_KEYS)
 
         self.original_url = self.node_get_member(node, str, 'url')
@@ -482,7 +483,7 @@ class GitTagSource(Source):
             for pattern in self.exclude:
                 track_args.append("--exclude={}".format(pattern))
 
-            branches = [self.tracking] +  self.track_extra
+            branches = [self.tracking] + self.track_extra
 
             # Find new candidate refs from self.tracking branches
             candidates = dict([self.mirror.latest_commit(

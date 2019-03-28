@@ -396,7 +396,6 @@ class DockerSource(Source):
             except (OSError, requests.RequestException) as e:
                 raise SourceError(e) from e
 
-
             for layer in manifest['layers']:
                 if layer['mediaType'] != 'application/vnd.docker.image.rootfs.diff.tar.gzip':
                     raise SourceError("Unsupported layer type: {}".format(layer['mediaType']))

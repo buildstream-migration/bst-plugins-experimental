@@ -26,7 +26,7 @@ The x86image default configuration:
      :language: yaml
 """
 
-from buildstream import ScriptElement
+from buildstream import ScriptElement, ElementError
 
 
 # Element implementation for the 'x86image' kind.
@@ -39,8 +39,7 @@ class X86ImageElement(ScriptElement):
             "final-commands"
         ]
 
-        self.node_validate(node, 
-            command_steps + ["base", "input"])
+        self.node_validate(node, command_steps + ["base", "input"])
 
         for step in command_steps:
             if step not in node:

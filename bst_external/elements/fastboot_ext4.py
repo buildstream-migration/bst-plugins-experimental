@@ -26,7 +26,7 @@ The fastboot default configuration:
      :language: yaml
 """
 
-from buildstream import ScriptElement
+from buildstream import ScriptElement, ElementError
 
 
 # Element implementation for the 'FastbootExt4Image' kind.
@@ -39,8 +39,7 @@ class FastbootExt4ImageElement(ScriptElement):
             "install_img"
         ]
 
-        self.node_validate(node,
-            command_steps + ["base", "input"])
+        self.node_validate(node, command_steps + ["base", "input"])
 
         for step in command_steps:
             if step not in node:
@@ -62,4 +61,3 @@ class FastbootExt4ImageElement(ScriptElement):
 # Plugin entry point
 def setup():
     return FastbootExt4ImageElement
-

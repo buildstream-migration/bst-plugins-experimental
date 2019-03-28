@@ -47,6 +47,7 @@ The manifest file is exported as a json file to the path provided
 under the "path" variable defined in the .bst file.
 """
 
+
 def get_version(sources):
     """
     This function attempts to extract the source version
@@ -68,6 +69,7 @@ def get_version(sources):
             if match:
                 return match.groups()[-1]
 
+
 def get_source_locations(sources):
     """
     Returns a list of source URLs and refs, currently for
@@ -79,12 +81,15 @@ def get_source_locations(sources):
     for source in sources:
         if source.get_kind() in ['git']:
             url = source.translate_url(source.mirror.url, alias_override=None,
-                                                                primary=source.mirror.primary)
-            source_locations.append({"type": source.get_kind(), "url" : url, "commit" : source.mirror.ref})
+                                       primary=source.mirror.primary)
+            source_locations.append({"type": source.get_kind(), "url": url, "commit": source.mirror.ref})
         if source.get_kind() in ['git_tag']:
             url = source.translate_url(source.mirror.url, alias_override=None,
-                                                                primary=source.mirror.primary)
-            source_locations.append({"type": "git", "x-bst-kind": source.get_kind(), "url" : url, "commit" : source.mirror.ref})
+                                       primary=source.mirror.primary)
+            source_locations.append({"type": "git",
+                                     "x-bst-kind": source.get_kind(),
+                                     "url": url,
+                                     "commit": source.mirror.ref})
         if source.get_kind() in ['patch']:
             patch = source.path.rpartition('/')[2]
             source_locations.append({"type": source.get_kind(), "path": patch})
@@ -92,6 +97,7 @@ def get_source_locations(sources):
             source_locations.append({"type": "archive", "url": source.url, "sha256": source.ref})
 
     return source_locations
+
 
 def cleanup_provenance(data):
     """
@@ -107,6 +113,7 @@ def cleanup_provenance(data):
         return [cleanup_provenance(v) for v in data]
     else:
         return data
+
 
 class CollectManifestElement(Element):
 
