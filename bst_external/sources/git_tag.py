@@ -381,7 +381,7 @@ class GitTagSource(Source):
     def configure(self, node):
         ref = self.node_get_member(node, str, 'ref', '') or None
 
-        config_keys = ['url', 'track', 'track-tags', 'ref', 'submodules', 'checkout-submodules', 'match', 'exclude']
+        config_keys = ['url', 'track', 'track-tags', 'track-extra', 'ref', 'submodules', 'checkout-submodules', 'match', 'exclude']
         self.node_validate(node, config_keys + Source.COMMON_CONFIG_KEYS)
 
         self.original_url = self.node_get_member(node, str, 'url')
