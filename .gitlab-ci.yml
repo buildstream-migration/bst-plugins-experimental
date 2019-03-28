@@ -11,10 +11,8 @@ stages:
   - upload
 
 before_script:
-  - adduser -um buildstream
+  - adduser -m buildstream
   - chown -R buildstream:buildstream .
-
-  - dnf install -y quilt
 
 #####################################################
 #                  Prepare stage                    #
@@ -63,6 +61,7 @@ source_dist:
   stage: test
   before_script:
     - pip3 install --upgrade pip tox tox-venv
+    - dnf install -y quilt
   script:
     - su buildstream -c tox
   variables: &tox-variables
@@ -94,6 +93,18 @@ tests-py35:
   variables:
     <<: *tox-variables
     TOXENV: py35
+
+tests-unix:
+  stage: test
+  variables:
+    BST_FORCE_BACKEND = "unix"
+    PYTEST_ADDOPTS = "--color=yes"
+  before_script:
+    - pip3 install --upgrade pip tox tox-venv
+    - dnf install -y quilt
+  script:
+    - tox
+
 
 lint:
   <<: *tox
