@@ -113,7 +113,7 @@ class CollectManifestElement(Element):
     BST_FORMAT_VERSION = 1
 
     def configure(self, node):
-        if 'path' in node:
+        if self.node_has_member(node, 'path'):
             self.path = self.node_subst_member(node, 'path', None)
         else:
             self.path = None

@@ -415,7 +415,7 @@ class GitTagSource(Source):
                 self.mark_download_url(url, primary=False)
 
             self.submodule_overrides[path] = url
-            if 'checkout' in submodule:
+            if self.node_has_member(submodule, 'checkout'):
                 checkout = self.node_get_member(submodule, bool, 'checkout')
                 self.submodule_checkout_overrides[path] = checkout
 

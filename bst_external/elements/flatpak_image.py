@@ -48,13 +48,12 @@ class FlatpakImageElement(Element):
         self.metadata = configparser.ConfigParser()
         self.metadata.optionxform = str
         metadata_dict = {}
-        for section, pairs in node.get('metadata').items():
-            if not section.startswith('__bst'):
-                section_dict = {}
-                for key in pairs.keys():
-                    if not key.startswith('__bst'):
-                        section_dict[key] = self.node_subst_member(pairs, key)
-                metadata_dict[section] = section_dict
+        metadata_node = self.node_get_member(node, dict, 'metadata')
+        for section, pairs in self.node_items(metadata_node):
+            section_dict = {}
+            for key, _ in self.node_items(pairs):
+                section_dict[key] = self.node_subst_member(pairs, key)
+            metadata_dict[section] = section_dict
 
         self.metadata.read_dict(metadata_dict)
 

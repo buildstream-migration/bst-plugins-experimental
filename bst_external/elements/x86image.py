@@ -43,7 +43,7 @@ class X86ImageElement(ScriptElement):
             command_steps + ["base", "input"])
 
         for step in command_steps:
-            if step not in node:
+            if not self.node_has_member(node, step):
                 raise ElementError("{}: Unexpectedly missing command step '{}'"
                                    .format(self, step))
             cmds = self.node_subst_list(node, step)
