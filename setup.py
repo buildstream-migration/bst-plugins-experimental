@@ -37,7 +37,8 @@ setup(name='bst-plugins-experimental',
       include_package_data=True,
       install_requires=[
           'requests',
-          'setuptools'
+          'setuptools',
+          'PyGObject'
       ],
       package_data={
           'buildstream': [
@@ -59,6 +60,7 @@ setup(name='bst-plugins-experimental',
               'git_tag = bst_plugins_experimental.sources.git_tag',
               'quilt = bst_plugins_experimental.sources.quilt',
               'tar_element = bst_plugins_experimental.elements.tar_element'
+              'ostree = bst_plugins_experimental.sources.ostree'
           ]
       },
       setup_requires=['pytest-runner', 'setuptools_scm'],
