@@ -1,8 +1,7 @@
 import os
 import pytest
 
-from tests.testutils import cli
-from tests.testutils.integration import assert_contains
+from buildstream.testing.integration import assert_contains
 
 DATA_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),

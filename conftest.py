@@ -18,27 +18,5 @@
 #  Authors:
 #        Tristan Maat <tristan.maat@codethink.co.uk>
 
-import os
-import pytest
-import shutil
-import tempfile
-
-
-@pytest.fixture(scope='session')
-def integration_cache(request):
-
-    # Set the tempdir to the INTEGRATION_CACHE variable, or the
-    # default if that is not set.
-    cache_dir = os.environ.get('INTEGRATION_CACHE', tempfile.gettempdir())
-
-    # We use a separate tempdir to cache sources and artifacts to
-    # increase test speed
-    cache = os.path.join(cache_dir, 'integration-cache')
-    yield cache
-
-    # Clean up the artifacts after each test run - we only want to
-    # cache sources
-    try:
-        shutil.rmtree(os.path.join(cache, 'artifacts'))
-    except FileNotFoundError:
-        pass
+# Fixtures provided by buildstream
+from buildstream.testing import cli, cli_integration, integration_cache
