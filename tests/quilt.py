@@ -17,7 +17,9 @@ def test_quilt_build(cli, datafiles):
     result = cli.run(project=project, args=['build', "quilt-build-test.bst"])
     result.assert_success()
 
-    result = cli.run(project=project, args=['checkout', "quilt-build-test.bst", checkout])
+    result = cli.run(project=project, args=[
+        'artifact', 'checkout', '--directory', checkout, 'quilt-build-test.bst'
+    ])
     result.assert_success()
 
     assert_contains(checkout, ['/patches/series','/patches/test','/src/hello.c'])

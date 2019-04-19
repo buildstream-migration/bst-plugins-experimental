@@ -200,17 +200,6 @@ class Cli():
         for key, val in config.items():
             self.config[key] = val
 
-    def remove_artifact_from_cache(self, project, element_name):
-        cache_dir = os.path.join(project, 'cache', 'artifacts')
-
-        if IS_LINUX:
-            cache_dir = os.path.join(cache_dir, 'ostree', 'refs', 'heads')
-        else:
-            cache_dir = os.path.join(cache_dir, 'tar')
-
-        cache_dir = os.path.splitext(os.path.join(cache_dir, 'test', element_name))[0]
-        shutil.rmtree(cache_dir)
-
     # run():
     #
     # Runs buildstream with the given arguments, additionally
@@ -483,7 +472,7 @@ def cli_integration(tmpdir, integration_cache):
     # to avoid downloading the huge base-sdk repeatedly
     fixture.configure({
         'sourcedir': os.path.join(integration_cache, 'sources'),
-        'artifactdir': os.path.join(integration_cache, 'artifacts')
+        'cachedir': os.path.join(integration_cache)
     })
 
     return fixture
@@ -523,10 +512,8 @@ def configured(directory, config=None):
 
     if not config.get('sourcedir', False):
         config['sourcedir'] = os.path.join(directory, 'sources')
-    if not config.get('builddir', False):
-        config['builddir'] = os.path.join(directory, 'build')
-    if not config.get('artifactdir', False):
-        config['artifactdir'] = os.path.join(directory, 'artifacts')
+    if not config.get('cachedir', False):
+        config['cachedir'] = directory
     if not config.get('logdir', False):
         config['logdir'] = os.path.join(directory, 'logs')
 
