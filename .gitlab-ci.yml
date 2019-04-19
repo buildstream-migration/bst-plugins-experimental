@@ -1,4 +1,4 @@
-image: buildstream/buildstream:latest-master-52125390
+image: buildstream/buildstream:nightly-master-56618785
 
 cache:
   paths:
@@ -57,12 +57,12 @@ source_dist:
     pip3 install --no-index .
     EOF
 
-  # unpack tarball as `dist/bst-external` directory
+  # unpack tarball as `dist/bst-plugins-experimental` directory
   - |
     cat > dist/unpack.sh << EOF
     #!/bin/sh
     tar -zxf ${tarball}
-    mv ${tarball%.tar.gz} bst-external
+    mv ${tarball%.tar.gz} bst-plugins-experimental
     EOF
 
   # Make our helpers executable
@@ -84,11 +84,11 @@ integration_linux:
 
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
     
-    # Unpack and get into dist/bst-external
+    # Unpack and get into dist/bst-plugins-experimental
     - cd dist && ./unpack.sh
-    - chown -R buildstream:buildstream bst-external
-    - cd bst-external
-    # Install bst-external at this branch as the tests need it
+    - chown -R buildstream:buildstream bst-plugins-experimental
+    - cd bst-plugins-experimental
+    # Install bst-plugins-experimental at this branch as the tests need it
     - pip3 install --no-index .
 
     # Run the tests from the source distribution.
@@ -98,7 +98,7 @@ integration_linux:
     # Go back top level and collect our reports
     - cd ../.. #you may only have to go back one level here...
     - mkdir -p coverage-linux/
-    - cp dist/bst-external/.coverage coverage-linux/coverage.linux
+    - cp dist/bst-plugins-experimental/.coverage coverage-linux/coverage.linux
   artifacts:
     paths:
     - coverage-linux/
@@ -114,8 +114,8 @@ integration_unix:
 
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
 
-    # Unpack and get into dist/bst-external
-    - cd dist && ./unpack.sh && cd bst-external && pip3 install --no-index .
+    # Unpack and get into dist/bst-plugins-experimental
+    - cd dist && ./unpack.sh && cd bst-plugins-experimental && pip3 install --no-index .
 
     # Since the unix platform is required to run as root, no user change required
     - python3 setup.py test --index-url file:///dev/null
@@ -123,7 +123,7 @@ integration_unix:
     # Go back top level and collect our reports
     - cd ../..
     - mkdir -p coverage-unix/
-    - cp dist/bst-external/.coverage coverage-unix/coverage.unix
+    - cp dist/bst-plugins-experimental/.coverage coverage-unix/coverage.unix
 
   artifacts:
     paths:
@@ -143,7 +143,7 @@ coverage:
   stage: coverage
   coverage: '/TOTAL +\d+ +\d+ +(\d+\.\d+)%/'
   script:
-    - cd dist && ./unpack.sh && cd bst-external
+    - cd dist && ./unpack.sh && cd bst-plugins-experimental
     - pip3 install --no-index .
     - mkdir report
     - cd report

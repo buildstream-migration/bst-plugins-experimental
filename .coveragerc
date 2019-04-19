@@ -1,8 +1,8 @@
 [run]
 concurrency = multiprocessing
 include =
-  *bst_external/elements/*
-  *bst_external/sources/*
+  *bst_plugins_experimental/elements/*
+  *bst_plugins_experimental/sources/*
 
 [report]
 show_missing = True
@@ -10,5 +10,5 @@ precision = 2
 
 [paths]
 bst-external =
-    bst_external/
-    */site-packages/bst_external/
+    bst_plugins_experimental/
+    */site-packages/bst_plugins_experimental/

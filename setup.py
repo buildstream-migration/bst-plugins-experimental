@@ -29,9 +29,9 @@ except ImportError:
           "pip (pip3 install setuptools).")
     sys.exit(1)
 
-setup(name='BuildStream-external',
+setup(name='bst-plugins-experimental',
       version="0.12.0",
-      description="A collection of BuildStream plugins that don't fit in with the core plugins for whatever reason.",
+      description="A collection of experimental BuildStream plugins.",
       license='LGPL',
       packages=find_packages(exclude=['tests', 'tests.*']),
       include_package_data=True,
@@ -41,24 +41,24 @@ setup(name='BuildStream-external',
       ],
       package_data={
           'buildstream': [
-              'bst_external/elements/**.yaml'
+              'bst_plugins_experimental/elements/**.yaml'
           ]
       },
       entry_points={
           'buildstream.plugins': [
-              'docker = bst_external.sources.docker',
-              'dpkg_build = bst_external.elements.dpkg_build',
-              'dpkg_deploy = bst_external.elements.dpkg_deploy',
-              'flatpak_image = bst_external.elements.flatpak_image',
-              'flatpak_repo = bst_external.elements.flatpak_repo',
-              'x86image = bst_external.elements.x86image',
-              'fastbootBootImage = bst_external.elements.fastboot_bootimg',
-              'fastbootExt4Image = bst_external.elements.fastboot_ext4',
-              'collect_integration = bst_external.elements.collect_integration',
-              'collect_manifest = bst_external.elements.collect_manifest',
-              'git_tag = bst_external.sources.git_tag',
-              'quilt = bst_external.sources.quilt',
-              'tar_element = bst_external.elements.tar_element'
+              'docker = bst_plugins_experimental.sources.docker',
+              'dpkg_build = bst_plugins_experimental.elements.dpkg_build',
+              'dpkg_deploy = bst_plugins_experimental.elements.dpkg_deploy',
+              'flatpak_image = bst_plugins_experimental.elements.flatpak_image',
+              'flatpak_repo = bst_plugins_experimental.elements.flatpak_repo',
+              'x86image = bst_plugins_experimental.elements.x86image',
+              'fastbootBootImage = bst_plugins_experimental.elements.fastboot_bootimg',
+              'fastbootExt4Image = bst_plugins_experimental.elements.fastboot_ext4',
+              'collect_integration = bst_plugins_experimental.elements.collect_integration',
+              'collect_manifest = bst_plugins_experimental.elements.collect_manifest',
+              'git_tag = bst_plugins_experimental.sources.git_tag',
+              'quilt = bst_plugins_experimental.sources.quilt',
+              'tar_element = bst_plugins_experimental.elements.tar_element'
           ]
       },
       setup_requires=['pytest-runner', 'setuptools_scm'],

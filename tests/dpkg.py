@@ -17,7 +17,9 @@ def test_dpkg_build(cli, datafiles):
     result = cli.run(project=project, args=['build', 'dpkg-build-test.bst'])
     result.assert_success()
 
-    result = cli.run(project=project, args=['checkout', 'dpkg-build-test.bst', checkout_dir])
+    result = cli.run(project=project, args=[
+        'artifact', 'checkout', '--directory', checkout_dir, 'dpkg-build-test.bst'
+    ])
     result.assert_success()
 
     assert_contains(checkout_dir, ['/usr/share/foo', '/usr/share/doc/test/changelog.gz'])
@@ -31,7 +33,9 @@ def test_dpkg_deploy(cli, datafiles):
     result = cli.run(project=project, args=['build', 'dpkg-deploy-test.bst'])
     result.assert_success()
 
-    result = cli.run(project=project, args=['checkout', 'dpkg-deploy-test.bst', checkout_dir])
+    result = cli.run(project=project, args=[
+        'artifact', 'checkout', '--directory', checkout_dir, 'dpkg-deploy-test.bst'
+    ])
     result.assert_success()
 
     # FIXME: assert_contains() doesn't seem to like this .deb file

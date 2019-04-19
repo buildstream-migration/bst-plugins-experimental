@@ -126,6 +126,7 @@ raw text, e.g.
 
 """
 
+from collections.abc import Mapping
 import hashlib
 import os
 import re
@@ -182,19 +183,35 @@ class DpkgDeployElement(ScriptElement):
         if "dpkg-data" not in bstdata:
             raise ElementError("{}: input element {} does not have any bst.dpkg-data public data"
                                .format(self.name, self.__input))
-        for package, package_data in self.node_items(bstdata['dpkg-data']):
-            package_name = package_data.get("name", "{}-{}".format(input_elm.normal_name, package))
-            if not ("split-rules" in bstdata and
-                    package in bstdata["split-rules"]):
+
+        dpkg_data = self.node_get_member(bstdata, Mapping, 'dpkg-data')
+        for package, package_data in self.node_items(dpkg_data):
+            package_name = self.node_get_member(package_data, str, "name",
+                                                "{}-{}".format(input_elm.normal_name, package))
+            split_rules = self.node_get_member(bstdata, Mapping, "split-rules", {})
+
+            if not ("split-rules" in bstdata and package in split_rules):
                 raise ElementError("{}: Input element {} does not have bst.split-rules.{}"
                                    .format(self.name, self.__input.name, package))
-            package_splits = bstdata['split-rules'][package]
+
+            # FIXME: The package_splits variable is unused, which means the
+            #        split rules from above are completely ignored, it appears
+            #        that we are relying on Element.compute_manifest(), can
+            #        we then remove this manual handling of split-rules ?
+            #
+            package_splits = self.node_get_member(split_rules, list, package)
+
             package_files = input_elm.compute_manifest(include=[package])
             src = os.path.join(sandbox.get_directory(),
                                self.get_variable("build-root").lstrip(os.sep))
             dst = os.path.join(src, package)
             os.makedirs(dst, exist_ok=True)
-            utils.link_files(src, dst, files=package_files)
+
+            # link only the files for this package into it's respective package directory
+            def package_filter(filename):
+                return filename in package_files
+
+            utils.link_files(src, dst, filter_callback=package_filter)
 
             # Create this dir. If it already exists,
             # something unexpected has happened.
@@ -207,13 +224,13 @@ class DpkgDeployElement(ScriptElement):
                 raise ElementError("{}: Cannot reconstitute package {}".format(self.name, package),
                                    detail="There is no public.bst.dpkg-data.{}.control".format(package))
             controlpath = os.path.join(debiandir, "control")
-            controltext = package_data["control"]
+            controltext = self.node_get_member(package_data, str, 'control')
             # Slightly ugly way of renaming the package
             controltext = re.sub(r"^Package:\s*\S+",
                                  "Package: {}".format(package_name),
                                  controltext)
             with open(controlpath, "w") as f:
-                f.write(controltext)
+                f.write(controltext + '\n')
 
             # Generate a DEBIAN/md5sums file from the artifact
             md5sums = {}
@@ -227,13 +244,14 @@ class DpkgDeployElement(ScriptElement):
                     f.write("{}  {}\n".format(md5sum, path))
 
             # scripts may exist
-            if ("package-scripts" in bstdata and
-                    package in bstdata["package-scripts"]):
+            package_scripts = self.node_get_member(bstdata, Mapping, "package-scripts", {})
+            if ("package-scripts" in bstdata and package in package_scripts):
                 for script in ["postinst", "preinst", "postrm", "prerm"]:
-                    if script in bstdata["package-scripts"][package]:
+                    script_text = self.node_get_member(package_scripts, str, script, '')
+                    if script_text:
                         filepath = os.path.join(debiandir, script)
                         with open(filepath, "w") as f:
-                            f.write(bstdata["package-scripts"][package][script])
+                            f.write(script_text)
                         os.chmod(filepath, 0o755)
 
     def _packages_list(self):
@@ -248,7 +266,9 @@ class DpkgDeployElement(ScriptElement):
         if "dpkg-data" not in bstdata:
             raise ElementError("{}: Can't get package list for {}, no bst.dpkg-data"
                                .format(self.name, self.__input))
-        return " ".join([k for k, v in self.node_items(bstdata["dpkg-data"])])
+
+        dpkg_data = self.node_get_member(bstdata, Mapping, "dpkg-data", {})
+        return " ".join([k for k, v in self.node_items(dpkg_data)])
 
     def _sub_packages_list(self, cmdlist):
         return [
