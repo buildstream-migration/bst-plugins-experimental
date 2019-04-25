@@ -1,4 +1,4 @@
-image: buildstream/buildstream:nightly-master-56618785
+image: buildstream/buildstream:nightly-master-58231744
 
 cache:
   paths:
