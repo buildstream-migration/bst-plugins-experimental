@@ -261,12 +261,6 @@ class GitTagMirror(SourceFetcher):
 
         ref = output.rstrip('\n')
 
-        # Find the time of the commit to avoid stepping onto an older tag
-        # on a different branch
-        _, time = self.source.check_output(
-            [self.source.host_git, 'show', '-s', '--format=%ct', ref],
-            cwd=self.mirror)
-
         # Prefix the ref with the closest annotated tag, if available,
         # to make the ref human readable
         exit_code, output = self.source.check_output(
@@ -274,6 +268,12 @@ class GitTagMirror(SourceFetcher):
             cwd=self.mirror)
         if exit_code == 0:
             ref = output.rstrip('\n')
+
+        # Find the time of the commit to avoid stepping onto an older tag
+        # on a different branch
+        _, time = self.source.check_output(
+            [self.source.host_git, 'show', '-s', '--format=%ct', ref],
+            cwd=self.mirror)
 
         return ref, time
 
