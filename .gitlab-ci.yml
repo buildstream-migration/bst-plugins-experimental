@@ -19,7 +19,7 @@ before_script:
   - adduser -m buildstream
   - chown -R buildstream:buildstream .
 
-  - dnf install -y quilt
+  - dnf install -y quilt qemu
 
   - pip3 install pytest
   - pip3 install pytest-cov
