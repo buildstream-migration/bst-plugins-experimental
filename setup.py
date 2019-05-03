@@ -60,9 +60,9 @@ setup(name='bst-plugins-experimental',
               'collect_manifest = bst_plugins_experimental.elements.collect_manifest',
               'meson = bst_plugins_experimental.elements.meson',
               'make = bst_plugins_experimental.elements.make',
+              'tar_element = bst_plugins_experimental.elements.tar_element',
               'git_tag = bst_plugins_experimental.sources.git_tag',
               'quilt = bst_plugins_experimental.sources.quilt',
-              'tar_element = bst_plugins_experimental.elements.tar_element',
               'ostree = bst_plugins_experimental.sources.ostree'
           ]
       },
