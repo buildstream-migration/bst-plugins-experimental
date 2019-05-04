@@ -111,29 +111,27 @@ config:
     sdabytes=$(( ${sdasectors} * %{sector-size} ))
 
     # Create the main disk and do the partitioning
-    truncate -s ${sdabytes} /buildstream/sda.img
-    parted -s /buildstream/sda.img mklabel msdos
-    parted -s /buildstream/sda.img unit s mkpart primary fat32 ${sda1offset} $(( ${sda1offset} + ${sda1sec} - 1 ))
-    parted -s /buildstream/sda.img unit s mkpart primary ext2 ${sda2offset} $(( ${sda2offset} + ${sda2sec} - 1 ))
-    parted -s /buildstream/sda.img unit s mkpart primary linux-swap ${sda3offset} $(( ${sda3offset} + ${sda3sec} - 1 ))
+    truncate -s ${sdabytes} %{install-root}/sda.img
+    parted -s %{install-root}/sda.img mklabel msdos
+    parted -s %{install-root}/sda.img unit s mkpart primary fat32 ${sda1offset} $(( ${sda1offset} + ${sda1sec} - 1 ))
+    parted -s %{install-root}/sda.img unit s mkpart primary ext2 ${sda2offset} $(( ${sda2offset} + ${sda2sec} - 1 ))
+    parted -s %{install-root}/sda.img unit s mkpart primary linux-swap ${sda3offset} $(( ${sda3offset} + ${sda3sec} - 1 ))
 
     # Make partition 1 the boot partition
-    parted -s /buildstream/sda.img set 1 boot on
+    parted -s %{install-root}/sda.img set 1 boot on
 
     # Now splice the existing filesystems directly into the image
-    dd if=/buildstream/sda1.img of=/buildstream/sda.img \
+    dd if=/buildstream/sda1.img of=%{install-root}/sda.img \
         ibs=%{sector-size} obs=%{sector-size} conv=notrunc \
         count=${sda1sec} seek=${sda1offset}
 
-    dd if=/buildstream/sda2.img of=/buildstream/sda.img \
+    dd if=/buildstream/sda2.img of=%{install-root}/sda.img \
         ibs=%{sector-size} obs=%{sector-size} conv=notrunc \
         count=${sda2sec} seek=${sda2offset}
 
-    dd if=/buildstream/sda3.img of=/buildstream/sda.img \
+    dd if=/buildstream/sda3.img of=%{install-root}/sda.img \
         ibs=%{sector-size} obs=%{sector-size} conv=notrunc \
         count=${sda3sec} seek=${sda3offset}
   final-commands:
   - |
-    # Move the image where it will be collected
-    mv /buildstream/sda.img %{install-root}
     chmod 0644 %{install-root}/sda.img
