@@ -203,8 +203,8 @@ class OSTreeSource(Source):
             gpg_key = 'file://' + self.gpg_key_path
 
         try:
-            _ostree.configure_remote(self.repo, remote_name, url, key_url=gpg_key)
-        except OSTreeError as e:
+            self._configure_remote(self.repo, remote_name, url, key_url=gpg_key)
+        except SourceError as e:
             raise SourceError("{}: Failed to configure origin {}\n\n{}".format(self, self.url, e)) from e
         return remote_name
 
@@ -376,6 +376,48 @@ class OSTreeSource(Source):
                 raise SourceError("Failed to fetch ref '{}' from '{}': {}".format(ref, remote, e.message)) from e
             else:
                 raise SourceError("Failed to fetch from '{}': {}".format(remote, e.message)) from e
+
+
+    # _configure_remote():
+    #
+    # Ensures a remote is setup to a given url.
+    #
+    # Args:
+    #    repo (OSTree.Repo): The repo
+    #    remote (str): The name of the remote
+    #    url (str): The url of the remote ostree repo
+    #    key_url (str): The optional url of a GPG key (should be a local file)
+    #
+    def _configure_remote(self, repo, remote, url, key_url=None):
+        # Add a remote OSTree repo. If no key is given, we disable gpg checking.
+        #
+        # cli exmaple:
+        #   wget https://sdk.gnome.org/keys/gnome-sdk.gpg
+        #   ostree --repo=repo --gpg-import=gnome-sdk.gpg remote add freedesktop https://sdk.gnome.org/repo
+        options = None  # or GLib.Variant of type a{sv}
+        if key_url is None:
+            vd = VariantDict.new()
+            vd.insert_value('gpg-verify', Variant.new_boolean(False))
+            options = vd.end()
+
+        try:
+            repo.remote_change(None,      # Optional OSTree.Sysroot
+                               OSTree.RepoRemoteChange.ADD_IF_NOT_EXISTS,
+                               remote,    # Remote name
+                               url,       # Remote url
+                               options,   # Remote options
+                               None)      # Optional Gio.Cancellable
+        except GLib.GError as e:
+            raise SourceError("Failed to configure remote '{}': {}".format(remote, e.message)) from e
+
+        # Remote needs to exist before adding key
+        if key_url is not None:
+            try:
+                gfile = Gio.File.new_for_uri(key_url)
+                stream = gfile.read()
+                repo.remote_gpg_import(remote, stream, None, 0, None)
+            except GLib.GError as e:
+                raise SourceError("Failed to add gpg key from url '{}': {}".format(key_url, e.message)) from e
 
 
 
