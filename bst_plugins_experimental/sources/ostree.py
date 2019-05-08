@@ -124,7 +124,7 @@ class OSTreeSource(Source):
     def fetch(self):
         self.ensure()
         remote_name = self.ensure_remote(self.url)
-        if not _ostree.exists(self.repo, self.ref):
+        if not self._exists(self.repo, self.ref):
             with self.timed_activity("Fetching remote ref: {} from origin: {}"
                                      .format(self.ref, self.url)):
                 try:
@@ -167,7 +167,7 @@ class OSTreeSource(Source):
             return Consistency.INCONSISTENT
 
         self.ensure()
-        if _ostree.exists(self.repo, self.ref):
+        if self._exists(self.repo, self.ref):
             return Consistency.CACHED
         return Consistency.RESOLVED
 
@@ -276,6 +276,41 @@ class OSTreeSource(Source):
             repo.checkout_at(options, AT_FDCWD, path, commit_)
         except GLib.GError as e:
             raise SourceError("Failed to checkout commit '{}': {}".format(commit_, e.message)) from e
+
+
+    # _exists():
+    #
+    # Checks wether a given commit or symbolic ref exists and
+    # is locally cached in the specified repo.
+    #
+    # Args:
+    #    repo (OSTree.Repo): The repo
+    #    ref (str): A commit checksum or symbolic ref
+    #
+    # Returns:
+    #    (bool): Whether 'ref' is valid in 'repo'
+    #
+    def _exists(self, repo, ref):
+
+        # Get the commit checksum, this will:
+        #
+        #  o Return a commit checksum if ref is a symbolic branch
+        #  o Return the same commit checksum if ref is a valid commit checksum
+        #  o Return None if the ostree repo doesnt know this ref.
+        #
+        ref = checksum(repo, ref)
+        if ref is None:
+            return False
+
+        # If we do have a ref which the ostree knows about, this does
+        # not mean we necessarily have the object locally (we may just
+        # have some metadata about it, this can happen).
+        #
+        # Use has_object() only with a resolved valid commit checksum
+        # to check if we actually have the object locally.
+        _, has_object = repo.has_object(OSTree.ObjectType.COMMIT, ref, None)
+        return has_object
+
 
 
 # Plugin entry point

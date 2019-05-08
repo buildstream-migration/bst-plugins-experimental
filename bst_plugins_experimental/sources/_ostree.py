@@ -38,40 +38,6 @@ class OSTreeError(SourceError):
         super().__init__(message, reason=reason)
 
 
-# exists():
-#
-# Checks wether a given commit or symbolic ref exists and
-# is locally cached in the specified repo.
-#
-# Args:
-#    repo (OSTree.Repo): The repo
-#    ref (str): A commit checksum or symbolic ref
-#
-# Returns:
-#    (bool): Whether 'ref' is valid in 'repo'
-#
-def exists(repo, ref):
-
-    # Get the commit checksum, this will:
-    #
-    #  o Return a commit checksum if ref is a symbolic branch
-    #  o Return the same commit checksum if ref is a valid commit checksum
-    #  o Return None if the ostree repo doesnt know this ref.
-    #
-    ref = checksum(repo, ref)
-    if ref is None:
-        return False
-
-    # If we do have a ref which the ostree knows about, this does
-    # not mean we necessarily have the object locally (we may just
-    # have some metadata about it, this can happen).
-    #
-    # Use has_object() only with a resolved valid commit checksum
-    # to check if we actually have the object locally.
-    _, has_object = repo.has_object(OSTree.ObjectType.COMMIT, ref, None)
-    return has_object
-
-
 # checksum():
 #
 # Returns the commit checksum for a given symbolic ref,
