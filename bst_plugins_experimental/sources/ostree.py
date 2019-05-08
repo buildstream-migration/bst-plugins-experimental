@@ -53,6 +53,7 @@ details on common configuration options for sources.
 import os
 import shutil
 
+from gi.repository import GLib, Gio, OSTree  # noqa
 from buildstream import Source, SourceError, Consistency
 from buildstream import utils
 from ._ostree import OSTreeError
@@ -118,7 +119,7 @@ class OSTreeSource(Source):
                 raise SourceError("{}: Failed to fetch tracking ref '{}' from origin {}\n\n{}"
                                   .format(self, self.tracking, self.url, e)) from e
 
-        return _ostree.checksum(self.repo, self.tracking)
+        return self._checksum(self.repo, self.tracking)
 
     def fetch(self):
         self.ensure()
@@ -142,8 +143,8 @@ class OSTreeSource(Source):
             with self.timed_activity("Staging ref: {} from origin: {}"
                                      .format(self.ref, self.url)):
                 try:
-                    _ostree.checkout(self.repo, checkoutdir, self.ref, user=True)
-                except OSTreeError as e:
+                    self._checkout(self.repo, checkoutdir, self.ref, user=True)
+                except SourceError as e:
                     raise SourceError("{}: Failed to checkout ref '{}' from origin: {}\n\n{}"
                                       .format(self, self.ref, self.url, e)) from e
 
@@ -209,6 +210,72 @@ class OSTreeSource(Source):
 
     def progress(self, percent, message):
         self.status(message)
+
+
+    # _checksum():
+    #
+    # Returns the commit checksum for a given symbolic ref,
+    # which might be a branch or tag. If it is a branch,
+    # the latest commit checksum for the given branch is returned.
+    #
+    # Args:
+    #    repo (OSTree.Repo): The repo
+    #    ref (str): The symbolic ref
+    #
+    # Returns:
+    #    (str): The commit checksum, or None if ref does not exist.
+    #
+    def _checksum(self, repo, ref):
+        _, checksum_ = repo.resolve_rev(ref, True)
+        return checksum_
+
+
+
+    # _checkout()
+    #
+    # Checkout the content at 'commit' from 'repo' in
+    # the specified 'path'
+    #
+    # Args:
+    #    repo (OSTree.Repo): The repo
+    #    path (str): The checkout path
+    #    commit_ (str): The commit checksum to checkout
+    #    user (boot): Whether to checkout in user mode
+    #
+    def _checkout(self, repo, path, commit_, user=False):
+
+        # Check out a full copy of an OSTree at a given ref to some directory.
+        #
+        # Note: OSTree does not like updating directories inline/sync, therefore
+        # make sure you checkout to a clean directory or add additional code to support
+        # union mode or (if it exists) file replacement/update.
+        #
+        # Returns True on success
+        #
+        # cli exmaple:
+        #   ostree --repo=repo checkout --user-mode runtime/org.freedesktop.Sdk/x86_64/1.4 foo
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+
+        options = OSTree.RepoCheckoutAtOptions()
+
+        # For repos which contain root owned files, we need
+        # to checkout with OSTree.RepoCheckoutMode.USER
+        #
+        # This will reassign uid/gid and also munge the
+        # permission bits a bit.
+        if user:
+            options.mode = OSTree.RepoCheckoutMode.USER
+
+        # Using AT_FDCWD value from fcntl.h
+        #
+        # This will be ignored if the passed path is an absolute path,
+        # if path is a relative path then it will be appended to the
+        # current working directory.
+        AT_FDCWD = -100
+        try:
+            repo.checkout_at(options, AT_FDCWD, path, commit_)
+        except GLib.GError as e:
+            raise SourceError("Failed to checkout commit '{}': {}".format(commit_, e.message)) from e
 
 
 # Plugin entry point

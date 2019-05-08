@@ -38,53 +38,6 @@ class OSTreeError(SourceError):
         super().__init__(message, reason=reason)
 
 
-# checkout()
-#
-# Checkout the content at 'commit' from 'repo' in
-# the specified 'path'
-#
-# Args:
-#    repo (OSTree.Repo): The repo
-#    path (str): The checkout path
-#    commit_ (str): The commit checksum to checkout
-#    user (boot): Whether to checkout in user mode
-#
-def checkout(repo, path, commit_, user=False):
-
-    # Check out a full copy of an OSTree at a given ref to some directory.
-    #
-    # Note: OSTree does not like updating directories inline/sync, therefore
-    # make sure you checkout to a clean directory or add additional code to support
-    # union mode or (if it exists) file replacement/update.
-    #
-    # Returns True on success
-    #
-    # cli exmaple:
-    #   ostree --repo=repo checkout --user-mode runtime/org.freedesktop.Sdk/x86_64/1.4 foo
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-
-    options = OSTree.RepoCheckoutAtOptions()
-
-    # For repos which contain root owned files, we need
-    # to checkout with OSTree.RepoCheckoutMode.USER
-    #
-    # This will reassign uid/gid and also munge the
-    # permission bits a bit.
-    if user:
-        options.mode = OSTree.RepoCheckoutMode.USER
-
-    # Using AT_FDCWD value from fcntl.h
-    #
-    # This will be ignored if the passed path is an absolute path,
-    # if path is a relative path then it will be appended to the
-    # current working directory.
-    AT_FDCWD = -100
-    try:
-        repo.checkout_at(options, AT_FDCWD, path, commit_)
-    except GLib.GError as e:
-        raise OSTreeError("Failed to checkout commit '{}': {}".format(commit_, e.message)) from e
-
-
 # exists():
 #
 # Checks wether a given commit or symbolic ref exists and
