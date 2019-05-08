@@ -9,7 +9,7 @@ case, or need to change faster than would be allowed by the long term stable
 API guarantees that we expect of core BuildStream plugins.
 
 To use one of these plugins in your project you need to have installed the
-bst-external package and enabled it in your `project configuration file
+bst-plugins-experimental package and enabled it in your `project configuration file
 <https://buildstream.gitlab.io/buildstream/projectconf.html#plugin-origins-and-versions>`_.
 
 .. toctree::

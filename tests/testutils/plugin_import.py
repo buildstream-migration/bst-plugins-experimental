@@ -8,9 +8,9 @@ def plugin_import(datafiles):
     owndir = os.path.dirname(os.path.realpath(__file__))
     topdir = os.path.realpath(os.path.join(owndir, "..", ".."))
     plugins_dir = os.path.join(project, "plugins")
-    elements_src = os.path.join(topdir, "bst_external", "elements")
+    elements_src = os.path.join(topdir, "bst_plugins_experimental", "elements")
     elements_dst = os.path.join(plugins_dir, "elements")
-    sources_src = os.path.join(topdir, "bst_external", "sources")
+    sources_src = os.path.join(topdir, "bst_plugins_experimental", "sources")
     sources_dst = os.path.join(plugins_dir, "sources")
     os.makedirs(elements_dst, exist_ok=True)
     for f in os.listdir(elements_src):

@@ -22,7 +22,7 @@ A :mod:`ScriptElement <buildstream.scriptelement>` implementation for exporting
 a flatpak repository from a set of `flatpak_image`s.
 
 The flatpak_repo default configuration:
-  .. literalinclude:: ../../../bst_external/elements/flatpak_repo.yaml
+  .. literalinclude:: ../../../bst_plugins_experimental/elements/flatpak_repo.yaml
      :language: yaml
 """
 

@@ -22,7 +22,7 @@ A :mod:`ScriptElement <buildstream.scriptelement>` implementation for creating
 fastboot boot images
 
 The fastboot default configuration:
-  .. literalinclude:: ../../../bst_external/elements/fastboot_bootimg.yaml
+  .. literalinclude:: ../../../bst_plugins_experimental/elements/fastboot_bootimg.yaml
      :language: yaml
 """
 
