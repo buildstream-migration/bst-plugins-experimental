@@ -38,25 +38,6 @@ class OSTreeError(SourceError):
         super().__init__(message, reason=reason)
 
 
-# checksum():
-#
-# Returns the commit checksum for a given symbolic ref,
-# which might be a branch or tag. If it is a branch,
-# the latest commit checksum for the given branch is returned.
-#
-# Args:
-#    repo (OSTree.Repo): The repo
-#    ref (str): The symbolic ref
-#
-# Returns:
-#    (str): The commit checksum, or None if ref does not exist.
-#
-def checksum(repo, ref):
-
-    _, checksum_ = repo.resolve_rev(ref, True)
-    return checksum_
-
-
 # fetch()
 #
 # Fetch new objects from a remote, if configured

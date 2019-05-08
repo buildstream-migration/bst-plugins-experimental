@@ -298,7 +298,7 @@ class OSTreeSource(Source):
         #  o Return the same commit checksum if ref is a valid commit checksum
         #  o Return None if the ostree repo doesnt know this ref.
         #
-        ref = checksum(repo, ref)
+        ref = self._checksum(repo, ref)
         if ref is None:
             return False
 
