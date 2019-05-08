@@ -1,4 +1,4 @@
-image: buildstream/buildstream:nightly-master-58231744
+image: buildstream/buildstream:nightly-master-59236613
 
 cache:
   paths:
@@ -21,6 +21,7 @@ before_script:
 
   - dnf install -y quilt
 
+  - pip3 install -r plugin-requirements.txt
   - pip3 install pytest
   - pip3 install pytest-cov
   - pip3 install pytest-datafiles
@@ -111,6 +112,12 @@ integration_unix:
     BST_FORCE_BACKEND: "unix"
     PYTEST_ADDOPTS: "--color=yes"
   script:
+
+    # We remove the Bubblewrap and OSTree packages here so that we catch any
+    # codepaths that try to use them. Removing OSTree causes fuse-libs to
+    # disappear unless we mark it as user-installed.
+    - dnf mark install fuse-libs systemd-udev
+    - dnf erase -y bubblewrap ostree
 
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
 
