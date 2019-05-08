@@ -53,11 +53,13 @@ details on common configuration options for sources.
 import os
 import shutil
 
-from gi.repository import GLib, Gio, OSTree  # noqa
 from buildstream import Source, SourceError, Consistency
 from buildstream import utils
-from ._ostree import OSTreeError
-from . import _ostree
+
+import gi
+gi.require_version('OSTree', '1.0')
+from gi.repository import GLib, Gio, OSTree  # noqa
+from gi.repository.GLib import Variant, VariantDict
 
 
 class OSTreeSource(Source):

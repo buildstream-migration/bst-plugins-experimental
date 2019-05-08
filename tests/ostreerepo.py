@@ -11,7 +11,7 @@ except ProgramNotFoundError:
     HAVE_OSTREE_CLI = False
 
 try:
-    from bst_plugins_experimental.sources import _ostree
+    from bst_plugins_experimental.sources import ostree
     HAVE_OSTREE = True
 except (ImportError, ValueError):
     HAVE_OSTREE = False
