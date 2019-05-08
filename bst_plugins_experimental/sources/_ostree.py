@@ -38,31 +38,6 @@ class OSTreeError(SourceError):
         super().__init__(message, reason=reason)
 
 
-# ensure()
-#
-# Args:
-#    path (str): The file path to where the desired repo should be
-#    compress (bool): use compression or not when creating
-#
-# Returns: an OSTree.Repo
-def ensure(path, compress):
-
-    # create also succeeds on existing repository
-    repo = OSTree.Repo.new(Gio.File.new_for_path(path))
-    mode = OSTree.RepoMode.ARCHIVE_Z2 if compress \
-        else OSTree.RepoMode.BARE_USER
-
-    repo.create(mode)
-
-    # Disble OSTree's built in minimum-disk-space check.
-    config = repo.copy_config()
-    config.set_string('core', 'min-free-space-percent', '0')
-    repo.write_config(config)
-    repo.reload_config()
-
-    return repo
-
-
 # checkout()
 #
 # Checkout the content at 'commit' from 'repo' in

@@ -177,7 +177,19 @@ class OSTreeSource(Source):
         if not self.repo:
             self.status("Creating local mirror for {}".format(self.url))
 
-            self.repo = _ostree.ensure(self.mirror, True)
+            # create also succeeds on existing repository
+            repo = OSTree.Repo.new(Gio.File.new_for_path(self.mirror))
+            mode = OSTree.RepoMode.ARCHIVE_Z2
+
+            repo.create(mode)
+
+            # Disble OSTree's built in minimum-disk-space check.
+            config = repo.copy_config()
+            config.set_string('core', 'min-free-space-percent', '0')
+            repo.write_config(config)
+            repo.reload_config()
+
+            self.repo = repo
 
     def ensure_remote(self, url):
         if self.original_url == self.url:
