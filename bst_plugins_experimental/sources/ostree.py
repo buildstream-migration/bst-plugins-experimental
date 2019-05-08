@@ -114,8 +114,8 @@ class OSTreeSource(Source):
         with self.timed_activity("Fetching tracking ref '{}' from origin: {}"
                                  .format(self.tracking, self.url)):
             try:
-                _ostree.fetch(self.repo, remote=remote_name, ref=self.tracking, progress=self.progress)
-            except OSTreeError as e:
+                self._fetch(self.repo, remote=remote_name, ref=self.tracking, progress=self.progress)
+            except SourceError as e:
                 raise SourceError("{}: Failed to fetch tracking ref '{}' from origin {}\n\n{}"
                                   .format(self, self.tracking, self.url, e)) from e
 
@@ -128,8 +128,8 @@ class OSTreeSource(Source):
             with self.timed_activity("Fetching remote ref: {} from origin: {}"
                                      .format(self.ref, self.url)):
                 try:
-                    _ostree.fetch(self.repo, remote=remote_name, ref=self.ref, progress=self.progress)
-                except OSTreeError as e:
+                    self._fetch(self.repo, remote=remote_name, ref=self.ref, progress=self.progress)
+                except SourceError as e:
                     raise SourceError("{}: Failed to fetch ref '{}' from origin: {}\n\n{}"
                                       .format(self, self.ref, self.url, e)) from e
 
@@ -310,6 +310,75 @@ class OSTreeSource(Source):
         # to check if we actually have the object locally.
         _, has_object = repo.has_object(OSTree.ObjectType.COMMIT, ref, None)
         return has_object
+
+
+    # _fetch()
+    #
+    # Fetch new objects from a remote, if configured
+    #
+    # Args:
+    #    repo (OSTree.Repo): The repo
+    #    remote (str): An optional remote name, defaults to 'origin'
+    #    ref (str): An optional ref to fetch, will reduce the amount of objects fetched
+    #    progress (callable): An optional progress callback
+    #
+    # Note that a commit checksum or a branch reference are both
+    # valid options for the 'ref' parameter. Using the ref parameter
+    # can save a lot of bandwidth but mirroring the full repo is
+    # still possible.
+    #
+    def _fetch(self, repo, remote="origin", ref=None, progress=None):
+        # Fetch metadata of the repo from a remote
+        #
+        # cli example:
+        #  ostree --repo=repo pull --mirror freedesktop:runtime/org.freedesktop.Sdk/x86_64/1.4
+        def progress_callback(info):
+            status = async_progress.get_status()
+            outstanding_fetches = async_progress.get_uint('outstanding-fetches')
+            bytes_transferred = async_progress.get_uint64('bytes-transferred')
+            fetched = async_progress.get_uint('fetched')
+            requested = async_progress.get_uint('requested')
+
+            if status:
+                progress(0.0, status)
+            elif outstanding_fetches > 0:
+                formatted_bytes = GLib.format_size_full(bytes_transferred, 0)
+                if requested == 0:
+                    percent = 0.0
+                else:
+                    percent = (fetched * 1.0 / requested) * 100
+
+                progress(percent,
+                         "Receiving objects: {:d}% ({:d}/{:d}) {}".format(int(percent), fetched,
+                                                                          requested, formatted_bytes))
+            else:
+                progress(100.0, "Writing Objects")
+
+        async_progress = None
+        if progress is not None:
+            async_progress = OSTree.AsyncProgress.new()
+            async_progress.connect('changed', progress_callback)
+
+        # FIXME: This hangs the process and ignores keyboard interrupt,
+        #        fix this using the Gio.Cancellable
+        refs = None
+        if ref is not None:
+            refs = [ref]
+
+        try:
+            repo.pull(remote,
+                      refs,
+                      OSTree.RepoPullFlags.MIRROR,
+                      async_progress,
+                      None)  # Gio.Cancellable
+        except GLib.GError as e:
+            if ref is not None:
+                raise SourceError("Failed to fetch ref '{}' from '{}': {}".format(ref, remote, e.message)) from e
+            else:
+                raise SourceError("Failed to fetch from '{}': {}".format(remote, e.message)) from e
+
+
+
 
 
 
