@@ -35,11 +35,7 @@ setup(name='bst-plugins-experimental',
       license='LGPL',
       packages=find_packages(exclude=['tests', 'tests.*']),
       include_package_data=True,
-      install_requires=[
-          'requests',
-          'setuptools',
-          'PyGObject'
-      ],
+      install_requires=['setuptools'],
       package_data={
           'buildstream': [
               'bst_plugins_experimental/elements/**.yaml'
