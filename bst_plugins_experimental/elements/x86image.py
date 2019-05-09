@@ -22,7 +22,7 @@ A :mod:`ScriptElement <buildstream.scriptelement>` implementation for creating
 x86 disk images
 
 The x86image default configuration:
-  .. literalinclude:: ../../../bst_external/elements/x86image.yaml
+  .. literalinclude:: ../../../bst_plugins_experimental/elements/x86image.yaml
      :language: yaml
 """
 

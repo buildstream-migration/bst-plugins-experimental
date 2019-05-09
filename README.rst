@@ -10,17 +10,17 @@ How to use this repo
 At the moment, this repo is a sort of incubation repo; it contains things
 which explicitly don't yet have strong API guarantees.
 
-Therefore, for the time being we recommend use bst-external as a submodule
+Therefore, for the time being we recommend use bst-plugins-experimental as a submodule
 for your buildstream projects.
 
 Using the plugins locally within a project
 ------------------------------------------
-To use the bst-external plugins locally within a
+To use the bst-plugins-experimental plugins locally within a
 `BuildStream <https://gitlab.com/BuildStream/buildstream>`_
 project, you will first need to clone the repo to a location **within your
 project**::
 
-    git clone https://gitlab.com/BuildStream/bst-external.git
+    git clone https://gitlab.com/BuildStream/bst-plugins-experimental.git
 
 The plugins must be declared in *project.conf*. To do this, please refer
 to BuildStream's
@@ -28,12 +28,12 @@ to BuildStream's
 
 Using the plugins as a Python package
 -------------------------------------
-To use the bst-external plugins as a Python package within a
+To use the bst-plugins-experimental plugins as a Python package within a
 `BuildStream <https://gitlab.com/BuildStream/buildstream>`_
-project, you will first need to install bst-external via pip::
+project, you will first need to install bst-plugins-experimental via pip::
 
-    git clone https://gitlab.com/BuildStream/bst-external.git
-    cd bst-external
+    git clone https://gitlab.com/BuildStream/bst-plugins-experimental.git
+    cd bst-plugins-experimental
     pip install --user -e .
 
 To ensure it's installed, try: ``pip show BuildStream-external``, this should

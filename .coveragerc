@@ -9,6 +9,6 @@ show_missing = True
 precision = 2
 
 [paths]
-bst-external =
+bst-plugins-experimental =
     bst_plugins_experimental/
     */site-packages/bst_plugins_experimental/

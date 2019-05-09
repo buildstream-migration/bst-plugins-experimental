@@ -2,6 +2,9 @@
 Next Version
 ================
 
+o Add ostree source plugin
+o Forked bst-plugins-experimental from bst-external at 3d52546
+
 ===================
 bst-external 0.12.0
 ===================

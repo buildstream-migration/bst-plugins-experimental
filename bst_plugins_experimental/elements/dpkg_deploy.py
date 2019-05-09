@@ -27,7 +27,7 @@ Default Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
 The dpkg_deploy default configuration:
-  .. literalinclude:: ../../../bst_external/elements/dpkg_deploy.yaml
+  .. literalinclude:: ../../../bst_plugins_experimental/elements/dpkg_deploy.yaml
      :language: yaml
 
 Public Data
