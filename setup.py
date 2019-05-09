@@ -55,7 +55,7 @@ setup(name='bst-plugins-experimental',
               'collect_manifest = bst_plugins_experimental.elements.collect_manifest',
               'git_tag = bst_plugins_experimental.sources.git_tag',
               'quilt = bst_plugins_experimental.sources.quilt',
-              'tar_element = bst_plugins_experimental.elements.tar_element'
+              'tar_element = bst_plugins_experimental.elements.tar_element',
               'ostree = bst_plugins_experimental.sources.ostree'
           ]
       },
