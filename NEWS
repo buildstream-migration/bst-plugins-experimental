@@ -3,6 +3,15 @@ Next Version
 ================
 
 ===================
+bst-external 0.13.0
+===================
+
+o git_tag: Cope with race conditions when cloning repeatedly to the same directory
+o x86image: The final image is now generated inside the destination directory,
+            improving performance when the install root is on a different device.
+o flatpak_repo: The ostree repo mode can be specified in the configuration.
+
+===================
 bst-external 0.12.0
 ===================
 
