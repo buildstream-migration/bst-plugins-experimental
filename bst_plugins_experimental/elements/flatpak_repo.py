@@ -30,7 +30,7 @@ from buildstream import ScriptElement, Scope, ElementError
 
 class FlatpakRepoElement(ScriptElement):
     def configure(self, node):
-        self.node_validate(node, ['environment', 'copy-refs', 'arch', 'branch'])
+        self.node_validate(node, ['environment', 'copy-refs', 'repo-mode', 'arch', 'branch'])
 
         self._env = self.node_get_member(node, list, 'environment')
 
@@ -44,8 +44,11 @@ class FlatpakRepoElement(ScriptElement):
         self._branch = self.node_subst_member(node, 'branch')
 
         self.set_work_dir()
-        self.set_install_root('/buildstream/repo')
         self.set_root_read_only(True)
+
+        repo_mode = self.node_subst_member(node, 'repo-mode')
+        self.set_install_root('/buildstream/repo')
+        self.add_commands('init repository', ['ostree init --repo=/buildstream/repo --mode={}'.format(repo_mode)])
 
     def _layout_flatpaks(self, elements):
         def staging_dir(elt):
