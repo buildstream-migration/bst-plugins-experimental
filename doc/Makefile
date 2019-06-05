@@ -28,7 +28,7 @@ ifeq ($(PYV), 2)
 	SPHINXBUILD = ./sphinx-build3
 endif
 
-.PHONY: all templates html devhelp
+.PHONY: all clean templates html devhelp
 
 # Canned recipe for generating plugin api skeletons
 #   $1 = the plugin directory
@@ -64,6 +64,9 @@ endef
 # We set PYTHONPATH here because source/conf.py sys.modules hacks don't seem to help sphinx-build import the plugins
 all: html devhelp
 
+clean: templates-clean
+	rm -rf build
+
 # Generate rst templates for the docs using a mix of sphinx-apidoc and
 # our 'plugin-doc-skeleton' routine for plugin pages.
 templates:
@@ -71,6 +74,10 @@ templates:
 	mkdir -p source/sources
 	$(call plugin-doc-skeleton,$(CURDIR)/../bst_plugins_experimental,elements)
 	$(call plugin-doc-skeleton,$(CURDIR)/../bst_plugins_experimental,sources)
+
+templates-clean:
+	rm -rf source/elements
+	rm -rf source/sources
 
 # Targets which generate docs with sphinx build
 #
