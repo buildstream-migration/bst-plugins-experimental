@@ -355,7 +355,7 @@ BASE_BUILDSTREAM_DOCS_URL = "https://buildstream.gitlab.io/buildstream"
 
 extlinks = {
     "ext_core_source_builtins": (
-        "{}/buildstream.source.html#built-in-functionality%s".format(BASE_BUILDSTREAM_DOCS_URL),
+        "{}/buildstream.source.html#built-in-functionality".format(BASE_BUILDSTREAM_DOCS_URL),
         None,
     ),
 }

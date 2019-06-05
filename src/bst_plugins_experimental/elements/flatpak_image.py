@@ -26,6 +26,8 @@
 
 """Flatpak Image Element
 
+.. _flatpak_image:
+
 A buildstream plugin used to stage its build-dependencies, and metadata
 provided by the 'metadata' field in a format useful to generate flatpaks.
 """
