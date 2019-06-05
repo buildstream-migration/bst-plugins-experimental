@@ -47,7 +47,7 @@ endif
 #   from plugin documentation.
 #
 define plugin-doc-skeleton
-    @for file in $$(find ${1}/${2} -name "*.py" ! -name "__init__.py"); do \
+    @for file in $$(find ${1}/${2} -name "*.py" ! -name "_*"); do \
         base=$$(basename $$file);                                   \
         module=${2}.$${base%.py};                                        \
         modname=$${base%.py};                                       \
