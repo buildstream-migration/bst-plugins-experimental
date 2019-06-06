@@ -79,7 +79,8 @@ setup(name='bst-plugins-experimental',
               'distutils = bst_plugins_experimental.elements.distutils',
               'git_tag = bst_plugins_experimental.sources.git_tag',
               'quilt = bst_plugins_experimental.sources.quilt',
-              'ostree = bst_plugins_experimental.sources.ostree'
+              'ostree = bst_plugins_experimental.sources.ostree',
+              'oci = bst_plugins_experimental.elements.oci'
           ]
       },
       tests_require=test_requires + plugin_requires,
