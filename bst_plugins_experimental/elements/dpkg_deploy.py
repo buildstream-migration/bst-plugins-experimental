@@ -126,7 +126,6 @@ raw text, e.g.
 
 """
 
-from collections.abc import Mapping
 import hashlib
 import os
 import re
@@ -184,11 +183,11 @@ class DpkgDeployElement(ScriptElement):
             raise ElementError("{}: input element {} does not have any bst.dpkg-data public data"
                                .format(self.name, self.__input))
 
-        dpkg_data = self.node_get_member(bstdata, Mapping, 'dpkg-data')
+        dpkg_data = self.node_get_member(bstdata, dict, 'dpkg-data')
         for package, package_data in self.node_items(dpkg_data):
             package_name = self.node_get_member(package_data, str, "name",
                                                 "{}-{}".format(input_elm.normal_name, package))
-            split_rules = self.node_get_member(bstdata, Mapping, "split-rules", {})
+            split_rules = self.node_get_member(bstdata, dict, "split-rules", {})
 
             if not ("split-rules" in bstdata and package in split_rules):
                 raise ElementError("{}: Input element {} does not have bst.split-rules.{}"
@@ -244,7 +243,7 @@ class DpkgDeployElement(ScriptElement):
                     f.write("{}  {}\n".format(md5sum, path))
 
             # scripts may exist
-            package_scripts = self.node_get_member(bstdata, Mapping, "package-scripts", {})
+            package_scripts = self.node_get_member(bstdata, dict, "package-scripts", {})
             if ("package-scripts" in bstdata and package in package_scripts):
                 for script in ["postinst", "preinst", "postrm", "prerm"]:
                     script_text = self.node_get_member(package_scripts, str, script, '')
@@ -267,7 +266,7 @@ class DpkgDeployElement(ScriptElement):
             raise ElementError("{}: Can't get package list for {}, no bst.dpkg-data"
                                .format(self.name, self.__input))
 
-        dpkg_data = self.node_get_member(bstdata, Mapping, "dpkg-data", {})
+        dpkg_data = self.node_get_member(bstdata, dict, "dpkg-data", {})
         return " ".join([k for k, v in self.node_items(dpkg_data)])
 
     def _sub_packages_list(self, cmdlist):

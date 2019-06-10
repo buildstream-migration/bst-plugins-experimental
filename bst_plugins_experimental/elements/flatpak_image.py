@@ -33,7 +33,6 @@ import os
 from buildstream import utils
 from buildstream import Element, ElementError, Scope
 import configparser
-from collections.abc import Mapping
 
 class FlatpakImageElement(Element):
 
@@ -49,7 +48,7 @@ class FlatpakImageElement(Element):
         self.metadata = configparser.ConfigParser()
         self.metadata.optionxform = str
         metadata_dict = {}
-        metadata_node = self.node_get_member(node, Mapping, 'metadata')
+        metadata_node = self.node_get_member(node, dict, 'metadata')
         for section, pairs in self.node_items(metadata_node):
             section_dict = {}
             for key, _ in self.node_items(pairs):
