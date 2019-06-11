@@ -3,6 +3,14 @@ Next Version
 ================
 
 ===================
+bst-external 0.14.0
+===================
+
+o git_tag: Fix searching for the latest commit not actually getting the latest
+           one.
+o oci: Added a new plugin that can generate OCI and Docker images.
+
+===================
 bst-external 0.13.0
 ===================
 
