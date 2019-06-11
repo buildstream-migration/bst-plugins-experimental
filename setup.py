@@ -58,7 +58,8 @@ setup(name='BuildStream-external',
               'collect_manifest = bst_external.elements.collect_manifest',
               'git_tag = bst_external.sources.git_tag',
               'quilt = bst_external.sources.quilt',
-              'tar_element = bst_external.elements.tar_element'
+              'tar_element = bst_external.elements.tar_element',
+              'oci = bst_external.elements.oci'
           ]
       },
       setup_requires=['pytest-runner', 'setuptools_scm'],
