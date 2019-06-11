@@ -26,6 +26,7 @@ bst-external package and enabled it in your `project configuration file
    elements/fastboot_bootimg
    elements/fastboot_ext4
    elements/tar_element
+   elements/oci
 
 .. toctree::
    :maxdepth: 1
