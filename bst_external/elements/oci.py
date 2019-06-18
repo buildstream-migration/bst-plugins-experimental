@@ -26,27 +26,29 @@
 Configuration
 =============
 
-```
-mode: docker
-```
+::
 
-Valid `mode` values are `oci` or `docker`. `oci` will output an OCI image
-according to the "Image Format Specification"[1] at the time of this plugin
-was made. `docker` will output Docker images according to "Docker Image Specification v1.2.0"[2].
+  mode: docker
 
-[1] https://github.com/opencontainers/image-spec/blob/master/spec.md
-[2] https://github.com/moby/moby/blob/master/image/spec/v1.2.md
+Valid ``mode`` values are ``oci`` or ``docker``. ``oci`` will output
+an OCI image according to the "Image Format Specification"[1]_ at the
+time of this plugin was made. `docker` will output Docker images
+according to "Docker Image Specification v1.2.0"[2]_.
 
-```
-annotations:
-  key1: value1
-```
+.. [1] https://github.com/opencontainers/image-spec/blob/master/spec.md
+.. [2] https://github.com/moby/moby/blob/master/image/spec/v1.2.md
+
+::
+
+  annotations:
+    key1: value1
 
 Optional. Only for OCI.
 
-images:
-- ...
-```
+::
+
+  images:
+  - ...
 
 Contains a series of images. Not to mix up with layers. Images do not
 need to share layers. For example there may be an image for each
@@ -54,120 +56,137 @@ architecture.
 
 The configuration of an image contains the following fields:
 
-  Image configuration
-  -------------------
+Image configuration
+-------------------
 
-```
-parent:
-  element: other-image.bst
-  image: 0
-```
+::
 
-`parent` is optional. If not provided, we are building an image with only
-one layer. `element` is the build dependency of type `oci` which contains
-the layers we want to import. `image` is the image index number. Default
-value for `image` is 0.
+  parent:
+    element: other-image.bst
+    image: 0
 
-`layer: mylayer.bst`
+``parent`` is optional. If not provided, we are building an image with only
+one layer. ``element`` is the build dependency of type ``oci`` which contains
+the layers we want to import. ``image`` is the image index number. Default
+value for ``image`` is 0.
 
-`layer` is a build dependency which provides the top
+::
+
+  layer: mylayer.bst
+
+``layer`` is a build dependency which provides the top
 layer. Integration commands are not run. So you may want to use depend
-on `compose` element to run those. `layer` is optional. If not
+on ``compose`` element to run those. `layer` is optional. If not
 provided, parent layers will be just used and new configuration will
 be set on an empty layer.
 
-`architecture: amd64`
+::
 
-Must be provided. Must be a "GOARCH" value.
+  architecture: amd64
+
+Must be provided. Must be a "``GOARCH``" value.
 https://github.com/golang/go/blob/master/src/go/build/syslist.go
 
-`os: linux`
+::
 
-Must be provided. Must be a "GOOS" value.
+  os: linux
+
+Must be provided. Must be a "``GOOS``" value.
 https://github.com/golang/go/blob/master/src/go/build/syslist.go
 
-`variant: v8`
-`os.version: 1`
-`os.features: ['a', 'b']`
+::
+
+  variant: v8
+  os.version: 1
+  os.features: ['a', 'b']
 
 OCI only. Optional. Only used in image index for selection of the
-right image. `os.version` and `os.features` are Windows related.
-`variant` are for selection of processor variants. For example ARM
+right image. ``os.version`` and ``os.features`` are Windows related.
+``variant`` are for selection of processor variants. For example ARM
 version.
 
-`author: John Doe <john.doe@example.com>`
+::
+
+  author: John Doe <john.doe@example.com>
 
 Author of the layer/image. Optional.
 
-`comment: Add my awesome app`
+::
+
+  comment: Add my awesome app
 
 Commit message for the layer/image. Optional.
 
-`annotations: {'key1': 'value1'}`
+::
+
+  annotations: {'key1': 'value1'}
 
 Optional. Only for OCI.
 
-`tags: ['myapp:latest', 'myapp:1.0']`
+::
+
+  tags: ['myapp:latest', 'myapp:1.0']
 
 Tags for the images. Only for Docker.
 
-```
-config:
-  ...
-```
+::
+
+  config:
+    ...
 
 Optional container config for the image.
 
-  Container configuration
-  -----------------------
+Container configuration
+-----------------------
 
 All configurations here are optional.
 
 Examples common for OCI and Docker:
 
-```
-User: "webadmin"
-ExposedPorts: ["80/tcp", "8080"]
-Env: ["A=value", "B=value"]
-Entrypoint: ["/bin/myapp"]
-Cmd: ["--default-param"]
-Volumes: ["/var/lib/myapp"]
-WorkingDir: "/home/myuser"
+::
+
+  User: "webadmin"
+  ExposedPorts: ["80/tcp", "8080"]
+  Env: ["A=value", "B=value"]
+  Entrypoint: ["/bin/myapp"]
+  Cmd: ["--default-param"]
+  Volumes: ["/var/lib/myapp"]
+  WorkingDir: "/home/myuser"
 
 OCI specific:
 
-```
-Labels: {"a": "b"}
-StopSignals: "SIGKILL"
-```
+::
+
+  Labels: {"a": "b"}
+  StopSignals: "SIGKILL"
 
 Docker specific:
 
-```
-Memory: 2048
-MemorySwap: 4096
-CpuShares: 2
-Heathcheck:
-  Test: ["CMD", "/bin/test", "param"]
-  Interval: 50000000000
-  Timeout: 10000000000
-  Retries: 2
-```
+::
+
+  Memory: 2048
+  MemorySwap: 4096
+  CpuShares: 2
+  Heathcheck:
+    Test: ["CMD", "/bin/test", "param"]
+    Interval: 50000000000
+    Timeout: 10000000000
+    Retries: 2
 
 Usage
 =====
 
 The artifact generated is an un-tared image and need to be composed
-into at tar file. This can be done with `--tar` of `bst checkout`.
+into at tar file. This can be done with ``--tar`` of ``bst checkout``.
 
-The image can be loaded by eithe `podman load -i` or `docker load -i`.
+The image can be loaded by either ``podman load -i`` or ``docker load -i``.
 
 For example:
 
-```
-bst checkout element.bst --tar element.tar
-podman load -i element.tar
-```
+::
+
+  bst checkout element.bst --tar element.tar
+  podman load -i element.tar
 
 Notes
 =====
@@ -178,9 +197,9 @@ layer should be provided complete with all the files of the result.
 There is no creation dates added to the images to avoid problems with
 reproducibility.
 
-Each `oci` element can only add one layer. So if you need to build
-multiple layers, you must provide an `oci` element for each. Remember
-that only `os` and `architecture` are required, so you can make
+Each ``oci`` element can only add one layer. So if you need to build
+multiple layers, you must provide an ``oci`` element for each. Remember
+that only ``os`` and ``architecture`` are required, so you can make
 relatively concise elements.
 
 You can layer OCI on top of Docker images or Docker images on top of
