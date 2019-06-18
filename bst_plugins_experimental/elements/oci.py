@@ -662,7 +662,8 @@ class OciElement(Element):
                 with tarfile.open(fileobj=tfile, mode='w:') as t:
                     with self.timed_activity('Building layer tar'):
                         for topdir, dirs, files in os.walk(layer):
-                            for f in itertools.chain(files, dirs):
+                            dirs.sort()
+                            for f in itertools.chain(sorted(files), dirs):
                                 path = os.path.join(topdir, f)
                                 arcname = os.path.relpath(path, layer)
                                 st = os.lstat(path)
