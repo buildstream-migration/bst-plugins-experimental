@@ -3,6 +3,14 @@ Next Version
 ================
 
 ===================
+bst-external 0.15.0
+===================
+
+o oci: Layers are now built in a consistent order
+o flatpak_repo: Improved cache key calculation
+o git_tag: Fetch with shallow clones if possible
+
+===================
 bst-external 0.14.0
 ===================
 
