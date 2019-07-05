@@ -440,7 +440,8 @@ class OciElement(Element):
 
     def get_unique_key(self):
         return {'annotations': self.annotations,
-                'images': self.images}
+                'images': self.images,
+                'gzip': self.gzip}
 
     def configure_sandbox(self, sandbox):
         pass
