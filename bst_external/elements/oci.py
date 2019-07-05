@@ -607,6 +607,10 @@ class OciElement(Element):
                                 else:
                                     shutil.rmtree(full_entry)
                             else:
+                                full_entry = os.path.join(parent_checkout, dirname, basename)
+                                if os.path.exists(full_entry):
+                                    if os.path.islink(full_entry) or not os.path.isdir(full_entry):
+                                        os.unlink(full_entry)
                                 members.append(info)
 
                         t.extractall(path=parent_checkout, members=members)
