@@ -440,7 +440,8 @@ class OciElement(Element):
 
     def get_unique_key(self):
         return {'annotations': self.annotations,
-                'images': self.images}
+                'images': self.images,
+                'gzip': self.gzip}
 
     def configure_sandbox(self, sandbox):
         pass
@@ -481,9 +482,12 @@ class OciElement(Element):
         if 'parent' in image:
             if os.path.exists(parent):
                 shutil.rmtree(parent)
-            dep = self.search(Scope.BUILD, image['parent']['element'])
-            dep.stage_dependency_artifacts(sandbox, Scope.RUN,
-                                           path='parent')
+            parent_dep = self.search(Scope.BUILD, image['parent']['element'])
+            if not parent_dep:
+                raise ElementError('{}: Element not in dependencies: {}'.format(self, image['parent']['element']))
+
+            parent_dep.stage_dependency_artifacts(sandbox, Scope.RUN,
+                                                  path='parent')
             if not os.path.exists(os.path.join(parent, 'index.json')):
                 with open(os.path.join(parent, 'manifest.json'), 'r', encoding='utf-8') as f:
                     parent_index = json.load(f)
@@ -577,38 +581,68 @@ class OciElement(Element):
                     legacy_parent = output_blob.legacy_id
 
         if 'parent' in image and 'layer' in image:
-            for layer in layer_files:
-                if self.gzip:
-                    mode='r:gz'
-                else:
-                    mode='r:'
-                with self.timed_activity('Decompressing layer {}'.format(layer)):
-                    with tarfile.open(layer, mode=mode) as t:
-                        members = []
-                        for info in t.getmembers():
-                            if '/../' in info.name:
-                                continue
-                            if info.name.startswith('../'):
-                                continue
+            unpacked = False
+            if isinstance(parent_dep, OciElement):
+                # Here we read the parent configuration to checkout
+                # the artifact which is much faster than unpacking the tar
+                # files.
+                layers = []
+                parent_image = image['parent']['image']
+                for layer in parent_dep.images[parent_image]['layer']:
+                    layer_dep = parent_dep.search(Scope.BUILD, layer)
+                    if not layer_dep:
+                        raise ElementError('{}: Element not in dependencies: {}'.format(parent_dep, layer))
 
-                            dirname, basename = os.path.split(info.name)
-                            if basename == '.wh..wh..opq':
-                                for entry in os.listdir(os.path.join(parent_checkout, dirname)):
-                                    full_entry = os.path.join(parent_checkout, dirname, entry)
+                    # We need to verify dependencies. If not in current
+                    # element's dependencies, then we cannnot safely assume
+                    # it is cached. Parent could be cached while its
+                    # dependencies either removed or not pulled.
+                    if layer_dep != self.search(Scope.BUILD, layer):
+                        self.warn('In order to optimize building of {}, you should add {} as build dependency'.format(self.name, layer))
+                        layers = None
+                        break
+                    else:
+                        layers.append(layer_dep)
+                if layers is not None:
+                    with self.timed_activity('Checking out layer from {}'.format(parent_dep.name)):
+                        for layer_dep in layers:
+                            layer_dep.stage_dependency_artifacts(sandbox, Scope.RUN,
+                                                                 path='parent_checkout')
+                        unpacked = True
+
+            if not unpacked:
+                for layer in layer_files:
+                    if self.gzip:
+                        mode='r:gz'
+                    else:
+                        mode='r:'
+                    with self.timed_activity('Decompressing layer {}'.format(layer)):
+                        with tarfile.open(layer, mode=mode) as t:
+                            members = []
+                            for info in t.getmembers():
+                                if '/../' in info.name:
+                                    continue
+                                if info.name.startswith('../'):
+                                    continue
+
+                                dirname, basename = os.path.split(info.name)
+                                if basename == '.wh..wh..opq':
+                                    for entry in os.listdir(os.path.join(parent_checkout, dirname)):
+                                        full_entry = os.path.join(parent_checkout, dirname, entry)
+                                        if os.path.islink(full_entry) or not os.path.isdir(full_entry):
+                                            os.unlink(full_entry)
+                                        else:
+                                            shutil.rmtree(full_entry)
+                                elif basename.startswith('.wh.'):
+                                    full_entry = os.path.join(parent_checkout, dirname, basename[4:])
                                     if os.path.islink(full_entry) or not os.path.isdir(full_entry):
                                         os.unlink(full_entry)
                                     else:
                                         shutil.rmtree(full_entry)
-                            elif basename.startswith('.wh.'):
-                                full_entry = os.path.join(parent_checkout, dirname, basename[4:])
-                                if os.path.islink(full_entry) or not os.path.isdir(full_entry):
-                                    os.unlink(full_entry)
                                 else:
-                                    shutil.rmtree(full_entry)
-                            else:
-                                members.append(info)
+                                    members.append(info)
 
-                        t.extractall(path=parent_checkout, members=members)
+                            t.extractall(path=parent_checkout, members=members)
 
         legacy_config = {}
         legacy_config.update(config)
