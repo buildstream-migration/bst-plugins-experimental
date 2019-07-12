@@ -343,7 +343,7 @@ class GitTagMirror(SourceFetcher):
     def latest_commit(self, tracking, *, track_tags, track_args):
         if track_tags:
             exit_code, output = self.source.check_output(
-                [self.source.host_git, "describe", "--tags", "--abbrev=0", *track_args, tracking],
+                [self.source.host_git, "describe", "--tags", "--abbrev=0"] + track_args + [tracking],
                 cwd=self.mirror)
 
             if exit_code == 128:
@@ -365,7 +365,7 @@ class GitTagMirror(SourceFetcher):
         # Prefix the ref with the closest annotated tag, if available,
         # to make the ref human readable
         exit_code, output = self.source.check_output(
-            [self.source.host_git, 'describe', '--tags', '--abbrev=40', '--long', ref],
+            [self.source.host_git, 'describe', '--tags', '--abbrev=40', '--long'] + track_args + [ref],
             cwd=self.mirror)
         if exit_code == 0:
             ref = output.rstrip('\n')
