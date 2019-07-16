@@ -427,9 +427,8 @@ class CliIntegration(Cli):
 
                 project_config = _yaml.load(temp_project)
 
-            _yaml.composite_dict(base_config, project_config)
+            base_config.composite(project_config)
 
-            base_config = _yaml.node_sanitize(base_config)
             _yaml.dump(base_config, project_filename)
 
         else:

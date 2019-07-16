@@ -40,7 +40,34 @@ The tarball_element default configuration:
 import tarfile
 import os
 
-from buildstream import Element, Scope, ElementError
+from buildstream import Element, Scope, ElementError, FastEnum
+
+
+# Supported compression types
+class CompressionTypes(FastEnum)
+    BZIP2 = 'bzip2'
+    NONE = 'none'
+    GZIP = 'gzip'
+    XZ = 'xz'
+
+
+# Compression type to compression option
+COMPRESSION_MAP = {
+    CompressionTypes.NONE: '',
+    CompressionTypes.BZIP2: 'bz2',
+    CompressionTypes.GZIP: 'gz',
+    CompressionTypes.XZ: 'xz',
+}
+
+
+# Compression type to file extension
+EXTENSION_MAP = {
+    CompressionTypes.NONE: '.tar',
+    CompressionTypes.BZIP2: '.tar.bz2',
+    CompressionTypes.GZIP: '.tar.gz',
+    CompressionTypes.XZ: '.tar.xz',
+}
+
 
 class TarElement(Element):
 
@@ -56,14 +83,9 @@ class TarElement(Element):
     BST_FORBID_SOURCES = True
 
     def configure(self, node):
-        self.node_validate(node, [
-            'filename', 'compression'
-        ])
+        node.validate_keys(['filename', 'compression'])
         self.filename = self.node_subst_member(node, 'filename')
-        self.compression = self.node_get_member(node, str, 'compression')
-
-        if self.compression not in ['none', 'gzip', 'xz', 'bzip2']:
-            raise ElementError("{}: Invalid compression option {}".format(self, self.compression))
+        self.compression = node.get_enum('compression', CompressionTypes)
 
     def preflight(self):
         pass
@@ -71,7 +93,7 @@ class TarElement(Element):
     def get_unique_key(self):
         key = {}
         key['filename'] = self.filename
-        key['compression'] = self.compression
+        key['compression'] = self.compression.value
         return key
 
     def configure_sandbox(self, sandbox):
@@ -94,10 +116,8 @@ class TarElement(Element):
         with self.timed_activity('Creating tarball', silent_nested=True):
 
             # Create an uncompressed tar archive
-            compress_map = {'none': '', 'gzip': 'gz', 'xz': 'xz', 'bzip2':'bz2'}
-            extension_map = {'none': '.tar', 'gzip': '.tar.gz', 'xz': '.tar.xz', 'bzip2': '.tar.bz2'}
-            tarname = os.path.join(outputdir, self.filename + extension_map[self.compression])
-            mode = 'w:' + compress_map[self.compression]
+            tarname = os.path.join(outputdir, self.filename + EXTENSION_MAP[self.compression])
+            mode = 'w:' + COMPRESSION_MAP[self.compression]
             with tarfile.TarFile.open(name=tarname, mode=mode) as tar:
                 for f in os.listdir(inputdir):
                     tar.add(os.path.join(inputdir, f), arcname=f)
