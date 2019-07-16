@@ -36,13 +36,10 @@ from buildstream import Element, ElementError, Scope
 
 class ExtractIntegrationElement(Element):
     def configure(self, node):
-        self.node_validate(node, [
-            'script-path',
-            'ignore'
-        ])
+        node.validate_keys(['script-path', 'ignore'])
 
         self.script_path = self.node_subst_member(node, 'script-path')
-        self.ignore = self.node_get_member(node, list, 'ignore', [])
+        self.ignore = node.get_str_list('ignore', [])
 
     def preflight(self):
         runtime_deps = list(self.dependencies(Scope.RUN, recurse=False))
@@ -91,7 +88,7 @@ class ExtractIntegrationElement(Element):
                     continue
                 bstdata = dependency.get_public_data('bst')
                 if bstdata is not None:
-                    commands = dependency.node_get_member(bstdata, list, 'integration-commands', [])
+                    commands = bstdata.get_str_list('integration-commands', [])
                     if commands:
                         f.write('# integration commands from {}\n'.format(dependency.name))
                     for i in range(len(commands)):

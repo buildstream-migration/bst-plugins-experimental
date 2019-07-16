@@ -38,7 +38,7 @@ from buildstream import utils
 class QuiltSource(Source):
 
     def configure(self, node):
-        self.path = self.node_get_member(node, str, "path", "")
+        self.path = node.get_str("path", "")
 
     def preflight(self):
         # Check if patch is installed, get the binary at the same time

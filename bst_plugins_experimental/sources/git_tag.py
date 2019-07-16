@@ -378,18 +378,18 @@ class GitTagSource(Source):
     BST_FORMAT_VERSION = 1
 
     def configure(self, node):
-        ref = self.node_get_member(node, str, 'ref', '') or None
+        ref = node.get_str('ref', '')
 
         config_keys = ['url', 'track', 'track-tags', 'track-extra', 'ref', 'submodules', 'checkout-submodules', 'match', 'exclude']
-        self.node_validate(node, config_keys + Source.COMMON_CONFIG_KEYS)
+        node.validate_keys(config_keys + Source.COMMON_CONFIG_KEYS)
 
-        self.original_url = self.node_get_member(node, str, 'url')
+        self.original_url = node.get_str('url')
         self.mirror = GitTagMirror(self, '', self.original_url, ref, primary=True)
-        self.tracking = self.node_get_member(node, str, 'track', None)
-        self.track_extra = self.node_get_member(node, list, 'track-extra', default=[])
-        self.track_tags = self.node_get_member(node, bool, 'track-tags', False)
-        self.match = self.node_get_member(node, list, 'match', [])
-        self.exclude = self.node_get_member(node, list, 'exclude', [])
+        self.tracking = node.get_str('track', None)
+        self.track_extra = node.get_str_list('track-extra', default=[])
+        self.track_tags = node.get_bool('track-tags', False)
+        self.match = node.get_str_list('match', [])
+        self.exclude = node.get_str_list('exclude', [])
 
         # At this point we now know if the source has a ref and/or a track.
         # If it is missing both then we will be unable to track or build.
@@ -397,17 +397,16 @@ class GitTagSource(Source):
             raise SourceError("{}: Git sources require a ref and/or track".format(self),
                               reason="missing-track-and-ref")
 
-        self.checkout_submodules = self.node_get_member(node, bool, 'checkout-submodules', True)
+        self.checkout_submodules = node.get_bool('checkout-submodules', True)
         self.submodules = []
 
         # Parse a dict of submodule overrides, stored in the submodule_overrides
         # and submodule_checkout_overrides dictionaries.
         self.submodule_overrides = {}
         self.submodule_checkout_overrides = {}
-        modules = self.node_get_member(node, dict, 'submodules', {})
-        for path, _ in self.node_items(modules):
-            submodule = self.node_get_member(modules, dict, path)
-            url = self.node_get_member(submodule, str, 'url', '') or None
+        modules = node.get_mapping('submodules', {})
+        for path, submodule in modules.items():
+            url = submodule.get_str('url', '')
 
             # Make sure to mark all URLs that are specified in the configuration
             if url:
@@ -415,7 +414,7 @@ class GitTagSource(Source):
 
             self.submodule_overrides[path] = url
             if 'checkout' in submodule:
-                checkout = self.node_get_member(submodule, bool, 'checkout')
+                checkout = submodule.get_bool('checkout')
                 self.submodule_checkout_overrides[path] = checkout
 
         self.mark_download_url(self.original_url)
@@ -453,7 +452,7 @@ class GitTagSource(Source):
         return Consistency.INCONSISTENT
 
     def load_ref(self, node):
-        self.mirror.ref = self.node_get_member(node, str, 'ref', None)
+        self.mirror.ref = node.get_str('ref', None)
 
     def get_ref(self):
         return self.mirror.ref

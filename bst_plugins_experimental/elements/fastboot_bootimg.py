@@ -38,8 +38,7 @@ class FastbootBootImageElement(ScriptElement):
             "install_img"
         ]
 
-        self.node_validate(node,
-            command_steps + ["base", "input"])
+        node.validate_keys(command_steps + ["base", "input"])
 
         for step in command_steps:
             if step not in node:
