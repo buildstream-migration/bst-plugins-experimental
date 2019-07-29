@@ -81,12 +81,14 @@ setup(name='bst-plugins-experimental',
               'quilt = bst_plugins_experimental.sources.quilt',
               'ostree = bst_plugins_experimental.sources.ostree',
               'oci = bst_plugins_experimental.elements.oci'
+              'cargo = bst_plugins_experimental.sources.cargo',
           ]
       },
       tests_require=test_requires + plugin_requires,
       extras_require={
           'ostree': ["PyGObject"],
-          'docker': ["requests"]
+          'docker': ["requests"],
+          'cargo': ["pytoml"],
       },
       zip_safe=False)
 # eof setup()
