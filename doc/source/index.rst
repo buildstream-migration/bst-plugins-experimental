@@ -32,6 +32,7 @@ bst-external package and enabled it in your `project configuration file
    :maxdepth: 1
    :caption: Contained Sources
 
+   sources/cargo
    sources/docker
    sources/quilt
    sources/git_tag

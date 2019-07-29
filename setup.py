@@ -36,6 +36,7 @@ setup(name='BuildStream-external',
       packages=find_packages(exclude=['tests', 'tests.*']),
       include_package_data=True,
       install_requires=[
+          'pytoml',
           'requests',
           'setuptools'
       ],
@@ -46,6 +47,7 @@ setup(name='BuildStream-external',
       },
       entry_points={
           'buildstream.plugins': [
+              'cargo = bst_external.sources.cargo',
               'docker = bst_external.sources.docker',
               'dpkg_build = bst_external.elements.dpkg_build',
               'dpkg_deploy = bst_external.elements.dpkg_deploy',
