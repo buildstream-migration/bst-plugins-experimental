@@ -63,12 +63,12 @@ class OSTreeSource(Source):
 
     def configure(self, node):
 
-        self.node_validate(node, ['url', 'ref', 'track', 'gpg-key', *Source.COMMON_CONFIG_KEYS])
+        node.validate_keys(['url', 'ref', 'track', 'gpg-key', *Source.COMMON_CONFIG_KEYS])
 
-        self.original_url = self.node_get_member(node, str, 'url')
+        self.original_url = node.get_str('url')
         self.url = self.translate_url(self.original_url)
-        self.ref = self.node_get_member(node, str, 'ref', None)
-        self.tracking = self.node_get_member(node, str, 'track', None)
+        self.ref = node.get_str('ref', default=None)
+        self.tracking = node.get_str('track', default=None)
         self.mirror = os.path.join(self.get_mirror_directory(),
                                    utils.url_directory_name(self.original_url))
 
@@ -80,9 +80,9 @@ class OSTreeSource(Source):
 
         # (optional) Not all repos are signed. But if they are, get the gpg key
         self.gpg_key_path = None
-        if self.node_get_member(node, str, 'gpg-key', None):
-            self.gpg_key = self.node_get_project_path(node, 'gpg-key',
-                                                      check_is_file=True)
+        gpg_key_node = node.get_scalar('gpg-key', default=None)
+        if not gpg_key_node.is_none():
+            self.gpg_key = self.node_get_project_path(gpg_key_node, check_is_file=True)
             self.gpg_key_path = os.path.join(self.get_project_directory(), self.gpg_key)
 
         # Our OSTree repo handle
@@ -95,7 +95,7 @@ class OSTreeSource(Source):
         return [self.original_url, self.ref]
 
     def load_ref(self, node):
-        self.ref = self.node_get_member(node, str, 'ref', None)
+        self.ref = node.get_str('ref', default=None)
 
     def get_ref(self):
         return self.ref

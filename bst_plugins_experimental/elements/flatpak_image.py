@@ -39,19 +39,17 @@ class FlatpakImageElement(Element):
     BST_STRICT_REBUILD = True
 
     def configure(self, node):
-        self.node_validate(node, [
-            'directory', 'include', 'exclude', 'metadata'
-        ])
+        node.validate_keys(['directory', 'include', 'exclude', 'metadata'])
         self.directory = self.node_subst_member(node, 'directory')
-        self.include = self.node_get_member(node, list, 'include')
-        self.exclude = self.node_get_member(node, list, 'exclude')
+        self.include = node.get_str_list('include')
+        self.exclude = node.get_str_list('exclude')
         self.metadata = configparser.ConfigParser()
         self.metadata.optionxform = str
         metadata_dict = {}
-        metadata_node = self.node_get_member(node, dict, 'metadata')
-        for section, pairs in self.node_items(metadata_node):
+        metadata_node = node.get_mapping('metadata')
+        for section, pairs in metadata_node.items():
             section_dict = {}
-            for key, _ in self.node_items(pairs):
+            for key in pairs.keys():
                 section_dict[key] = self.node_subst_member(pairs, key)
             metadata_dict[section] = section_dict
 
