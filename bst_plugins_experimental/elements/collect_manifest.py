@@ -27,7 +27,7 @@ import re
 import json
 from collections import OrderedDict
 from collections.abc import Mapping
-from buildstream import Element, ElementError, Scope
+from buildstream import Element, ElementError, Scope, Node
 
 """
 Collect Manifest Element
@@ -141,8 +141,6 @@ class CollectManifestElement(Element):
 
         if cpe is None:
             cpe = {}
-        else:
-            cpe = self.dict_from_node(cpe)
 
         if 'product' not in cpe:
             cpe['product'] = os.path.basename(os.path.splitext(dep.name)[0])
@@ -188,7 +186,6 @@ class CollectManifestElement(Element):
                 import_manifest = dep.get_public_data('cpe-manifest')
 
                 if import_manifest:
-                    import_manifest = self.dict_from_node(import_manifest)
                     manifest['modules'].extend(import_manifest['modules'])
                 else:
                     cpe = self.extract_cpe(dep)
@@ -215,75 +212,12 @@ class CollectManifestElement(Element):
             with open(path, 'w') as o:
                 json.dump(cleanup_provenance(manifest), o, indent=2)
 
-        manifest_node = self.node_from_dict(manifest)
+        manifest_node = Node.from_dict(manifest)
         self.set_public_data('cpe-manifest', manifest_node)
         return os.path.sep
 
     def get_unique_key(self):
         return self.BST_FORMAT_VERSION
-
-    #
-    # Some helper APIs to go back and forth from nodes and dicts
-    #
-    def node_from_dict(self, dictionary):
-        node = self.new_empty_node()
-
-        for key, value in dictionary.items():
-            if isinstance(value, Mapping):
-                sub_dict = self.node_from_dict(value)
-                self.node_set_member(node, key, sub_dict)
-            elif isinstance(value, list):
-                sub_list = self.nodes_from_list(value)
-                self.node_set_member(node, key, sub_list)
-            else:
-                self.node_set_member(node, key, value)
-
-        return node
-
-    def nodes_from_list(self, list_value):
-        ret_list = []
-
-        for item in list_value:
-            if isinstance(item, Mapping):
-                sub_node = self.node_from_dict(item)
-                ret_list.append(sub_node)
-            elif isinstance(item, list):
-                sub_list = self.nodes_from_list(item)
-                ret_list.append(sub_list)
-            else:
-                ret_list.append(item)
-
-        return ret_list
-
-    def dict_from_node(self, node):
-        dictionary = {}
-
-        for key, value in self.node_items(node):
-            if isinstance(value, Mapping):
-                sub_dict = self.dict_from_node(value)
-                dictionary[key] = sub_dict
-            elif isinstance(value, list):
-                sub_list = self.dicts_from_list(value)
-                dictionary[key] = sub_list
-            else:
-                dictionary[key] = value
-
-        return dictionary
-
-    def dicts_from_list(self, list_value):
-        ret_list = []
-
-        for item in list_value:
-            if isinstance(item, Mapping):
-                sub_dict = self.dict_from_node(item)
-                ret_list.append(sub_dict)
-            elif isinstance(item, list):
-                sub_list = self.dicts_from_list(item)
-                ret_list.append(sub_list)
-            else:
-                ret_list.append(item)
-
-        return ret_list
 
 def setup():
     return CollectManifestElement
