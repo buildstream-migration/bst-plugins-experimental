@@ -205,7 +205,7 @@ class GitTagMirror(SourceFetcher):
             for ref_line in refs.splitlines():
                 ad_commit, ad_ref = ref_line.split('\t', 1)
                 if ad_commit == commit:
-                    if ad_ref in [f'refs/tags/{tag}^{{}}', f'refs/tags/{tag}']:
+                    if ad_ref in ['refs/tags/{tag}^{{}}'.format(tag=tag), 'refs/tags/{tag}'.format(tag=tag)]:
                         advertised = True
                         break
 
@@ -227,7 +227,7 @@ class GitTagMirror(SourceFetcher):
 
 
             # We need to have a ref to make it clonable
-            self.source.call([self.source.host_git, 'update-ref', 'HEAD', f'{commit}^{{}}'],
+            self.source.call([self.source.host_git, 'update-ref', 'HEAD', '{commit}^{{}}'.format(commit=commit)],
                              cwd=tmpdir,
                              fail="Failed to tag HEAD",
                              fail_temporarily=True)
