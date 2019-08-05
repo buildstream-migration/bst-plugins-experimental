@@ -16,6 +16,7 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    :maxdepth: 1
    :caption: Contained Elements
 
+   elements/cmake
    elements/dpkg_build
    elements/dpkg_deploy
    elements/x86image
