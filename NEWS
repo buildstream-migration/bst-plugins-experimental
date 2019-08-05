@@ -3,6 +3,13 @@ Next Version
 ================
 
 ===================
+bst-external 0.16.0
+===================
+
+o oci: Several fixes
+o git_tag: Make it compatible with python 3.5
+
+===================
 bst-external 0.15.0
 ===================
 
