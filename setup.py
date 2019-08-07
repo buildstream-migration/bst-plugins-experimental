@@ -43,6 +43,7 @@ setup(name='bst-plugins-experimental',
       },
       entry_points={
           'buildstream.plugins': [
+              'cmake = bst_plugins_experimental.elements.cmake',
               'docker = bst_plugins_experimental.sources.docker',
               'dpkg_build = bst_plugins_experimental.elements.dpkg_build',
               'dpkg_deploy = bst_plugins_experimental.elements.dpkg_deploy',

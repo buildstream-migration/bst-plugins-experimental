@@ -109,7 +109,7 @@ integration_linux:
 integration_unix:
   stage: test
   variables:
-    BST_FORCE_BACKEND: "unix"
+    BST_FORCE_SANDBOX: "chroot"
     PYTEST_ADDOPTS: "--color=yes"
   script:
 

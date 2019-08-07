@@ -2,7 +2,8 @@ import os
 import pytest
 
 from tests.testutils import cli
-from tests.testutils.integration import assert_contains
+from buildstream.testing.integration import assert_contains
+from buildstream.testing._utils.site import HAVE_SANDBOX
 
 DATA_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
@@ -16,6 +17,7 @@ def test_docker_fetch(cli, datafiles):
     result.assert_success()
 
 @pytest.mark.datafiles(DATA_DIR)
+@pytest.mark.skipif(not HAVE_SANDBOX, reason='Only available with a functioning sandbox')
 def test_docker_source_build(cli, datafiles):
     project = str(datafiles)
     checkout = os.path.join(cli.directory, 'checkout')
