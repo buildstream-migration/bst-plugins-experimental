@@ -22,7 +22,6 @@ before_script:
 
   - dnf install -y quilt
 
-  - pip3 install -r plugin-requirements.txt
   - pip3 install pytest
   - pip3 install pytest-cov
   - pip3 install pytest-datafiles
