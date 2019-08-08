@@ -1,4 +1,5 @@
 image: buildstream/buildstream:nightly-master-59236613
+# bst version 1.3.0+2113.g377f20fe
 
 cache:
   paths:
