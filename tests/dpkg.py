@@ -3,6 +3,7 @@ import pytest
 
 from tests.testutils import cli_integration as cli
 from tests.testutils.integration import assert_contains
+from buildstream.testing._utils.site import HAVE_SANDBOX
 
 DATA_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
@@ -10,6 +11,7 @@ DATA_DIR = os.path.join(
 )
 
 @pytest.mark.datafiles(DATA_DIR)
+@pytest.mark.skipif(not HAVE_SANDBOX, reason='Only available with a functioning sandbox')
 def test_dpkg_build(cli, datafiles):
     project = str(datafiles)
     checkout_dir = os.path.join(cli.directory, 'checkout')
@@ -26,6 +28,7 @@ def test_dpkg_build(cli, datafiles):
 
 
 @pytest.mark.datafiles(DATA_DIR)
+@pytest.mark.skipif(not HAVE_SANDBOX, reason='Only available with a functioning sandbox')
 def test_dpkg_deploy(cli, datafiles):
     project = str(datafiles)
     checkout_dir = os.path.join(cli.directory, 'debian_package')
