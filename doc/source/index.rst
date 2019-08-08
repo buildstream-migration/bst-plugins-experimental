@@ -27,6 +27,7 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    elements/fastboot_bootimg
    elements/fastboot_ext4
    elements/tar_element
+   elements/meson
 
 .. toctree::
    :maxdepth: 1
