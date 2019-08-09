@@ -114,7 +114,7 @@ import filecmp
 import os
 import re
 
-from buildstream import BuildElement, utils, ElementError
+from buildstream import BuildElement, utils, ElementError, Node
 
 
 # Element implementation for the 'dpkg' kind.
@@ -157,9 +157,9 @@ class DpkgElement(BuildElement):
         collectdir = super().assemble(sandbox)
 
         bad_overlaps = set()
-        new_split_rules = self.new_empty_node()
-        new_dpkg_data = self.new_empty_node()
-        new_package_scripts = self.new_empty_node()
+        new_split_rules = Node.from_dict({})
+        new_dpkg_data = Node.from_dict({})
+        new_package_scripts = Node.from_dict({})
         have_package_scripts = False
         for package in packages:
             if not self._get_workspace():  # If we're not using a workspace
@@ -176,14 +176,14 @@ class DpkgElement(BuildElement):
                         if x != "." and not x.startswith("DEBIAN")]
 
             # Setup the new split rules
-            self.node_set_member(new_split_rules, package, contents)
+            new_split_rules[package] = contents
 
             # Check for any overlapping files that are different.
             # Since we're storing all these files together, we need to warn
             # because clobbering is bad!
             for content_file in contents:
-                for split_package, split_contents in self.node_items(new_split_rules):
-                    for split_file in split_contents:
+                for split_package, split_contents in new_split_rules.items():
+                    for split_file in split_contents.as_str_list():
                         content_file_path = os.path.join(package_path,
                                                          content_file.lstrip(os.sep))
                         split_file_path = os.path.join(os.path.dirname(package_path),
@@ -204,29 +204,29 @@ class DpkgElement(BuildElement):
                 controldata = f.read()
 
             # Setup the package data
-            dpkg_data = self.new_empty_node()
-            self.node_set_member(dpkg_data, "name", package)
-            self.node_set_member(dpkg_data, "control", controldata)
-            self.node_set_member(new_dpkg_data, package, dpkg_data)
+            new_dpkg_data[package] = {
+                "name": package,
+                "control": controldata
+            }
 
             # DEBIAN/{pre,post}{inst,rm} scripts go into bst.package-scripts.<package>.<script>
-            package_scripts = self.new_empty_node()
+            package_scripts = Node.from_dict({})
             scriptfiles = ["preinst", "postinst", "prerm", "postrm"]
             for s in scriptfiles:
                 path = os.path.join(package_path, "DEBIAN", s)
                 if os.path.exists(path):
                     have_package_scripts = True
                     if package not in new_package_scripts:
-                        self.node_set_member(new_package_scripts, package, package_scripts)
+                        new_package_scripts[package] = package_scripts
                     with open(path, "r") as f:
                         data = f.read()
-                    self.node_set_member(package_scripts, s, data)
+                    package_scripts[s] = data
 
         bstdata = self.get_public_data("bst")
-        self.node_set_member(bstdata, "split-rules", new_split_rules)
-        self.node_set_member(bstdata, "dpkg-data", new_dpkg_data)
+        bstdata["split-rules"] = new_split_rules
+        bstdata["dpkg-data"] = new_dpkg_data
         if have_package_scripts:
-            self.node_set_member(bstdata, "package-scripts", new_package_scripts)
+            bstdata["package-scripts"] = new_package_scripts
 
         self.set_public_data("bst", bstdata)
 
