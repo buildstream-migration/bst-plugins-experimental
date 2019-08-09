@@ -61,6 +61,7 @@ setup(name='bst-plugins-experimental',
               'meson = bst_plugins_experimental.elements.meson',
               'make = bst_plugins_experimental.elements.make',
               'tar_element = bst_plugins_experimental.elements.tar_element',
+              'makemaker = bst_plugins_experimental.elements.makemaker',
               'git_tag = bst_plugins_experimental.sources.git_tag',
               'quilt = bst_plugins_experimental.sources.quilt',
               'ostree = bst_plugins_experimental.sources.ostree'

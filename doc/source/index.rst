@@ -29,6 +29,7 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    elements/tar_element
    elements/meson
    elements/make
+   elements/makemaker
 
 .. toctree::
    :maxdepth: 1
