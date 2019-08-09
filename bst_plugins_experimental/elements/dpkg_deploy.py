@@ -143,9 +143,7 @@ def md5sum_file(path):
 # Element implementation for the 'dpkg_deploy' kind.
 class DpkgDeployElement(ScriptElement):
     def configure(self, node):
-        self.node_validate(node, [
-            'build-commands', 'base', 'input'
-        ])
+        node.validate_keys(['build-commands', 'base', 'input'])
 
         self.__input = self.node_subst_member(node, 'input')
         self.layout_add(self.node_subst_member(node, 'base'), "/")
@@ -183,11 +181,11 @@ class DpkgDeployElement(ScriptElement):
             raise ElementError("{}: input element {} does not have any bst.dpkg-data public data"
                                .format(self.name, self.__input))
 
-        dpkg_data = self.node_get_member(bstdata, dict, 'dpkg-data')
-        for package, package_data in self.node_items(dpkg_data):
-            package_name = self.node_get_member(package_data, str, "name",
+        dpkg_data = bstdata.get_mapping('dpkg-data')
+        for package, package_data in dpkg_data.items():
+            package_name = package_data.get_str("name",
                                                 "{}-{}".format(input_elm.normal_name, package))
-            split_rules = self.node_get_member(bstdata, dict, "split-rules", {})
+            split_rules = bstdata.get_mapping("split-rules", {})
 
             if not ("split-rules" in bstdata and package in split_rules):
                 raise ElementError("{}: Input element {} does not have bst.split-rules.{}"
@@ -198,7 +196,7 @@ class DpkgDeployElement(ScriptElement):
             #        that we are relying on Element.compute_manifest(), can
             #        we then remove this manual handling of split-rules ?
             #
-            package_splits = self.node_get_member(split_rules, list, package)
+            package_splits = split_rules.get_str_list(package)
 
             package_files = input_elm.compute_manifest(include=[package])
             src = os.path.join(sandbox.get_directory(),
@@ -223,7 +221,7 @@ class DpkgDeployElement(ScriptElement):
                 raise ElementError("{}: Cannot reconstitute package {}".format(self.name, package),
                                    detail="There is no public.bst.dpkg-data.{}.control".format(package))
             controlpath = os.path.join(debiandir, "control")
-            controltext = self.node_get_member(package_data, str, 'control')
+            controltext = package_data.get_str('control')
             # Slightly ugly way of renaming the package
             controltext = re.sub(r"^Package:\s*\S+",
                                  "Package: {}".format(package_name),
@@ -243,10 +241,10 @@ class DpkgDeployElement(ScriptElement):
                     f.write("{}  {}\n".format(md5sum, path))
 
             # scripts may exist
-            package_scripts = self.node_get_member(bstdata, dict, "package-scripts", {})
+            package_scripts = bstdata.get_mapping("package-scripts", {})
             if ("package-scripts" in bstdata and package in package_scripts):
                 for script in ["postinst", "preinst", "postrm", "prerm"]:
-                    script_text = self.node_get_member(package_scripts, str, script, '')
+                    script_text = package_scripts.get_str(script, '')
                     if script_text:
                         filepath = os.path.join(debiandir, script)
                         with open(filepath, "w") as f:
@@ -266,8 +264,8 @@ class DpkgDeployElement(ScriptElement):
             raise ElementError("{}: Can't get package list for {}, no bst.dpkg-data"
                                .format(self.name, self.__input))
 
-        dpkg_data = self.node_get_member(bstdata, dict, "dpkg-data", {})
-        return " ".join([k for k, v in self.node_items(dpkg_data)])
+        dpkg_data = bstdata.get_mapping("dpkg-data", {})
+        return " ".join(dpkg_data.keys())
 
     def _sub_packages_list(self, cmdlist):
         return [
