@@ -29,6 +29,10 @@ except ImportError:
           "pip (pip3 install setuptools).")
     sys.exit(1)
 
+with open('plugin-requirements.txt', 'r') as plugin_req_file:
+    plugin_requires = [line for line in plugin_req_file.readlines()
+            if not line.strip().startswith('#') and line != '']
+
 setup(name='bst-plugins-experimental',
       version="0.12.0",
       description="A collection of experimental BuildStream plugins.",
@@ -73,6 +77,7 @@ setup(name='bst-plugins-experimental',
                      'pytest-cov',
                      # Provide option to run tests in parallel, less reliable
                      'pytest-xdist',
-                     'pytest >= 3.1.0'],
+                     'pytest >= 3.1.0']
+                     + plugin_requires,
       zip_safe=False
 )  #eof setup()
