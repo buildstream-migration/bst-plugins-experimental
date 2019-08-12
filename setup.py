@@ -62,6 +62,7 @@ setup(name='bst-plugins-experimental',
               'make = bst_plugins_experimental.elements.make',
               'tar_element = bst_plugins_experimental.elements.tar_element',
               'makemaker = bst_plugins_experimental.elements.makemaker',
+              'modulebuild = bst_plugins_experimental.elements.modulebuild',
               'git_tag = bst_plugins_experimental.sources.git_tag',
               'quilt = bst_plugins_experimental.sources.quilt',
               'ostree = bst_plugins_experimental.sources.ostree'
