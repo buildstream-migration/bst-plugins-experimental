@@ -31,6 +31,7 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    elements/make
    elements/makemaker
    elements/modulebuild
+   elements/qmake
 
 .. toctree::
    :maxdepth: 1
