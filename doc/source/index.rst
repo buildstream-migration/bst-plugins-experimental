@@ -30,6 +30,7 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    elements/meson
    elements/make
    elements/makemaker
+   elements/modulebuild
 
 .. toctree::
    :maxdepth: 1
