@@ -3,6 +3,15 @@ Next Version
 ================
 
 ===================
+bst-external 0.17.0
+===================
+
+o cargo: Added new source plugin to automatically
+         download any sources required by a package's
+	 Cargo.lock file (for projects using cargo and
+	 rust)
+
+===================
 bst-external 0.16.0
 ===================
 
