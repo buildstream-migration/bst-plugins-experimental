@@ -145,13 +145,20 @@ class GitTagMirror(SourceFetcher):
         self.source = source
         self.path = path
         self.url = url
-        self.ref = ref
         self.primary = primary
         self.mirror = os.path.join(source.get_mirror_directory(), utils.url_directory_name(url))
-        ref_dirname = utils.url_directory_name('{}#{}'.format(url, ref))
-        self.fetch_mirror = os.path.join(source.get_mirror_directory(), ref_dirname)
+
         self.mark_download_url(url)
         self.full_clone = full_clone
+        self.set_ref(ref)
+
+    def set_ref(self, ref):
+        self.ref = ref
+        if ref is None:
+            self.fetch_mirror = None
+        else:
+            ref_dirname = utils.url_directory_name('{}#{}'.format(self.url, ref))
+            self.fetch_mirror = os.path.join(self.source.get_mirror_directory(), ref_dirname)
 
     def mirror_path(self):
         if os.path.exists(self.mirror):
@@ -561,13 +568,15 @@ class GitTagSource(Source):
         return Consistency.INCONSISTENT
 
     def load_ref(self, node):
-        self.mirror.ref = self.node_get_member(node, str, 'ref', None)
+        ref = self.node_get_member(node, str, 'ref', None)
+        self.mirror.set_ref(ref)
 
     def get_ref(self):
         return self.mirror.ref
 
     def set_ref(self, ref, node):
-        node['ref'] = self.mirror.ref = ref
+        self.mirror.set_ref(ref)
+        node['ref'] = ref
 
     def track(self):
 
