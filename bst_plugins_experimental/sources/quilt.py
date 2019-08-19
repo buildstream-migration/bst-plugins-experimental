@@ -36,6 +36,7 @@ from buildstream import Source, SourceError, Consistency
 from buildstream import utils
 
 class QuiltSource(Source):
+    BST_REQUIRES_PREVIOUS_SOURCES_STAGE = True
 
     def configure(self, node):
         self.path = self.node_get_member(node, str, "path", "")
