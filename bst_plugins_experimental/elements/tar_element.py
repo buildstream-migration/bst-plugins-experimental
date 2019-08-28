@@ -56,11 +56,9 @@ class TarElement(Element):
     BST_FORBID_SOURCES = True
 
     def configure(self, node):
-        self.node_validate(node, [
-            'filename', 'compression'
-        ])
+        node.validate_keys(['filename', 'compression'])
         self.filename = self.node_subst_member(node, 'filename')
-        self.compression = self.node_get_member(node, str, 'compression')
+        self.compression = node.get_str('compression')
 
         if self.compression not in ['none', 'gzip', 'xz', 'bzip2']:
             raise ElementError("{}: Invalid compression option {}".format(self, self.compression))

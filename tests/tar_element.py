@@ -2,8 +2,10 @@ import os
 import pytest
 import tarfile
 
-from tests.testutils import cli_integration as cli
-from tests.testutils.integration import assert_contains
+from buildstream.testing.integration import assert_contains
+from buildstream.testing.integration import integration_cache  # pylint: disable=unused-import
+from buildstream.testing.runcli import cli_integration as cli  # pylint: disable=unused-import
+
 
 DATA_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),

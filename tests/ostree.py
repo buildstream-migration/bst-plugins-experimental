@@ -49,7 +49,7 @@ def test_submodule_track_no_ref_or_track(cli, tmpdir, datafiles):
         ]
     }
 
-    _yaml.dump(element, os.path.join(project, 'target.bst'))
+    _yaml.roundtrip_dump(element, os.path.join(project, 'target.bst'))
 
     # Track will encounter an inconsistent submodule without any ref
     result = cli.run(project=project, args=['show', 'target.bst'])

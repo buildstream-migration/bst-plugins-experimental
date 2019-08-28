@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from tests.testutils import cli
+from buildstream.testing.runcli import cli
 from buildstream.testing.integration import assert_contains
 from buildstream.testing._utils.site import HAVE_SANDBOX
 
