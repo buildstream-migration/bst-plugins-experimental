@@ -1,14 +1,11 @@
-image: buildstream/buildstream:nightly-master-78573898
-# BuildStream at af03e3edc2cf7159bf5865a95f101d2fd890cc84 (2019/08/27)
+image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:30-master-75925678
 
 cache:
   paths:
     - cache/
 
 stages:
-  - prepare
   - test
-  - coverage
   - docs
   - upload
 
@@ -19,59 +16,6 @@ before_script:
 
   - adduser -m buildstream
   - chown -R buildstream:buildstream .
-
-  - dnf install -y quilt
-
-  - pip3 install pytest
-  - pip3 install pytest-cov
-  - pip3 install pytest-datafiles
-  - pip3 install pytest-env
-  - pip3 install pytest-pep8
-  - pip3 install pytest-xdist
-  - pip3 install coverage==4.4.0
-  - pip3 install pep8
-  - pip3 install requests
-  - pip3 install twine
-
-#####################################################
-#                  Prepare stage                    #
-#####################################################
-
-# Create a source distribution
-#
-source_dist:
-  stage: prepare
-  script:
-
-  # Generate the source distribution tarball
-  #
-  - python3 setup.py sdist
-  - tar -ztf dist/*
-  - tarball=$(cd dist && echo $(ls *))
-
-  # Create an installer script
-  - |
-    cat > dist/install.sh << EOF
-    #!/bin/sh
-    tar -zxf ${tarball}
-    cd ${tarball%.tar.gz}
-    pip3 install --no-index .
-    EOF
-
-  # unpack tarball as `dist/bst-plugins-experimental` directory
-  - |
-    cat > dist/unpack.sh << EOF
-    #!/bin/sh
-    tar -zxf ${tarball}
-    mv ${tarball%.tar.gz} bst-plugins-experimental
-    EOF
-
-  # Make our helpers executable
-  - chmod +x dist/install.sh
-  - chmod +x dist/unpack.sh
-  artifacts:
-    paths:
-    - dist/
 
 #####################################################
 #                    Test stage                     #
@@ -85,26 +29,11 @@ integration_linux:
 
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
 
-    # Unpack and get into dist/bst-plugins-experimental
-    - cd dist && ./unpack.sh
-    - chown -R buildstream:buildstream bst-plugins-experimental
-    - cd bst-plugins-experimental
-    # Install bst-plugins-experimental at this branch as the tests need it
-    - pip3 install --no-index .
+    - chown -R buildstream:buildstream .
 
     # Run the tests from the source distribution.
     # We run as a simple user to test for permission issues.
-    - su buildstream -c 'python3 setup.py test --index-url file:///dev/null'
-
-    # Go back top level and collect our reports
-    - cd ../.. #you may only have to go back one level here...
-    - mkdir -p coverage-linux/
-    - cp dist/bst-plugins-experimental/.coverage coverage-linux/coverage.linux
-  artifacts:
-    paths:
-    - coverage-linux/
-  dependencies:
-  - source_dist
+    - su buildstream -c 'tox'
 
 integration_unix:
   stage: test
@@ -121,47 +50,17 @@ integration_unix:
 
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
 
-    # Unpack and get into dist/bst-plugins-experimental
-    - cd dist && ./unpack.sh && cd bst-plugins-experimental && pip3 install --no-index .
-
     # Since the unix platform is required to run as root, no user change required
-    - python3 setup.py test --index-url file:///dev/null
-
-    # Go back top level and collect our reports
-    - cd ../..
-    - mkdir -p coverage-unix/
-    - cp dist/bst-plugins-experimental/.coverage coverage-unix/coverage.unix
+    - tox
 
   artifacts:
     paths:
-    - coverage-unix/
     - logs-unix/
 
-  dependencies:
-  - source_dist
-
-#####################################################
-#                Coverage stage                     #
-#####################################################
-
-# Collate coverage reports
-#
-coverage:
-  stage: coverage
-  coverage: '/TOTAL +\d+ +\d+ +(\d+\.\d+)%/'
+lint:
+  stage: test
   script:
-    - cd dist && ./unpack.sh && cd bst-plugins-experimental
-    - pip3 install --no-index .
-    - mkdir report
-    - cd report
-    - cp ../../../coverage-linux/coverage.linux .
-    - cp ../../../coverage-unix/coverage.unix .
-    - coverage combine --rcfile=../.coveragerc -a coverage.*
-    - coverage report --rcfile=../.coveragerc -m
-  dependencies:
-  - source_dist
-  - integration_linux
-  - integration_unix
+  - tox -e lint
 
 # Automatically build documentation, only for merges which land
 # on master branch.
@@ -203,9 +102,8 @@ pages:
 upload:
   stage: upload
   script:
+  - python3 setup.py sdist
   - twine upload dist/*.tar.gz
-  dependencies:
-  - source_dist
   only:
   - /[0-9]+\.[0-9]+\.[0-9]+/
   except:
