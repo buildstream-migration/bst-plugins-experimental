@@ -35,6 +35,7 @@ import os
 from buildstream import Source, SourceError, Consistency
 from buildstream import utils
 
+
 class QuiltSource(Source):
     BST_REQUIRES_PREVIOUS_SOURCES_STAGE = True
 
@@ -69,6 +70,7 @@ class QuiltSource(Source):
             # Call quilt command
             self.command = [self.host_quilt, "push", "-a"]
             self.call(self.command, cwd=patch_dir, fail="Error occurred while calling {}".format(self.command))
+
 
 # Plugin entry point
 def setup():
