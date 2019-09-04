@@ -1,7 +1,10 @@
+# Pylint doesn't play well with fixtures and dependency injection from pytest
+# pylint: disable=redefined-outer-name
+
 import os
 import pytest
 
-from buildstream.testing.runcli import cli
+from buildstream.testing.runcli import cli  # pylint: disable=unused-import
 from buildstream.testing.integration import assert_contains
 from buildstream.testing._utils.site import HAVE_SANDBOX
 
@@ -10,11 +13,13 @@ DATA_DIR = os.path.join(
     "project"
 )
 
+
 @pytest.mark.datafiles(DATA_DIR)
 def test_docker_fetch(cli, datafiles):
     project = str(datafiles)
     result = cli.run(project=project, args=['source', 'fetch', 'dockerhub-alpine.bst'])
     result.assert_success()
+
 
 @pytest.mark.datafiles(DATA_DIR)
 @pytest.mark.skipif(not HAVE_SANDBOX, reason='Only available with a functioning sandbox')

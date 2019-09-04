@@ -17,12 +17,15 @@
 #  Authors: William Salmon <will.salmon@codethink.co.uk>
 #
 
+# Pylint doesn't play well with fixtures and dependency injection from pytest
+# pylint: disable=redefined-outer-name
+
 import os
 import pytest
 
 from buildstream._exceptions import ErrorDomain
 from buildstream import _yaml
-from buildstream.testing import cli
+from buildstream.testing import cli  # pylint: disable=unused-import
 from buildstream.testing import create_repo
 
 DATA_DIR = os.path.join(

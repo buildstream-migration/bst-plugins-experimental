@@ -5,9 +5,9 @@ import os
 import pytest
 
 from buildstream.testing.runcli import cli_integration as cli  # pylint: disable=unused-import
-from buildstream.testing.integration import assert_contains, integration_cache
+from buildstream.testing.integration import integration_cache  # pylint: disable=unused-import
+from buildstream.testing.integration import assert_contains
 from buildstream.testing._utils.site import HAVE_SANDBOX
-
 
 pytestmark = pytest.mark.integration
 
