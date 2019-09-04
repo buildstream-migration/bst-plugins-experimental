@@ -34,15 +34,16 @@ import os
 import stat
 from buildstream import Element, ElementError, Scope
 
+
 class ExtractIntegrationElement(Element):
     def configure(self, node):
-        self.node_validate(node, [
+        node.validate_keys([
             'script-path',
             'ignore'
         ])
 
         self.script_path = self.node_subst_member(node, 'script-path')
-        self.ignore = self.node_get_member(node, list, 'ignore', [])
+        self.ignore = node.get_str_list('ignore', [])
 
     def preflight(self):
         runtime_deps = list(self.dependencies(Scope.RUN, recurse=False))
@@ -100,6 +101,7 @@ class ExtractIntegrationElement(Element):
                         f.write('{}\n\n'.format(cmd))
 
         return os.path.sep
+
 
 def setup():
     return ExtractIntegrationElement
