@@ -400,7 +400,7 @@ class OciElement(Element):
                             int(self.node_subst_member(config, member))
 
                 for member in ['ExposedPort', 'Volumes',
-                               'Env', 'EntryPoint', 'Cmd']:
+                               'Env', 'Entrypoint', 'Cmd']:
                     if member in config:
                         config_value[member] = \
                             self.node_subst_list(config, member)
