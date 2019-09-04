@@ -175,7 +175,7 @@ class DpkgDeployElement(ScriptElement):
         if not input_elm:
             raise ElementError("{}: Failed to find input element {} in build-depends"
                                .format(self.name, self.__input))
-            return
+
         bstdata = input_elm.get_public_data('bst')
         if "dpkg-data" not in bstdata:
             raise ElementError("{}: input element {} does not have any bst.dpkg-data public data"
@@ -196,7 +196,7 @@ class DpkgDeployElement(ScriptElement):
             #        that we are relying on Element.compute_manifest(), can
             #        we then remove this manual handling of split-rules ?
             #
-            package_splits = split_rules.get_str_list(package)
+            package_splits = split_rules.get_str_list(package)  # pylint: disable=unused-variable
 
             package_files = input_elm.compute_manifest(include=[package])
             src = os.path.join(sandbox.get_directory(),
@@ -205,7 +205,7 @@ class DpkgDeployElement(ScriptElement):
             os.makedirs(dst, exist_ok=True)
 
             # link only the files for this package into it's respective package directory
-            def package_filter(filename):
+            def package_filter(filename, package_files=package_files):
                 return filename in package_files
 
             utils.link_files(src, dst, filter_callback=package_filter)
