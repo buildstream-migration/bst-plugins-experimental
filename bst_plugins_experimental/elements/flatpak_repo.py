@@ -28,15 +28,16 @@ The flatpak_repo default configuration:
 
 from buildstream import ScriptElement, Scope, ElementError
 
+
 class FlatpakRepoElement(ScriptElement):
     def configure(self, node):
-        self.node_validate(node, ['environment', 'copy-refs', 'repo-mode', 'arch', 'branch'])
+        node.validate_keys(['environment', 'copy-refs', 'repo-mode', 'arch', 'branch'])
 
-        self._env = self.node_get_member(node, list, 'environment')
+        self._env = node.get_str_list('environment')
 
         self._copy_refs = []
-        for subnode in self.node_get_member(node, list, 'copy-refs'):
-            self.node_validate(subnode, ['src', 'dest'])
+        for subnode in node.get_str_list('copy-refs'):
+            subnode.validate_keys(['src', 'dest'])
             self._copy_refs.append((self.node_subst_member(subnode, 'src'),
                                     self.node_subst_member(subnode, 'dest')))
 
