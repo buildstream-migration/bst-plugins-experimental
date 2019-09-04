@@ -27,89 +27,28 @@ import re
 import json
 from collections import OrderedDict
 from collections.abc import Mapping
-from buildstream import Element, ElementError, Scope
+from buildstream import Element, Scope, Node
 
-"""
-Collect Manifest Element
-
-A buildstream plugin used to produce a manifest file
-containing a list of elements for a given dependency.
-
-The manifest contains useful information such as:
-    - CPE data, such as CVE patches
-    - Package name
-    - Version
-    - Sources
-     - Source locations
-     - SHAs
-     - Patch files
-
-The manifest file is exported as a json file to the path provided
-under the "path" variable defined in the .bst file.
-"""
-
-def get_version(sources):
-    """
-    This function attempts to extract the source version
-    from a dependency. This data can generally be found
-    in the url for tar balls, or the ref for git repos.
-
-    :sources A list of BuildStream Sources
-    """
-    for source in sources:
-        if source.get_kind() in ['tar', 'zip']:
-            url = source.url
-            filename = url.rpartition('/')[2]
-            match = re.search(r'(\d+\.\d+(?:\.\d+)?)', filename)
-            if match:
-                return match.groups()[-1]
-        elif source.get_kind() in ['git', 'git_tag']:
-            ref = source.mirror.ref
-            match = re.search(r'(\d+\.\d+(?:\.\d+)?)', ref)
-            if match:
-                return match.groups()[-1]
-
-def get_source_locations(sources):
-    """
-    Returns a list of source URLs and refs, currently for
-    git, tar and patch sources.
-
-    :sources A list of BuildStream Sources
-    """
-    source_locations = []
-    for source in sources:
-        if source.get_kind() in ['git']:
-            url = source.translate_url(source.mirror.url, alias_override=None,
-                                                                primary=source.mirror.primary)
-            source_locations.append({"type": source.get_kind(), "url" : url, "commit" : source.mirror.ref})
-        if source.get_kind() in ['git_tag']:
-            url = source.translate_url(source.mirror.url, alias_override=None,
-                                                                primary=source.mirror.primary)
-            source_locations.append({"type": "git", "x-bst-kind": source.get_kind(), "url" : url, "commit" : source.mirror.ref})
-        if source.get_kind() in ['patch']:
-            patch = source.path.rpartition('/')[2]
-            source_locations.append({"type": source.get_kind(), "path": patch})
-        if source.get_kind() in ['tar', 'zip']:
-            source_locations.append({"type": "archive", "url": source.url, "sha256": source.ref})
-
-    return source_locations
-
-def cleanup_provenance(data):
-    """
-    Remove buildstream provenance data from the output data
-    """
-    if isinstance(data, dict):
-        ret = OrderedDict()
-        for k, v in data.items():
-            if k != '__bst_provenance_info':
-                ret[k] = cleanup_provenance(v)
-        return ret
-    elif isinstance(data, list):
-        return [cleanup_provenance(v) for v in data]
-    else:
-        return data
 
 class CollectManifestElement(Element):
+    """
+    Collect Manifest Element
+
+    A buildstream plugin used to produce a manifest file
+    containing a list of elements for a given dependency.
+
+    The manifest contains useful information such as:
+        - CPE data, such as CVE patches
+        - Package name
+        - Version
+        - Sources
+        - Source locations
+        - SHAs
+        - Patch files
+
+    The manifest file is exported as a json file to the path provided
+    under the "path" variable defined in the .bst file.
+    """
 
     BST_FORMAT_VERSION = 1
 
@@ -142,7 +81,7 @@ class CollectManifestElement(Element):
         if cpe is None:
             cpe = {}
         else:
-            cpe = self.dict_from_node(cpe)
+            cpe = cpe.as_dict()
 
         if 'product' not in cpe:
             cpe['product'] = os.path.basename(os.path.splitext(dep.name)[0])
@@ -188,7 +127,7 @@ class CollectManifestElement(Element):
                 import_manifest = dep.get_public_data('cpe-manifest')
 
                 if import_manifest:
-                    import_manifest = self.dict_from_node(import_manifest)
+                    import_manifest = import_manifest.as_dict()
                     manifest['modules'].extend(import_manifest['modules'])
                 else:
                     cpe = self.extract_cpe(dep)
@@ -215,37 +154,16 @@ class CollectManifestElement(Element):
             with open(path, 'w') as o:
                 json.dump(cleanup_provenance(manifest), o, indent=2)
 
-        manifest_node = self.node_from_dict(manifest)
+        manifest_node = Node.from_dict(manifest)
         self.set_public_data('cpe-manifest', manifest_node)
         return os.path.sep
-
-    def get_unique_key(self):
-        return self.BST_FORMAT_VERSION
-
-    #
-    # Some helper APIs to go back and forth from nodes and dicts
-    #
-    def node_from_dict(self, dictionary):
-        node = self.new_empty_node()
-
-        for key, value in dictionary.items():
-            if isinstance(value, Mapping):
-                sub_dict = self.node_from_dict(value)
-                self.node_set_member(node, key, sub_dict)
-            elif isinstance(value, list):
-                sub_list = self.nodes_from_list(value)
-                self.node_set_member(node, key, sub_list)
-            else:
-                self.node_set_member(node, key, value)
-
-        return node
 
     def nodes_from_list(self, list_value):
         ret_list = []
 
         for item in list_value:
             if isinstance(item, Mapping):
-                sub_node = self.node_from_dict(item)
+                sub_node = Node.from_dict(item)
                 ret_list.append(sub_node)
             elif isinstance(item, list):
                 sub_list = self.nodes_from_list(item)
@@ -255,27 +173,12 @@ class CollectManifestElement(Element):
 
         return ret_list
 
-    def dict_from_node(self, node):
-        dictionary = {}
-
-        for key, value in self.node_items(node):
-            if isinstance(value, Mapping):
-                sub_dict = self.dict_from_node(value)
-                dictionary[key] = sub_dict
-            elif isinstance(value, list):
-                sub_list = self.dicts_from_list(value)
-                dictionary[key] = sub_list
-            else:
-                dictionary[key] = value
-
-        return dictionary
-
     def dicts_from_list(self, list_value):
         ret_list = []
 
         for item in list_value:
             if isinstance(item, Mapping):
-                sub_dict = self.dict_from_node(item)
+                sub_dict = item.as_dict()
                 ret_list.append(sub_dict)
             elif isinstance(item, list):
                 sub_list = self.dicts_from_list(item)
@@ -284,6 +187,71 @@ class CollectManifestElement(Element):
                 ret_list.append(item)
 
         return ret_list
+
+
+def get_version(sources):
+    """
+    This function attempts to extract the source version
+    from a dependency. This data can generally be found
+    in the url for tar balls, or the ref for git repos.
+
+    :sources A list of BuildStream Sources
+    """
+    for source in sources:
+        if source.get_kind() in ['tar', 'zip']:
+            url = source.url
+            filename = url.rpartition('/')[2]
+            match = re.search(r'(\d+\.\d+(?:\.\d+)?)', filename)
+            if match:
+                return match.groups()[-1]
+        elif source.get_kind() in ['git', 'git_tag']:
+            ref = source.mirror.ref
+            match = re.search(r'(\d+\.\d+(?:\.\d+)?)', ref)
+            if match:
+                return match.groups()[-1]
+    return None
+
+
+def get_source_locations(sources):
+    """
+    Returns a list of source URLs and refs, currently for
+    git, tar and patch sources.
+
+    :sources A list of BuildStream Sources
+    """
+    source_locations = []
+    for source in sources:
+        if source.get_kind() in ['git']:
+            url = source.translate_url(source.mirror.url, alias_override=None, primary=source.mirror.primary)
+            source_locations.append({"type": source.get_kind(), "url": url, "commit": source.mirror.ref})
+        if source.get_kind() in ['git_tag']:
+            url = source.translate_url(source.mirror.url, alias_override=None, primary=source.mirror.primary)
+            source_locations.append({"type": "git", "x-bst-kind": source.get_kind(), "url": url,
+                                     "commit": source.mirror.ref})
+        if source.get_kind() in ['patch']:
+            patch = source.path.rpartition('/')[2]
+            source_locations.append({"type": source.get_kind(), "path": patch})
+        if source.get_kind() in ['tar', 'zip']:
+            source_locations.append({"type": "archive", "url": source.url, "sha256": source.ref})
+
+    return source_locations
+
+
+def cleanup_provenance(data):
+    """
+    Remove buildstream provenance data from the output data
+    """
+    if isinstance(data, dict):
+        ret = OrderedDict()
+        for k, v in data.items():
+            if k != '__bst_provenance_info':
+                ret[k] = cleanup_provenance(v)
+        return ret
+    elif isinstance(data, list):
+        return [cleanup_provenance(v) for v in data]
+    else:
+        return data
+
 
 def setup():
     return CollectManifestElement
