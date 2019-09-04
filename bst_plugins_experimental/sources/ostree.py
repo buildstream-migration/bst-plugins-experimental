@@ -81,8 +81,7 @@ class OSTreeSource(Source):
         # (optional) Not all repos are signed. But if they are, get the gpg key
         self.gpg_key_path = None
         if node.get_str('gpg-key', None):
-            self.gpg_key = self.node_get_project_path(node, 'gpg-key',
-                                                      check_is_file=True)
+            self.gpg_key = self.node_get_project_path(node, check_is_file=True)
             self.gpg_key_path = os.path.join(self.get_project_directory(), self.gpg_key)
 
         # Our OSTree repo handle
