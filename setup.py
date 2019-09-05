@@ -83,5 +83,9 @@ setup(name='bst-plugins-experimental',
           ]
       },
       tests_require=test_requires + plugin_requires,
+      extras_require={
+          'ostree': ["PyGObject"],
+          'docker': ["requests"]
+      },
       zip_safe=False)
 # eof setup()
