@@ -147,12 +147,12 @@ class DpkgElement(BuildElement):
     def assemble(self, sandbox):
         # Replace <PACKAGES> if no variable was set
         packages = self._get_packages(sandbox)
-        self._BuildElement__commands = dict([
-            (group, [
+        self._BuildElement__commands = {
+            group: [
                 c.replace("<PACKAGES>", " ".join(packages)) for c in commands
-            ])
+            ]
             for group, commands in self._BuildElement__commands.items()
-        ])
+        }
 
         collectdir = super().assemble(sandbox)
 
@@ -172,7 +172,7 @@ class DpkgElement(BuildElement):
                                             'debian', package)
 
             # Exclude DEBIAN files because they're pulled in as public metadata
-            contents = ['/'+x for x in utils.list_relative_paths(package_path)
+            contents = ['/' + x for x in utils.list_relative_paths(package_path)
                         if x != "." and not x.startswith("DEBIAN")]
 
             # Setup the new split rules

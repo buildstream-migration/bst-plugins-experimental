@@ -12,3 +12,7 @@
 doc/source/elements/
 doc/source/sources/
 doc/build/
+
+# Testing folders
+.tox
+integration-cache

@@ -1,3 +1,6 @@
+# Pylint doesn't play well with fixtures and dependency injection from pytest
+# pylint: disable=redefined-outer-name
+
 import subprocess
 import pytest
 
@@ -11,7 +14,7 @@ except ProgramNotFoundError:
     HAVE_OSTREE_CLI = False
 
 try:
-    from bst_plugins_experimental.sources import _ostree
+    from bst_plugins_experimental.sources import _ostree  # pylint: disable=unused-import
     HAVE_OSTREE = True
 except (ImportError, ValueError):
     HAVE_OSTREE = False

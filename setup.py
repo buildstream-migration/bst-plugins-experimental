@@ -29,9 +29,21 @@ except ImportError:
           "pip (pip3 install setuptools).")
     sys.exit(1)
 
-with open('plugin-requirements.txt', 'r') as plugin_req_file:
-    plugin_requires = [line for line in plugin_req_file.readlines()
-            if not line.strip().startswith('#') and line != '']
+###############################################################################
+#                          Gather Requirements                                #
+###############################################################################
+
+
+def parse_requirements(requirements_file):
+    with open(requirements_file, 'r') as f:
+        reqs = [line.strip() for line in f.readlines()
+                if not line.strip().startswith('#') and line != '']
+    return reqs
+
+
+install_requires = parse_requirements('requirements/install-requirements.txt')
+plugin_requires = parse_requirements('requirements/plugin-requirements.txt')
+test_requires = parse_requirements('requirements/test-requirements.txt')
 
 setup(name='bst-plugins-experimental',
       version="0.12.0",
@@ -39,7 +51,7 @@ setup(name='bst-plugins-experimental',
       license='LGPL',
       packages=find_packages(exclude=['tests', 'tests.*']),
       include_package_data=True,
-      install_requires=['setuptools'],
+      install_requires=install_requires,
       package_data={
           'buildstream': [
               'bst_plugins_experimental/elements/**.yaml'
@@ -70,18 +82,10 @@ setup(name='bst-plugins-experimental',
               'ostree = bst_plugins_experimental.sources.ostree'
           ]
       },
-      setup_requires=['pytest-runner', 'setuptools_scm'],
-      tests_require=['pep8',
-                     # Pin coverage to 4.2 for now, we're experiencing
-                     # random crashes with 4.4.2
-                     'coverage == 4.4.0',
-                     'pytest-datafiles',
-                     'pytest-env',
-                     'pytest-pep8',
-                     'pytest-cov',
-                     # Provide option to run tests in parallel, less reliable
-                     'pytest-xdist',
-                     'pytest >= 3.1.0']
-                     + plugin_requires,
-      zip_safe=False
-)  #eof setup()
+      tests_require=test_requires + plugin_requires,
+      extras_require={
+          'ostree': ["PyGObject"],
+          'docker': ["requests"]
+      },
+      zip_safe=False)
+# eof setup()

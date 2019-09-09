@@ -22,14 +22,16 @@
 # Code based on Jürg's artifact cache and Andrew's ostree plugin
 #
 
+# Pylint is not happy about having imports beneath the `gi.require_version()`
+# pylint: disable=wrong-import-position
 import os
 
 import gi
-from gi.repository.GLib import Variant, VariantDict
-from buildstream import SourceError
-
 gi.require_version('OSTree', '1.0')
 from gi.repository import GLib, Gio, OSTree  # noqa
+from gi.repository.GLib import Variant, VariantDict  # noqa
+
+from buildstream import SourceError  # noqa
 
 
 # For users of this file, they must expect (except) it.
@@ -225,8 +227,7 @@ def fetch(repo, remote="origin", ref=None, progress=None):
     except GLib.GError as e:
         if ref is not None:
             raise OSTreeError("Failed to fetch ref '{}' from '{}': {}".format(ref, remote, e.message)) from e
-        else:
-            raise OSTreeError("Failed to fetch from '{}': {}".format(remote, e.message)) from e
+        raise OSTreeError("Failed to fetch from '{}': {}".format(remote, e.message)) from e
 
 
 # configure_remote():

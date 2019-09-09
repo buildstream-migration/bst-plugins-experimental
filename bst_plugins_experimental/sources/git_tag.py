@@ -248,9 +248,9 @@ class GitTagMirror(SourceFetcher):
             if exit_code == 128:
                 self.source.info("Unable to find tag for specified branch name '{}'".format(tracking))
                 _, output = self.source.check_output(
-                        [self.source.host_git, 'rev-parse', tracking],
-                        fail="Unable to find commit for specified branch name '{}'".format(tracking),
-                        cwd=self.mirror)
+                    [self.source.host_git, 'rev-parse', tracking],
+                    fail="Unable to find commit for specified branch name '{}'".format(tracking),
+                    cwd=self.mirror)
             tracking = output.rstrip('\n')
 
         else:
@@ -264,8 +264,8 @@ class GitTagMirror(SourceFetcher):
         # Find the time of the commit to avoid stepping onto an older tag
         # on a different branch
         _, time = self.source.check_output(
-                [self.source.host_git, 'show', '-s', '--format=%ct', ref],
-                cwd=self.mirror)
+            [self.source.host_git, 'show', '-s', '--format=%ct', ref],
+            cwd=self.mirror)
 
         # Prefix the ref with the closest annotated tag, if available,
         # to make the ref human readable
@@ -380,7 +380,15 @@ class GitTagSource(Source):
     def configure(self, node):
         ref = node.get_str('ref', None)
 
-        config_keys = ['url', 'track', 'track-tags', 'track-extra', 'ref', 'submodules', 'checkout-submodules', 'match', 'exclude']
+        config_keys = ['url',
+                       'track',
+                       'track-tags',
+                       'track-extra',
+                       'ref',
+                       'submodules',
+                       'checkout-submodules',
+                       'match',
+                       'exclude']
         node.validate_keys(config_keys + Source.COMMON_CONFIG_KEYS)
 
         self.original_url = node.get_str('url')
@@ -484,12 +492,17 @@ class GitTagSource(Source):
             for pattern in self.exclude:
                 track_args.append("--exclude={}".format(pattern))
 
-            branches = [self.tracking] +  self.track_extra
+            branches = [self.tracking] + self.track_extra
 
             # Find new candidate refs from self.tracking branches
+            #
+            # As we are constructing a dict from the returned tuples of a
+            # function, so directly constructing with dict() is nicer than dict
+            # comprehension
+            # pylint: disable=consider-using-dict-comprehension
             candidates = dict([self.mirror.latest_commit(
-                       branch, track_tags=self.track_tags, track_args=track_args)
-                       for branch in branches])
+                branch, track_tags=self.track_tags, track_args=track_args)
+                for branch in branches])  # pylint: disable=bad-continuation
 
             # Find latest candidate ref from all branches
             # Update self.mirror.ref, node.ref
