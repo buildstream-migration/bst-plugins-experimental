@@ -77,7 +77,7 @@ lint:
 pages:
   stage: docs
   script:
-  - dnf install -y python2
+  - dnf install -y python2 make
   # Pin sphinx as docs will not build at latest version
   - pip3 install sphinx==1.8.5
   - pip3 install sphinx-click
