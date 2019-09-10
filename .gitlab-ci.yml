@@ -22,21 +22,33 @@ before_script:
 #                    Test stage                     #
 #####################################################
 
-integration_linux:
+.test-template: &test-template
   stage: test
-  variables:
+  variables: &test-variables
     PYTEST_ADDOPTS: "--color=yes"
   script:
-
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
-
+   
     - chown -R buildstream:buildstream .
 
-    # Run the tests from the source distribution.
-    # We run as a simple user to test for permission issues.
+    # Run the tests form the source distribution.
+    # We run as a simple user to test for permission issues
     - su buildstream -c 'tox -- --integration'
 
-integration_unix:
+test-fixed:
+  <<: *test-template
+  variables:
+    <<: *test-variables
+    TOXENV: "py37-bst-fixed"
+
+test-master:
+  <<: *test-template
+  variables:
+    <<: *test-variables
+    TOXENV: "py37-bst-master"
+  allow_failure: true
+
+test-unix:
   stage: test
   variables:
     BST_FORCE_SANDBOX: "chroot"
@@ -52,7 +64,7 @@ integration_unix:
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
 
     # Since the unix platform is required to run as root, no user change required
-    - tox -- --integration
+    - tox -e py37-bst-fixed -- --integration
 
   artifacts:
     paths:
