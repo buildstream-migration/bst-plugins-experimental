@@ -49,6 +49,11 @@ class OSTreeError(SourceError):
 # Returns: an OSTree.Repo
 def ensure(path, compress):
 
+    # Use local-only GIO, don't use the DBus-based GVfs backend.
+    # GVfs/DBus uses background threads, which can cause problems
+    # with BuildStream's fork-based process model.
+    os.environ['GIO_USE_VFS'] = 'local'
+
     # create also succeeds on existing repository
     repo = OSTree.Repo.new(Gio.File.new_for_path(path))
     mode = OSTree.RepoMode.ARCHIVE_Z2 if compress \
