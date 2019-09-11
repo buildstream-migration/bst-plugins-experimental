@@ -201,9 +201,9 @@ import codecs
 import shutil
 import filecmp
 from contextlib import contextmanager, ExitStack
-from collections.abc import Mapping
 
 from buildstream import Element, ElementError, Scope
+
 
 class blob:
     def __init__(self, root, media_type=None, text=False, mode='oci', legacy_config=None):
@@ -235,8 +235,8 @@ class blob:
                 f.seek(0)
                 h = hashlib.sha256()
                 while True:
-                    data = f.read(16*1204)
-                    if len(data) == 0:
+                    data = f.read(16 * 1204)
+                    if not data:
                         break
                     h.update(data)
                 if self.mode == 'oci':
@@ -262,12 +262,14 @@ class blob:
                     else:
                         assert False
                 os.rename(filename, self.filename)
-            except:
+            except Exception:
                 try:
                     os.unlink(filename)
-                except:
+                # FIXME: we probably want to be more precise here
+                except Exception:  # pylint: disable=broad-except
                     pass
                 raise
+
 
 def safe_path(path):
     norm = os.path.normpath(path)
@@ -276,48 +278,46 @@ def safe_path(path):
     else:
         return norm
 
+
 class OciElement(Element):
     def configure(self, node):
-        self.node_validate(node, [
-            'mode', 'gzip',
-            'images', 'annotations'
-        ])
+        node.validate_keys(['mode', 'gzip', 'images', 'annotations'])
 
-        self.mode = self.node_get_member(node, str, 'mode', 'oci')
+        self.mode = node.get_str('mode', 'oci')
+        # FIXME: use a enum with node.get_enum here
         if self.mode not in ['docker', 'oci']:
-            raise ElementError('{}: Mode must be "oci" or "docker"'.format(self.node_provenance(node, 'mode')))
+            raise ElementError(
+                '{}: Mode must be "oci" or "docker"'.format(node.get_scalar('mode').get_provenance()))
 
-        self.gzip = self.node_get_member(node, bool, 'gzip', self.mode == 'oci')
+        self.gzip = node.get_bool('gzip', self.mode == 'oci')
 
         if 'annotations' not in node:
             self.annotations = None
         else:
             self.annotations = {}
-            annotations = self.node_get_member(node, Mapping, 'images')
-            for k, _ in self.node_items(annotations):
+            annotations = node.get_mapping('images')
+            for k in annotations.keys():
                 v = self.node_subst_member(annotations, k)
                 self.annotations[k] = v
 
         self.images = []
-        for image in self.node_get_member(node, list, 'images'):
-            self.node_validate(image, [
+        for image in node.get_sequence('images'):
+            image.validate_keys([
                 'parent', 'layer',
                 'architecture', 'variant',
                 'os', 'os.version', 'os.features',
                 'author', 'comment', 'config',
                 'annotations'
             ] + (['tags'] if self.mode == 'docker' else []))
-            parent = self.node_get_member(image, Mapping, 'parent', None)
+            parent = image.get_mapping('parent', None)
             image_value = {}
             if parent:
-                self.node_validate(parent, [
-                    'element', 'image'
-                ])
+                parent.validate_keys(['element', 'image'])
 
                 parent = {
-                    'element': self.node_get_member(parent, str, 'element'),
-                    'image': self.node_get_member(parent, int, 'image', 0),
-                    }
+                    'element': parent.get_str('element'),
+                    'image': parent.get_int('image', 0),
+                }
 
                 image_value['parent'] = parent
             if 'layer' in image:
@@ -351,7 +351,7 @@ class OciElement(Element):
                     self.node_subst_member(image, 'comment')
 
             if 'config' in image:
-                config = self.node_get_member(image, Mapping, 'config')
+                config = image.get_mapping('config')
 
                 common_config = [
                     'User', 'ExposedPorts',
@@ -367,7 +367,7 @@ class OciElement(Element):
                     'Labels', 'StopSignals'
                 ]
 
-                self.node_validate(config, common_config + (docker_config if self.mode == 'docker' else oci_config))
+                config.validate_keys(common_config + (docker_config if self.mode == 'docker' else oci_config))
 
                 config_value = {}
                 for member in ['User', 'WorkingDir', 'StopSignal']:
@@ -387,14 +387,14 @@ class OciElement(Element):
                             self.node_subst_list(config, member)
 
                 if 'Labels' in config:
-                    labels = self.node_get_member(config, Mapping, 'Labels')
+                    labels = config.get_mapping('Labels')
                     config_value['Labels'] = {}
-                    for k, v in self.node_items(config, labels):
+                    for k, v in labels.items():
                         config_value['Labels'][k] = v
 
                 if 'Healthcheck' in config:
-                    healthcheck = self.node_get_member(config, Mapping, 'Healthcheck')
-                    self.node_validate(healthcheck, [
+                    healthcheck = config.get_mapping('Healthcheck')
+                    healthcheck.validate_keys([
                         'Test', 'Interval',
                         'Timeout', 'Retries'
                     ])
@@ -408,9 +408,8 @@ class OciElement(Element):
                 image_value['config'] = config_value
             if 'annotations' in image:
                 image_value['annotations'] = {}
-                annotations = \
-                    self.node_get_member(image, Mapping, 'annotations')
-                for k, _ in self.node_items(config, annotations):
+                annotations = image.get_mapping('annotations')
+                for k in annotations.keys():
                     v = self.node_subst_member(annotations, k)
                     image_value['annotations'][k] = v
 
@@ -482,7 +481,9 @@ class OciElement(Element):
                     _, diff_id = diff_ids[i].split(':', 1)
                     with open(os.path.join(parent, safe_path(layer)), 'rb') as origblob:
                         if self.gzip:
-                            targz_blob = blob(output, media_type='application/vnd.oci.image.layer.v1.tar+gzip', mode=self.mode)
+                            targz_blob = blob(output,
+                                              media_type='application/vnd.oci.image.layer.v1.tar+gzip',
+                                              mode=self.mode)
                             with targz_blob.create() as gzipfile:
                                 with gzip.GzipFile(filename=diff_id, fileobj=gzipfile,
                                                    mode='wb', mtime=1320937200) as gz:
@@ -496,7 +497,9 @@ class OciElement(Element):
                             }
                             if legacy_parent:
                                 legacy_config['parent'] = legacy_parent
-                            tar_blob = blob(output, media_type='application/vnd.oci.image.layer.v1.tar', mode=self.mode)
+                            tar_blob = blob(output,
+                                            media_type='application/vnd.oci.image.layer.v1.tar',
+                                            mode=self.mode)
                             with tar_blob.create() as newfile:
                                 shutil.copyfileobj(origblob, newfile)
                             layer_descs.append(tar_blob.descriptor)
@@ -521,7 +524,7 @@ class OciElement(Element):
                     algo, h = layer['digest'].split(':', 1)
                     origfile = os.path.join(parent, 'blobs', safe_path(algo), safe_path(h))
                     with ExitStack() as e:
-                        if 'layer' not in image and i+1 == len(image_manifest['layers']):
+                        if 'layer' not in image and i + 1 == len(image_manifest['layers']):
                             # The case were we do not add a layer, the last imported layer has to be fully reconfigured
                             legacy_config = {}
                             legacy_config.update(config)
@@ -534,9 +537,13 @@ class OciElement(Element):
                         if legacy_parent:
                             legacy_config['parent'] = legacy_parent
                         if self.gzip:
-                            output_blob = blob(output, media_type='application/vnd.oci.image.layer.v1.tar+gzip', mode=self.mode)
+                            output_blob = blob(output,
+                                               media_type='application/vnd.oci.image.layer.v1.tar+gzip',
+                                               mode=self.mode)
                         else:
-                            output_blob = blob(output, media_type='application/vnd.oci.image.layer.v1.tar', mode=self.mode, legacy_config=legacy_config)
+                            output_blob = blob(output,
+                                               media_type='application/vnd.oci.image.layer.v1.tar',
+                                               mode=self.mode, legacy_config=legacy_config)
                         outp = e.enter_context(output_blob.create())
                         inp = e.enter_context(open(origfile, 'rb'))
                         if layer['mediaType'].endswith('+gzip'):
@@ -560,9 +567,9 @@ class OciElement(Element):
         if 'parent' in image and 'layer' in image:
             for layer in layer_files:
                 if self.gzip:
-                    mode='r:gz'
+                    mode = 'r:gz'
                 else:
-                    mode='r:'
+                    mode = 'r:'
                 with self.timed_activity('Decompressing layer {}'.format(layer)):
                     with tarfile.open(layer, mode=mode) as t:
                         members = []
@@ -597,27 +604,26 @@ class OciElement(Element):
             legacy_config['parent'] = legacy_parent
 
         if 'layer' in image:
-            deps = []
             for name in image['layer']:
                 dep = self.search(Scope.BUILD, name)
                 dep.stage_dependency_artifacts(sandbox, Scope.RUN, path='layer')
 
             layer = os.path.join(root, 'layer')
             with self.timed_activity('Transforming into layer'):
-                for root, dirs, files in os.walk(parent_checkout):
+                for topdir, dirs, files in os.walk(parent_checkout):
                     for f in itertools.chain(files, dirs):
-                        rel = os.path.relpath(os.path.join(root, f), parent_checkout)
+                        rel = os.path.relpath(os.path.join(topdir, f), parent_checkout)
                         if not os.path.lexists(os.path.join(layer, rel)) \
                            and os.path.lexists(os.path.dirname(os.path.join(layer, rel))):
-                            whfile = os.path.join(layer, os.path.relpath(root, parent_checkout), '.wh.' + f)
+                            whfile = os.path.join(layer, os.path.relpath(topdir, parent_checkout), '.wh.' + f)
                             with open(whfile, 'w') as f:
                                 pass
 
                 if 'parent' in image:
-                    for root, dirs, files in os.walk(layer):
+                    for topdir, dirs, files in os.walk(layer):
                         for f in files:
-                            new = os.path.join(root, f)
-                            rel = os.path.relpath(os.path.join(root, f), layer)
+                            new = os.path.join(topdir, f)
+                            rel = os.path.relpath(os.path.join(topdir, f), layer)
                             old = os.path.join(parent_checkout, rel)
                             if os.path.lexists(old):
                                 old_st = os.lstat(old)
@@ -636,9 +642,9 @@ class OciElement(Element):
             with tempfile.TemporaryFile(mode='w+b') as tfile:
                 with tarfile.open(fileobj=tfile, mode='w:') as t:
                     with self.timed_activity('Building layer tar'):
-                        for root, dirs, files in os.walk(layer):
+                        for topdir, dirs, files in os.walk(layer):
                             for f in itertools.chain(files, dirs):
-                                path = os.path.join(root, f)
+                                path = os.path.join(topdir, f)
                                 arcname = os.path.relpath(path, layer)
                                 st = os.lstat(path)
                                 tinfo = tarfile.TarInfo(name=arcname)
@@ -664,8 +670,8 @@ class OciElement(Element):
                 tar_hash = hashlib.sha256()
                 with self.timed_activity('Hashing layer'):
                     while True:
-                        data = tfile.read(16*1024)
-                        if len(data) == 0:
+                        data = tfile.read(16 * 1024)
+                        if not data:
                             break
                         tar_hash.update(data)
                 tfile.seek(0)
@@ -678,7 +684,9 @@ class OciElement(Element):
                                 shutil.copyfileobj(tfile, gz)
                     layer_descs.append(targz_blob.descriptor)
                 else:
-                    copied_blob = blob(output, media_type='application/vnd.oci.image.layer.v1.tar', mode=self.mode, legacy_config=legacy_config)
+                    copied_blob = blob(output,
+                                       media_type='application/vnd.oci.image.layer.v1.tar',
+                                       mode=self.mode, legacy_config=legacy_config)
                     with copied_blob.create() as copiedfile:
                         shutil.copyfileobj(tfile, copiedfile)
                     layer_descs.append(copied_blob.descriptor)
@@ -708,7 +716,7 @@ class OciElement(Element):
             manifest = {
                 'Config': config_blob.descriptor,
                 'Layers': layer_descs
-                }
+            }
             legacy_repositories = {}
             if 'tags' in image:
                 manifest['RepoTags'] = image['tags']
@@ -783,6 +791,7 @@ class OciElement(Element):
                 json.dump(oci_layout, f)
 
         return 'output'
+
 
 def setup():
     return OciElement
