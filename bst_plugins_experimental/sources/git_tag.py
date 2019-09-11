@@ -170,13 +170,15 @@ class GitTagMirror(SourceFetcher):
         if self.full_clone:
             self.source.status("{}: Full clone requested"
                                .format(self.source))
-            return self.ensure_trackable(alias_override=alias_override)
+            self.ensure_trackable(alias_override=alias_override)
+            return
 
         m = re.match(r'(?P<tag>.*)-0-g(?P<commit>.*)', self.ref)
         if not m:
             self.source.status("{}: Not fetching exact tag. Getting full clone."
                                .format(self.source))
-            return self.ensure_trackable(alias_override=alias_override)
+            self.ensure_trackable(alias_override=alias_override)
+            return
 
         tag = m.group('tag')
         commit = m.group('commit')
@@ -219,8 +221,8 @@ class GitTagMirror(SourceFetcher):
             exit_code = self.source.call([self.source.host_git, 'fetch', '--depth=1', 'origin', tag],
                                          cwd=tmpdir)
             if exit_code != 0:
-                self.source.status("{}: Failed to shallow clone. Probably dumb HTTP server. Trying full clone."
-                                   .format(self.source, self.ref, url))
+                self.source.status("{}: Failed to shallow clone from {}. Probably dumb HTTP server. Trying full clone."
+                                   .format(self.source, url))
 
                 self.ensure_trackable(alias_override=alias_override)
                 return
