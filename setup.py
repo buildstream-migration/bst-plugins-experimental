@@ -47,6 +47,26 @@ plugin_requires = parse_requirements('requirements/plugin-requirements.txt')
 test_requires = parse_requirements('requirements/test-requirements.txt')
 
 
+def parse_extra_requires(requirements_file):
+    reqs = {}
+    with open(requirements_file, 'r') as f:
+        content = [line.strip() for line in f.readlines()
+                   if not line.strip().startswith('# ') and line.strip() != '']
+
+    for line in content:
+        line = line.strip()
+        if line.startswith('##'):
+            current_extra = line.split()[1]
+            reqs[current_extra] = []
+        else:
+            if current_extra:
+                reqs[current_extra].append(line)
+    return reqs
+
+
+extra_requires = parse_extra_requires('requirements/plugin-requirements.txt')
+
+
 #####################################################
 #                   Pytest command                  #
 #####################################################
@@ -87,7 +107,7 @@ class PyTest(TestCommand):
 
 setup(name='bst-plugins-experimental',
       version="0.12.0",
-      cmdclass={"pytest":PyTest},
+      cmdclass={"pytest": PyTest},
       description="A collection of experimental BuildStream plugins.",
       license='LGPL',
       packages=find_packages(exclude=['tests', 'tests.*']),
@@ -124,9 +144,6 @@ setup(name='bst-plugins-experimental',
           ]
       },
       tests_require=test_requires + plugin_requires,
-      extras_require={
-          'ostree': ["PyGObject"],
-          'docker': ["requests"]
-      },
+      extras_require=extra_requires,
       zip_safe=False)
 # eof setup()
