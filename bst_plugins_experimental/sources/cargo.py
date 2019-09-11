@@ -53,16 +53,17 @@ obtain the crates automatically into %{vendordir}.
    cargo-lock: Cargo.lock
 """
 
-import json
-import tarfile
-import pytoml
-import urllib.request
-import urllib.error
 import contextlib
+import json
+import os.path
 import shutil
+import tarfile
+import urllib.error
+import urllib.request
+
 from buildstream import Source, SourceFetcher, SourceError
 from buildstream import utils, Consistency
-import os.path
+import pytoml
 
 
 # This automatically goes into .cargo/config
@@ -88,6 +89,8 @@ _default_vendor_config_template = \
 class Crate(SourceFetcher):
 
     def __init__(self, cargo, name, version, sha=None):
+        super().__init__()
+
         self.cargo = cargo
         self.name = name
         self.version = str(version)
@@ -113,7 +116,7 @@ class Crate(SourceFetcher):
             sha256 = self._download(crate_url)
             if self.sha is not None and sha256 != self.sha:
                 raise SourceError("File downloaded from {} has sha256sum '{}', not '{}'!"
-                                  .format(self.url, sha256, self.sha))
+                                  .format(crate_url, sha256, self.sha))
 
     ########################################################
     #        Helper APIs for the Cargo Source to use       #
@@ -134,7 +137,7 @@ class Crate(SourceFetcher):
                 tar.extractall(path=directory)
                 members = tar.getmembers()
 
-            if len(members) != 0:
+            if members:
                 dirname = members[0].name.split('/')[0]
                 package_dir = os.path.join(directory, dirname)
                 checksum_file = os.path.join(package_dir,
@@ -319,12 +322,17 @@ class CargoSource(Source):
 
         # The url before any aliasing
         #
-        self.url = self.node_get_member(node, str, 'url', 'https://static.crates.io/crates')
-        self.ref = self.node_get_member(node, list, 'ref', None)
-        self.cargo_lock = self.node_get_member(node, str, 'cargo-lock', 'Cargo.lock')
-        self.vendor_dir = self.node_get_member(node, str, 'vendor-dir', 'crates')
+        self.url = node.get_str('url', 'https://static.crates.io/crates')
+        # XXX: should we use get_sequence here?
+        self.ref = node.get_sequence('ref', None)
+        if self.ref is not None:
+            # FIXME: this is private BuildStream API, we should push to make
+            #        it public or provide an alternative
+            self.ref = self.ref._strip_node_info()
+        self.cargo_lock = node.get_str('cargo-lock', 'Cargo.lock')
+        self.vendor_dir = node.get_str('vendor-dir', 'crates')
 
-        self.node_validate(node, Source.COMMON_CONFIG_KEYS + ['url', 'ref', 'cargo-lock', 'vendor-dir'])
+        node.validate_keys(Source.COMMON_CONFIG_KEYS + ['url', 'ref', 'cargo-lock', 'vendor-dir'])
 
         self.crates = self._parse_crates(self.ref)
 
@@ -344,7 +352,8 @@ class CargoSource(Source):
         return consistency
 
     def load_ref(self, node):
-        self.ref = self.node_get_member(node, list, 'ref', None)
+        # XXX: this should be get_sequence, and parse_crate should expect nodes
+        self.ref = node.get_sequence('ref', None)
         self.crates = self._parse_crates(self.ref)
 
     def get_ref(self):
