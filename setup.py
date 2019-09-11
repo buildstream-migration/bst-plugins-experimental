@@ -23,6 +23,7 @@ import sys
 
 try:
     from setuptools import setup, find_packages
+    from setuptools.command.test import test as TestCommand
 except ImportError:
     print("BuildStream requires setuptools in order to locate plugins. Install "
           "it using your package manager (usually python3-setuptools) or via "
@@ -45,8 +46,48 @@ install_requires = parse_requirements('requirements/install-requirements.txt')
 plugin_requires = parse_requirements('requirements/plugin-requirements.txt')
 test_requires = parse_requirements('requirements/test-requirements.txt')
 
+
+#####################################################
+#                   Pytest command                  #
+#####################################################
+class PyTest(TestCommand):
+    """Defines a pytest command class to run tests from setup.py"""
+
+    user_options = TestCommand.user_options + [
+        ("addopts=", None, "Arguments to pass to pytest"),
+        ('index-url=', None, "Specify an index url from which to retrieve "
+                             "dependencies"),
+    ]
+
+    # pylint: disable=attribute-defined-outside-init
+    def initialize_options(self):
+        super().initialize_options()
+        self.addopts = ""
+        self.index_url = None
+
+    def run(self):
+        if self.index_url is not None:
+            if self.distribution.command_options.get("easy_install") is None:
+                self.distribution.command_options["easy_install"] = {}
+
+            self.distribution.command_options["easy_install"]["index_url"] = (
+                "cmdline", self.index_url,
+            )
+        super().run()
+
+    def run_tests(self):
+        import shlex
+        import pytest
+
+        errno = pytest.main(shlex.split(self.addopts))
+
+        if errno:
+            raise SystemExit(errno)
+
+
 setup(name='bst-plugins-experimental',
       version="0.12.0",
+      cmdclass={"pytest":PyTest},
       description="A collection of experimental BuildStream plugins.",
       license='LGPL',
       packages=find_packages(exclude=['tests', 'tests.*']),
