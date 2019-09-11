@@ -1,10 +1,15 @@
-# The dependencies listed here are necessary for specifc plugins, but
+# The dependencies listed here are necessary for specific plugins, but
 # aren't required for bst-plugins-experimental to be installed. 
 
-# OSTree source
-PyGObject
+# In order to parse the extra data (hackily), comments must be started 
+# with a `# ` (note the space), where as a header for a plugin must be
+# started with a `## `. This could probably be improved.
 
-# Docker source
+## ostree
+PyGObject
+pycairo
+
+## docker
 requests
 
 # Cargo source
