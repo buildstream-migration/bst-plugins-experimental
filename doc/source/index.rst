@@ -40,7 +40,6 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    :caption: Contained Sources
 
    sources/cargo
-   sources/docker
    sources/ostree
    sources/quilt
    sources/git_tag
