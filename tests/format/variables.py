@@ -33,6 +33,7 @@ def print_warning(msg):
     ('distutils.bst', 'python-install',
      "python3 ./setup.py install --prefix \"/usr\" \\\n" +
      "--root \"/buildstream-install\""),
+    ('dpkg_build.bst', 'build', "debian/rules build"),
     ('makemaker.bst', 'configure', "perl Makefile.PL PREFIX=/buildstream-install/usr"),
     ('modulebuild.bst', 'configure', "perl Build.PL --prefix \"/buildstream-install/usr\""),
     ('qmake.bst', 'make-install', "make -j1 INSTALL_ROOT=\"/buildstream-install\" install"),
@@ -58,6 +59,7 @@ def test_defaults(cli, datafiles, target, varname, expected):
     ('distutils.bst', 'python-install',
      "python3 ./setup.py install --prefix \"/opt\" \\\n" +
      "--root \"/custom/install/root\""),
+    ('dpkg_build.bst', 'build', 'src/debian/rules build'),
     ('makemaker.bst', 'configure', "perl Makefile.PL PREFIX=/custom/install/root/opt"),
     ('modulebuild.bst', 'configure', "perl Build.PL --prefix \"/custom/install/root/opt\""),
     ('qmake.bst', 'make-install', "make -j1 INSTALL_ROOT=\"/custom/install/root\" install"),
