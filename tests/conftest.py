@@ -1,5 +1,22 @@
+import pytest
+
 from buildstream.testing import sourcetests_collection_hook, register_repo_kind
-from tests.ostreerepo import OSTree
+from tests.sources.ostreerepo import OSTree
+
+
+#################################################
+#            Implement pytest option            #
+#################################################
+def pytest_addoption(parser):
+    parser.addoption('--integration', action='store_true', default=False,
+                     help='Run integration tests')
+
+
+def pytest_runtest_setup(item):
+    # Without --integration: skip tests not marked with 'integration'
+    if not item.config.getvalue('integration'):
+        if item.get_closest_marker('integration'):
+            pytest.skip('skipping integration test')
 
 
 # TODO: can we get this from somewhere? pkg_resources?

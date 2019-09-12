@@ -34,7 +34,7 @@ integration_linux:
 
     # Run the tests from the source distribution.
     # We run as a simple user to test for permission issues.
-    - su buildstream -c 'tox'
+    - su buildstream -c 'tox -- --integration'
 
 integration_unix:
   stage: test
@@ -52,7 +52,7 @@ integration_unix:
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
 
     # Since the unix platform is required to run as root, no user change required
-    - tox
+    - tox -- --integration
 
   artifacts:
     paths:
