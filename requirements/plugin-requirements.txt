@@ -6,3 +6,6 @@ PyGObject
 
 # Docker source
 requests
+
+# Cargo source
+pytoml

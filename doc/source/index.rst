@@ -33,11 +33,13 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    elements/modulebuild
    elements/qmake
    elements/distutils
+   elements/oci
 
 .. toctree::
    :maxdepth: 1
    :caption: Contained Sources
 
+   sources/cargo
    sources/docker
    sources/ostree
    sources/quilt
