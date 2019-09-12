@@ -1,8 +1,7 @@
 import pytest
 
 from buildstream.testing import sourcetests_collection_hook, register_repo_kind
-from tests.sources.ostreerepo import OSTree
-from tests.sources.gitrepo import Git
+from tests.sources.repo import Git, OSTree
 
 
 #################################################
