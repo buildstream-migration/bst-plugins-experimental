@@ -2,6 +2,7 @@ import pytest
 
 from buildstream.testing import sourcetests_collection_hook, register_repo_kind
 from tests.sources.ostreerepo import OSTree
+from tests.sources.gitrepo import Git
 
 
 #################################################
@@ -26,6 +27,7 @@ package_name = "bst_plugins_experimental"
 # Register a repo type to run the ostree plugin through buildstream's
 # generic source plugin tests
 register_repo_kind('ostree', OSTree, package_name)
+register_repo_kind('git_tag', Git, package_name)
 
 
 # This hook enables pytest to collect the templated source tests from
