@@ -53,6 +53,7 @@ install_requires = parse_requirements(os.path.join(REQUIREMENTS_DIR, 'install-re
 plugin_requires = parse_requirements(os.path.join(REQUIREMENTS_DIR, 'plugin-requirements.txt'))
 test_requires = parse_requirements(os.path.join(REQUIREMENTS_DIR, 'test-requirements.txt'))
 
+
 def parse_extra_requires(requirements_file):
     reqs = {}
     with open(requirements_file, 'r') as f:
