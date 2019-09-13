@@ -34,7 +34,7 @@ except ImportError:
 #                         Find out where we are                               #
 ###############################################################################
 
-ROOT_DIR = os.path.realpath(__file__)
+ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 REQUIREMENTS_DIR = os.path.join(ROOT_DIR, 'requirements')
 
 ###############################################################################
