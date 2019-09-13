@@ -19,6 +19,7 @@
 #        Tristan Maat <tristan.maat@codethink.co.uk>
 #        James Ennis  <james.ennis@codethink.co.uk>
 
+import os
 import sys
 
 try:
@@ -28,6 +29,13 @@ except ImportError:
           "it using your package manager (usually python3-setuptools) or via "
           "pip (pip3 install setuptools).")
     sys.exit(1)
+
+###############################################################################
+#                         Find out where we are                               #
+###############################################################################
+
+ROOT_DIR = os.path.realpath(__file__)
+REQUIREMENTS_DIR = os.path.join(ROOT_DIR, 'requirements')
 
 ###############################################################################
 #                          Gather Requirements                                #
@@ -41,9 +49,9 @@ def parse_requirements(requirements_file):
     return reqs
 
 
-install_requires = parse_requirements('requirements/install-requirements.txt')
-plugin_requires = parse_requirements('requirements/plugin-requirements.txt')
-test_requires = parse_requirements('requirements/test-requirements.txt')
+install_requires = parse_requirements(os.path.join(REQUIREMENTS_DIR, 'install-requirements.txt'))
+plugin_requires = parse_requirements(os.path.join(REQUIREMENTS_DIR, 'plugin-requirements.txt'))
+test_requires = parse_requirements(os.path.join(REQUIREMENTS_DIR, 'test-requirements.txt'))
 
 def parse_extra_requires(requirements_file):
     reqs = {}
@@ -62,7 +70,7 @@ def parse_extra_requires(requirements_file):
     return reqs
 
 
-extra_requires = parse_extra_requires('requirements/plugin-requirements.txt')
+extra_requires = parse_extra_requires(os.path.join(REQUIREMENTS_DIR, 'plugin-requirements.txt'))
 
 
 setup(name='bst-plugins-experimental',
