@@ -399,7 +399,7 @@ class OciElement(Element):
                         config_value[member] = \
                             int(self.node_subst_member(config, member))
 
-                for member in ['ExposedPort', 'Volumes',
+                for member in ['ExposedPorts', 'Volumes',
                                'Env', 'Entrypoint', 'Cmd']:
                     if member in config:
                         config_value[member] = \
