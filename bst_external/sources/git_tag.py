@@ -129,6 +129,7 @@ from configparser import RawConfigParser
 
 from buildstream import Source, SourceError, Consistency, SourceFetcher
 from buildstream import utils
+from urllib.parse import urljoin
 
 GIT_MODULES = '.gitmodules'
 
@@ -685,6 +686,8 @@ class GitTagSource(Source):
 
             ref = self.mirror.submodule_ref(path)
             if ref is not None:
+                if url.startswith("./") or url.startswith("../"):
+                    url = urljoin(self.mirror.url, url)
                 mirror = GitTagMirror(self, path, url, ref)
                 submodules.append(mirror)
 
