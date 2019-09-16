@@ -74,7 +74,7 @@ def parse_extra_requires(requirements_file):
 extra_requires = parse_extra_requires(os.path.join(REQUIREMENTS_DIR, 'plugin-requirements.txt'))
 
 
-setup(name='bst-plugins-experimental',
+setup(name='bst_plugins_experimental',
       version="0.12.0",
       description="A collection of experimental BuildStream plugins.",
       license='LGPL',
