@@ -49,12 +49,13 @@ setup(name='bst-plugins-experimental',
       version="0.12.0",
       description="A collection of experimental BuildStream plugins.",
       license='LGPL',
-      packages=find_packages(exclude=['tests', 'tests.*']),
+      package_dir={'': 'src'},
+      packages=find_packages(where='src'),
       include_package_data=True,
       install_requires=install_requires,
       package_data={
           'buildstream': [
-              'bst_plugins_experimental/elements/**.yaml'
+              'src/bst_plugins_experimental/elements/**.yaml'
           ]
       },
       entry_points={
