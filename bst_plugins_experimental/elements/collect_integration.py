@@ -92,13 +92,11 @@ class ExtractIntegrationElement(Element):
                     continue
                 bstdata = dependency.get_public_data('bst')
                 if bstdata is not None:
-                    commands = dependency.node_get_member(bstdata, list, 'integration-commands', [])
+                    commands = dependency.node_subst_list(bstdata, 'integration-commands')
                     if commands:
                         f.write('# integration commands from {}\n'.format(dependency.name))
-                    for i in range(len(commands)):
-                        cmd = dependency.node_subst_list_element(bstdata, 'integration-commands', [i])
-
-                        f.write('{}\n\n'.format(cmd))
+                        for cmd in commands:
+                            f.write('{}\n\n'.format(cmd))
 
         return os.path.sep
 
