@@ -4,8 +4,5 @@
 # OSTree source
 PyGObject
 
-# Docker source
-requests
-
 # Cargo source
 pytoml
