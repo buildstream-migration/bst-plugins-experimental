@@ -53,11 +53,6 @@ setup(name='bst-plugins-experimental',
       packages=find_packages(where='src'),
       include_package_data=True,
       install_requires=install_requires,
-      package_data={
-          'buildstream': [
-              'src/bst_plugins_experimental/elements/**.yaml'
-          ]
-      },
       entry_points={
           'buildstream.plugins': [
               'cmake = bst_plugins_experimental.elements.cmake',
