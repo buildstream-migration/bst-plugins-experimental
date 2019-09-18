@@ -20,10 +20,10 @@ DATA_DIR = os.path.join(
 
 @pytest.mark.datafiles(DATA_DIR)
 @pytest.mark.skipif(not HAVE_SANDBOX, reason='Only available with a functioning sandbox')
-def test_cmake_build(cli, datafiles):
+def test_meson_build(cli, datafiles):
     project = str(datafiles)
     checkout = os.path.join(cli.directory, 'checkout')
-    element_name = 'cmake/cmakehello.bst'
+    element_name = 'meson/mesonhello.bst'
 
     result = cli.run(project=project, args=['build', element_name])
     assert result.exit_code == 0
@@ -36,10 +36,10 @@ def test_cmake_build(cli, datafiles):
 
 @pytest.mark.datafiles(DATA_DIR)
 @pytest.mark.skipif(not HAVE_SANDBOX, reason='Only available with a functioning sandbox')
-def test_cmake_confroot_build(cli, datafiles):
+def test_meson_confroot_build(cli, datafiles):
     project = str(datafiles)
     checkout = os.path.join(cli.directory, 'checkout')
-    element_name = 'cmake/cmakeconfroothello.bst'
+    element_name = 'meson/mesonconfroothello.bst'
 
     result = cli.run(project=project, args=['build', element_name])
     assert result.exit_code == 0
@@ -52,9 +52,9 @@ def test_cmake_confroot_build(cli, datafiles):
 
 @pytest.mark.datafiles(DATA_DIR)
 @pytest.mark.skipif(not HAVE_SANDBOX, reason='Only available with a functioning sandbox')
-def test_cmake_run(cli, datafiles):
+def test_meson_run(cli, datafiles):
     project = str(datafiles)
-    element_name = 'cmake/cmakehello.bst'
+    element_name = 'meson/mesonhello.bst'
 
     result = cli.run(project=project, args=['build', element_name])
     assert result.exit_code == 0
@@ -62,6 +62,4 @@ def test_cmake_run(cli, datafiles):
     result = cli.run(project=project, args=['shell', element_name, '/usr/bin/hello'])
     assert result.exit_code == 0
 
-    assert result.output == """Hello World!
-This is hello.
-"""
+    assert result.output == """Hello, World!\n"""
