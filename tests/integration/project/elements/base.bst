@@ -7,3 +7,4 @@ depends:
   - base/alpine-image.bst
   - base/meson.bst
   - base/ninja.bst
+  - base/modulebuild.bst
