@@ -37,10 +37,17 @@ The tarball_element default configuration:
      :language: yaml
 """
 
-import tarfile
+import hashlib
 import os
+import tarfile
 
-from buildstream import Element, Scope, ElementError
+from buildstream import Element, Scope, ElementError, SequenceNode, ScalarNode
+
+# Block size for reading tarball when hashing
+BLOCKSIZE = 65536
+
+# Permitted checksums
+CHECKSUMS = set(['sha1', 'sha256', 'sha512', 'md5'])
 
 
 class TarElement(Element):
@@ -57,9 +64,18 @@ class TarElement(Element):
     BST_FORBID_SOURCES = True
 
     def configure(self, node):
-        node.validate_keys(['filename', 'compression', 'include', 'exclude', 'include-orphans'])
+        node.validate_keys([
+            'filename', 'compression', 'include', 'exclude', 'include-orphans', 'checksums'
+        ])
         self.filename = self.node_subst_member(node, 'filename')
         self.compression = node.get_str('compression')
+
+        self.checksums = None
+        checksums = node.get_node('checksums', allowed_types=[SequenceNode, ScalarNode], allow_none=True)
+        if isinstance(checksums, SequenceNode):
+            self.checksums = checksums.as_str_list()
+        if isinstance(checksums, ScalarNode):
+            self.checksums = [checksums.as_str()]
 
         self.include = node.get_str_list('include', [])
         self.exclude = node.get_str_list('exclude', [])
@@ -69,7 +85,11 @@ class TarElement(Element):
             raise ElementError("{}: Invalid compression option {}".format(self, self.compression))
 
     def preflight(self):
-        pass
+        if self.checksums:
+            checksums_set = set(self.checksums)
+            if not checksums_set.issubset(CHECKSUMS):
+                unsupported = list(checksums_set - CHECKSUMS)
+                raise ElementError("{}: Unsupported checksum(s) {}".format(self, ','.join(unsupported)))
 
     def get_unique_key(self):
         key = {}
@@ -78,6 +98,7 @@ class TarElement(Element):
         key['include'] = self.include
         key['exclude'] = self.exclude
         key['include-orphans'] = self.include_orphans
+        key['checksums'] = self.checksums
         return key
 
     def configure_sandbox(self, sandbox):
@@ -108,6 +129,31 @@ class TarElement(Element):
             with tarfile.TarFile.open(name=tarname, mode=mode) as tar:
                 for f in os.listdir(inputdir):
                     tar.add(os.path.join(inputdir, f), arcname=f)
+
+            if self.checksums:
+                hash_map = {'sha1': hashlib.sha1, 'sha256': hashlib.sha256,
+                            'sha512': hashlib.sha512, 'md5': hashlib.md5}
+
+                # We use the path of the final checksum as a unique ID for the
+                # hashes themselves to simplify data structure at the expense of
+                # readability
+                #
+                hashes = {}
+                for hash_type in self.checksums:
+                    hash_path = os.path.join(outputdir, self.filename + '.{}sum'.format(hash_type))
+                    hashes[hash_path] = hash_map[hash_type]()
+
+                with open(tarname, 'rb') as f:
+                    while True:
+                        buf = f.read(BLOCKSIZE)
+                        if not buf:
+                            break
+                        for path in hashes:
+                            hashes[path].update(buf)
+
+                for path in hashes:
+                    with open(path, 'w') as hash_file:
+                        hash_file.write(hashes[path].hexdigest())
 
         return '/output'
 
