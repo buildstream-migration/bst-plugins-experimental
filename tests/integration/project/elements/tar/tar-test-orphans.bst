@@ -6,3 +6,6 @@ depends:
 
 config:
   filename: hello
+  exclude:
+  - patch 
+  include-orphans: False

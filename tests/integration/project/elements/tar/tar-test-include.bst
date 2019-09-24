@@ -6,3 +6,5 @@ depends:
 
 config:
   filename: hello
+  include:
+  - hello
