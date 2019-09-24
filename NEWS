@@ -5,6 +5,9 @@ Next Version
 o Add ostree source plugin
 o Forked bst-plugins-experimental from bst-external at 3d52546
 o Removed docker source, it's in bst-plugins-container now
+o tar_element.py: Allow handling of split rule domains
+o tar_element.py: Allow generation of checksums of artifacts at
+  build time
 
 ===================
 bst-external 0.12.0

@@ -63,6 +63,10 @@ class TarElement(Element):
     # remote sources
     BST_FORBID_SOURCES = True
 
+    # Bump the BST_FORMAT_VERSION every time an "API" change
+    # is made
+    BST_FORMAT_VERSION = 1
+
     def configure(self, node):
         node.validate_keys([
             'filename', 'compression', 'include', 'exclude', 'include-orphans', 'checksums'
