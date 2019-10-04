@@ -27,8 +27,8 @@ class Git(Repo):
         if 'env' not in kwargs:
             kwargs['env'] = dict(self.env, PWD=self.repo)
         kwargs.setdefault('cwd', self.repo)
-        kwargs.setdefault('check', True)
-        return subprocess.run(argv, **kwargs)
+        check = kwargs.pop('check', True)
+        return subprocess.run(argv, check=check, **kwargs)
 
     def create(self, directory):
         self.copy_directory(directory, self.repo)
