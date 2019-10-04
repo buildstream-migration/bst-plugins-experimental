@@ -610,8 +610,8 @@ class OciElement(Element):
                                 self.name, layer))
                         layers = None
                         break
-                    else:
-                        layers.append(layer_dep)
+
+                    layers.append(layer_dep)
                 if layers is not None:
                     with self.timed_activity('Checking out layer from {}'.format(parent_dep.name)):
                         for layer_dep in layers:
