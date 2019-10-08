@@ -81,7 +81,9 @@ class CollectManifestElement(Element):
         if cpe is None:
             cpe = {}
         else:
-            cpe = cpe.as_dict()
+            # FIXME: this uses a private part of the BuildStream API
+            #        We should try to move it public
+            cpe = cpe._strip_node_info()
 
         if 'product' not in cpe:
             cpe['product'] = os.path.basename(os.path.splitext(dep.name)[0])
@@ -154,7 +156,7 @@ class CollectManifestElement(Element):
             with open(path, 'w') as o:
                 json.dump(cleanup_provenance(manifest), o, indent=2)
 
-        manifest_node = Node.from_dict(manifest)
+        manifest_node = Node.from_dict(dict(manifest))
         self.set_public_data('cpe-manifest', manifest_node)
         return os.path.sep
 
