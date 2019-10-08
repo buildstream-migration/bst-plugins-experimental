@@ -1,5 +1,5 @@
-image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:30-master-80990368
-# Testsuite image at 6e2d93c1f9132f207d0abbf822eaf5f76677533c (09/09/2019)
+image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:30-master-86931906
+# Testsuite image at a2ca12e76296f072fb98075bee257b2b6eb2523b (08/10/2019)
 
 cache:
   paths:
