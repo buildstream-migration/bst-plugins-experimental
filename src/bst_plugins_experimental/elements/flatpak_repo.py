@@ -31,6 +31,8 @@ from buildstream import ScriptElement, Scope, ElementError
 
 class FlatpakRepoElement(ScriptElement):
     BST_ARTIFACT_VERSION = 1
+    BST_REQUIRED_VERSION_MAJOR = 1
+    BST_REQUIRED_VERSION_MINOR = 91
 
     def configure(self, node):
         node.validate_keys(['environment', 'copy-refs', 'repo-mode', 'arch', 'branch'])
@@ -40,16 +42,16 @@ class FlatpakRepoElement(ScriptElement):
         self._copy_refs = []
         for subnode in node.get_str_list('copy-refs'):
             subnode.validate_keys(['src', 'dest'])
-            self._copy_refs.append((self.node_subst_member(subnode, 'src'),
-                                    self.node_subst_member(subnode, 'dest')))
+            self._copy_refs.append((self.node_subst_vars(subnode.get_scalar('src')),
+                                    self.node_subst_vars(subnode.get_scalar('dest'))))
 
-        self._arch = self.node_subst_member(node, 'arch')
-        self._branch = self.node_subst_member(node, 'branch')
+        self._arch = self.node_subst_vars(node.get_scalar('arch'))
+        self._branch = self.node_subst_vars(node.get_scalar('branch'))
 
         self.set_work_dir()
         self.set_root_read_only(True)
 
-        self._repo_mode = self.node_subst_member(node, 'repo-mode')
+        self._repo_mode = self.node_subst_vars(node.get_scalar('repo-mode'))
         self.set_install_root('/buildstream/repo')
         self.add_commands('init repository',
                           ['ostree init --repo=/buildstream/repo --mode={}'.format(self._repo_mode)])

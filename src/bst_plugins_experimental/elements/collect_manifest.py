@@ -51,10 +51,12 @@ class CollectManifestElement(Element):
     """
 
     BST_FORMAT_VERSION = 1
+    BST_REQUIRED_VERSION_MAJOR = 1
+    BST_REQUIRED_VERSION_MINOR = 91
 
     def configure(self, node):
         if 'path' in node:
-            self.path = self.node_subst_member(node, 'path', None)
+            self.path = self.node_subst_vars(node.get_scalar('path'))
         else:
             self.path = None
 
@@ -81,9 +83,7 @@ class CollectManifestElement(Element):
         if cpe is None:
             cpe = {}
         else:
-            # FIXME: this uses a private part of the BuildStream API
-            #        We should try to move it public
-            cpe = cpe._strip_node_info()
+            cpe = cpe.strip_node_info()
 
         if 'product' not in cpe:
             cpe['product'] = os.path.basename(os.path.splitext(dep.name)[0])
