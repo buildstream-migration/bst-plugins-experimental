@@ -32,6 +32,9 @@ from buildstream import ScriptElement, ElementError
 # Element implementation for the 'FastbootExt4Image' kind.
 # Based on the implementation for generating x86 images
 class FastbootExt4ImageElement(ScriptElement):
+    BST_REQUIRED_VERSION_MAJOR = 1
+    BST_REQUIRED_VERSION_MINOR = 91
+
     def configure(self, node):
         command_steps = [
             "create_dev_proc_shadow",
@@ -45,12 +48,12 @@ class FastbootExt4ImageElement(ScriptElement):
             if step not in node:
                 raise ElementError("{}: Unexpectedly missing command step '{}'"
                                    .format(self, step))
-            cmds = self.node_subst_list(node, step)
+            cmds = self.node_subst_sequence_vars(node.get_sequence(step))
             self.add_commands(step, cmds)
 
-        self.layout_add(self.node_subst_member(node, 'base'), "/")
+        self.layout_add(self.node_subst_vars(node.get_scalar('base')), "/")
         self.layout_add(None, '/buildstream')
-        self.layout_add(self.node_subst_member(node, 'input'),
+        self.layout_add(self.node_subst_vars(node.get_scalar('input')),
                         self.get_variable('build-root'))
 
         self.set_work_dir()

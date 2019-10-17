@@ -45,6 +45,9 @@ from buildstream import Element, Scope, ElementError
 
 class TarElement(Element):
 
+    BST_REQUIRED_VERSION_MAJOR = 1
+    BST_REQUIRED_VERSION_MINOR = 91
+
     # The tarball's output is its dependencies, so
     # we must rebuild if they change
     BST_STRICT_REBUILD = True
@@ -58,7 +61,7 @@ class TarElement(Element):
 
     def configure(self, node):
         node.validate_keys(['filename', 'compression'])
-        self.filename = self.node_subst_member(node, 'filename')
+        self.filename = self.node_subst_vars(node.get_scalar('filename'))
         self.compression = node.get_str('compression')
 
         if self.compression not in ['none', 'gzip', 'xz', 'bzip2']:

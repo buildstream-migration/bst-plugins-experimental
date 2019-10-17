@@ -38,13 +38,15 @@ from buildstream import Element, ElementError, Scope
 
 class FlatpakImageElement(Element):
 
+    BST_REQUIRED_VERSION_MAJOR = 1
+    BST_REQUIRED_VERSION_MINOR = 91
     BST_STRICT_REBUILD = True
 
     def configure(self, node):
         node.validate_keys([
             'directory', 'include', 'exclude', 'metadata'
         ])
-        self.directory = self.node_subst_member(node, 'directory')
+        self.directory = self.node_subst_vars(node.get_scalar('directory'))
         self.include = node.get_str_list('include')
         self.exclude = node.get_str_list('exclude')
         self.metadata = configparser.ConfigParser()
@@ -53,8 +55,8 @@ class FlatpakImageElement(Element):
         metadata_node = node.get_mapping('metadata')
         for section, pairs in metadata_node.items():
             section_dict = {}
-            for key in pairs.keys():
-                section_dict[key] = self.node_subst_member(pairs, key)
+            for key, value in pairs.items():
+                section_dict[key] = self.node_subst_vars(value)
             metadata_dict[section] = section_dict
 
         self.metadata.read_dict(metadata_dict)

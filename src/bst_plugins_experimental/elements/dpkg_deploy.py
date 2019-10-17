@@ -142,11 +142,14 @@ def md5sum_file(path):
 
 # Element implementation for the 'dpkg_deploy' kind.
 class DpkgDeployElement(ScriptElement):
+    BST_REQUIRED_VERSION_MAJOR = 1
+    BST_REQUIRED_VERSION_MINOR = 91
+
     def configure(self, node):
         node.validate_keys(['build-commands', 'base', 'input'])
 
-        self.__input = self.node_subst_member(node, 'input')
-        self.layout_add(self.node_subst_member(node, 'base'), "/")
+        self.__input = self.node_subst_vars(node.get_scalar('input'))
+        self.layout_add(self.node_subst_vars(node.get_scalar('base')), "/")
         self.layout_add(None, '/buildstream')
         self.layout_add(self.__input,
                         self.get_variable('build-root'))
@@ -154,7 +157,7 @@ class DpkgDeployElement(ScriptElement):
         if 'build-commands' not in node:
             raise ElementError("{}: Unexpectedly missing command: 'build-commands'"
                                .format(self))
-        cmds = self.node_subst_list(node, 'build-commands')
+        cmds = self.node_subst_sequence_vars(node.get_sequence('build-commands'))
         self.unedited_cmds['build-commands'] = cmds
 
         self.set_work_dir()

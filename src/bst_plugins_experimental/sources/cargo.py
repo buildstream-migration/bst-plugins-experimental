@@ -310,7 +310,7 @@ class CargoSource(Source):
     # We require at least BuildStream 1.3 for the ability to
     # view previously staged sources at track and fetch time.
     BST_REQUIRED_VERSION_MAJOR = 1
-    BST_REQUIRED_VERSION_MINOR = 3
+    BST_REQUIRED_VERSION_MINOR = 91
 
     # We need the Cargo.lock file to construct our ref at track time
     BST_REQUIRES_PREVIOUS_SOURCES_TRACK = True
@@ -326,9 +326,7 @@ class CargoSource(Source):
         # XXX: should we use get_sequence here?
         self.ref = node.get_sequence('ref', None)
         if self.ref is not None:
-            # FIXME: this is private BuildStream API, we should push to make
-            #        it public or provide an alternative
-            self.ref = self.ref._strip_node_info()
+            self.ref = self.ref.strip_node_info()
         self.cargo_lock = node.get_str('cargo-lock', 'Cargo.lock')
         self.vendor_dir = node.get_str('vendor-dir', 'crates')
 

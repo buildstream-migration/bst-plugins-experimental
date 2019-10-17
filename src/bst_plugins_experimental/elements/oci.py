@@ -299,6 +299,9 @@ def safe_path(path):
 
 
 class OciElement(Element):
+    BST_REQUIRED_VERSION_MAJOR = 1
+    BST_REQUIRED_VERSION_MINOR = 91
+
     def configure(self, node):
         node.validate_keys(['mode', 'gzip', 'images', 'annotations'])
 
@@ -315,8 +318,8 @@ class OciElement(Element):
         else:
             self.annotations = {}
             annotations = node.get_mapping('images')
-            for k in annotations.keys():
-                v = self.node_subst_member(annotations, k)
+            for k, value in annotations.items():
+                v = self.node_subst_vars(value)
                 self.annotations[k] = v
 
         self.images = []
@@ -340,34 +343,34 @@ class OciElement(Element):
 
                 image_value['parent'] = parent
             if 'layer' in image:
-                image_value['layer'] = self.node_subst_list(image, 'layer')
+                image_value['layer'] = self.node_subst_sequence_vars(image.get_sequence('layer'))
 
             image_value['architecture'] = \
-                self.node_subst_member(image, 'architecture')
+                self.node_subst_vars(image.get_scalar('architecture'))
 
             if 'tags' in image:
                 image_value['tags'] = \
-                    self.node_subst_list(image, 'tags')
+                    self.node_subst_sequence_vars(image.get_sequence('tags'))
 
-            image_value['os'] = self.node_subst_member(image, 'os')
+            image_value['os'] = self.node_subst_vars(image.get_scalar('os'))
 
             if 'os.version' in image:
                 image_value['os.version'] = \
-                    self.node_subst_member(image, 'os.version')
+                    self.node_subst_vars(image.get_scalar('os.version'))
             if 'os.features' in image:
                 image_value['os.features'] = \
-                    self.node_subst_list(image, 'os.features')
+                    self.node_subst_sequence_vars(image.get_sequence('os.features'))
             if 'os.features' in image:
                 image_value['variant'] = \
-                    self.node_subst_member(image, 'variant')
+                    self.node_subst_vars(image.get_scalar('variant'))
 
             if 'author' in image:
                 image_value['author'] = \
-                    self.node_subst_member(image, 'author')
+                    self.node_subst_vars(image.get_scalar('author'))
 
             if 'comment' in image:
                 image_value['comment'] = \
-                    self.node_subst_member(image, 'comment')
+                    self.node_subst_vars(image.get_scalar('comment'))
 
             if 'config' in image:
                 config = image.get_mapping('config')
@@ -392,18 +395,18 @@ class OciElement(Element):
                 for member in ['User', 'WorkingDir', 'StopSignal']:
                     if member in config:
                         config_value[member] = \
-                            self.node_subst_member(config, member)
+                            self.node_subst_vars(config.get_scalar(member))
 
                 for member in ['Memory', 'MemorySwap', 'CpuShares']:
                     if member in config:
                         config_value[member] = \
-                            int(self.node_subst_member(config, member))
+                            int(self.node_subst_vars(config.get_scalar(member)))
 
                 for member in ['ExposedPort', 'Volumes',
                                'Env', 'Entrypoint', 'Cmd']:
                     if member in config:
                         config_value[member] = \
-                            self.node_subst_list(config, member)
+                            self.node_subst_sequence_vars(config.get_sequence(member))
 
                 if 'Labels' in config:
                     labels = config.get_mapping('Labels')
@@ -419,17 +422,18 @@ class OciElement(Element):
                     ])
                     config['Healthcheck'] = {}
                     if 'Test' in healthcheck:
-                        config['Healthcheck']['Test'] = self.node_subst_list(healthcheck, 'Test')
+                        config['Healthcheck']['Test'] = self.node_subst_sequence_vars(healthcheck.get_sequence('Test'))
                     for member in ['Interval', 'Timeout', 'Retries']:
                         if member in healthcheck:
-                            config['Healthcheck'][member] = int(self.node_subst_member(healthcheck, member))
+                            config['Healthcheck'][member] = \
+                                int(self.node_subst_sequence_vars(healthcheck.get_scalar(member)))
 
                 image_value['config'] = config_value
             if 'annotations' in image:
                 image_value['annotations'] = {}
                 annotations = image.get_mapping('annotations')
-                for k in annotations.keys():
-                    v = self.node_subst_member(annotations, k)
+                for k, value in annotations.items():
+                    v = self.node_subst_vars(value)
                     image_value['annotations'][k] = v
 
             self.images.append(image_value)
