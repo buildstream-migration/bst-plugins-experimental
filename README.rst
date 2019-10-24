@@ -35,7 +35,7 @@ project, you will first need to install bst-plugins-experimental via pip::
     cd bst-plugins-experimental
     pip install --user -e .
 
-To ensure it's installed, try: ``pip show BuildStream-external``, this should
+To ensure it's installed, try: ``pip show bst-plugins-experimental``, this should
 show information about the package.
 
 .. note::
