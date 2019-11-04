@@ -130,6 +130,7 @@ from buildstream import Source, SourceError, Consistency, SourceFetcher
 from buildstream import utils
 
 GIT_MODULES = '.gitmodules'
+GIT_ATTRIBUTES = '.gitattributes'
 
 
 # Because of handling of submodules, we maintain a GitMirror
@@ -342,6 +343,13 @@ class GitTagMirror(SourceFetcher):
         rc = self.source.call([self.source.host_git, 'cat-file', '-t', self.ref], cwd=mirror)
         return rc == 0
 
+    def ref_expects_lfs(self):
+        if not self.has_ref():
+            return False
+        exit_code, files = self.source.check_output([self.source.host_git, 'lfs', 'ls-files', self.ref],
+                                                    cwd=self.mirror_path())
+        return exit_code == 0 and len(files) > 0
+
     def assert_ref(self):
         if not self.has_ref():
             raise SourceError("{}: expected ref '{}' was not found in git repository: '{}'"
@@ -396,6 +404,11 @@ class GitTagMirror(SourceFetcher):
         self.source.call([self.source.host_git, 'clone', '--no-checkout', '--no-hardlinks', mirror, fullpath],
                          fail="Failed to create git mirror {} in directory: {}".format(mirror, fullpath),
                          fail_temporarily=True)
+
+        expects_lfs = self.ref_expects_lfs()
+        if expects_lfs:
+            self.source.warn("{}: ref expects lfs'{}'".format(self.source, self.ref))
+            self.set_origin_url(directory)
 
         self.source.call([self.source.host_git, 'checkout', '--force', self.ref],
                          fail="Failed to checkout git ref {}".format(self.ref),
@@ -484,6 +497,15 @@ class GitTagMirror(SourceFetcher):
                              .format(self.source, submodule), detail=detail)
 
             return None
+
+    def set_origin_url(self, directory):
+        fullpath = os.path.join(directory, self.path)
+        _, origin_url = self.source.check_output([self.source.host_git, 'config', '--get', 'remote.origin.url'],
+                                                 fail='Failed to get origin url "{}"'.format(self.mirror_path()),
+                                                 cwd=self.mirror_path())
+        self.source.call([self.source.host_git, 'config', 'remote.origin.url', origin_url],
+                         fail="Failed to set origin url {}".format(origin_url),
+                         cwd=fullpath)
 
 
 class GitTagSource(Source):
