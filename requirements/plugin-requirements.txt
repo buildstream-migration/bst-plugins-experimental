@@ -6,3 +6,6 @@ PyGObject
 
 # Cargo source
 pytoml
+
+# Bazel source
+requests
