@@ -65,7 +65,7 @@ class ExtractIntegrationElement(Element):
     def get_unique_key(self):
         key = {
             'script-path': self.script_path,
-            'ignore': set(self.ignore)
+            'ignore': sorted(set(self.ignore))
         }
         return key
 
