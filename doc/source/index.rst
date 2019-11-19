@@ -1,12 +1,10 @@
 .. toctree::
    :maxdepth: 2
 
-BuildStream-External Documentation
-==================================
+bst-plugins-experimental Documentation
+======================================
 
-This is a collection of plugins that are either tailored to a very specific use
-case, or need to change faster than would be allowed by the long term stable
-API guarantees that we expect of core BuildStream plugins.
+This is a collection of plugins to use with Buildstream
 
 To use one of these plugins in your project you need to have installed the
 bst-plugins-experimental package and enabled it in your `project configuration file
