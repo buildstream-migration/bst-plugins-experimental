@@ -27,7 +27,7 @@ import re
 import json
 from collections import OrderedDict
 from collections.abc import Mapping
-from buildstream import Element, Scope, Node
+from buildstream import Element, Scope, Node, ElementError
 
 
 class CollectManifestElement(Element):
@@ -48,9 +48,53 @@ class CollectManifestElement(Element):
 
     The manifest file is exported as a json file to the path provided
     under the "path" variable defined in the .bst file.
+
+    Dependency elements can manually declare CPE data in their public
+    section. For example:
+
+    .. code:: yaml
+
+       public:
+         cpe:
+           product: gnutls
+           vendor: gnu
+           version: '1.0'
+
+    This data will be set in the ``x-cpe`` field of the entry.
+
+    If not present, ``product`` will be automatically be inferred from the
+    name of the element.
+
+    If not present, ``version`` will be taken from first ``git``,
+    ``git_tag``, ``tar`` or ``zip`` source which filename (for ``tar`` and
+    ``zip``) or reference (for ``git`` and ``git_tag``) contains a
+    substring matching a version regular expression. That matched
+    substring will be the ``version``.
+
+    The default version regular expression is ``\\d+\\.\\d+(?:\\.\\d+)?`` (2 or 3
+    numerical components separated by dots). It is possible to
+    change the version regular expression with field ``version-match``.
+
+    The version regular exression must follow Python regular expression
+    syntax.  A version regular expression with no group will match exactly
+    the version. A version regular expression with groups will match
+    components of the version with each groups. The components will then
+    be concatenated using ``.`` (dot) as a separator.
+
+    ``version-match`` in the ``cpe`` public data will never be exported in
+    the ``x-cpe`` field of the manifest.
+
+    Here is an example of ``version-match`` where the filename is
+    ``openssl1_1_1d.tar.gz``, the result version will be ``1.1.1d``.
+
+    .. code:: yaml
+
+       public:
+         cpe:
+           version-match: '(\\d+)_(\\d+)_(\\d+[a-z]?)'
     """
 
-    BST_FORMAT_VERSION = 1
+    BST_FORMAT_VERSION = 2
     BST_REQUIRED_VERSION_MAJOR = 1
     BST_REQUIRED_VERSION_MINOR = 91
 
@@ -88,11 +132,20 @@ class CollectManifestElement(Element):
         if 'product' not in cpe:
             cpe['product'] = os.path.basename(os.path.splitext(dep.name)[0])
 
+        version_match = cpe.pop('version-match', None)
+
         if 'version' not in cpe:
-            version = get_version(sources)
+            matcher = VersionMatcher(version_match)
+            version = matcher.get_version(sources)
+            self.info("{} version {}".format(dep, version, ))
 
             if version is None:
-                self.status('Missing version to {}. Please add variable "manifest-version"'.format(dep))
+                if version_match is None:
+                    self.status('Missing version to {}.'.format(dep))
+                else:
+                    fmt = '{}: {}: version match string "{}" did not match anything.'
+                    msg = fmt.format(self, dep, version_match)
+                    raise ElementError(msg)
 
             if version:
                 cpe['version'] = version
@@ -190,27 +243,46 @@ class CollectManifestElement(Element):
         return ret_list
 
 
-def get_version(sources):
-    """
-    This function attempts to extract the source version
-    from a dependency. This data can generally be found
-    in the url for tar balls, or the ref for git repos.
+class VersionMatcher:
 
-    :sources A list of BuildStream Sources
-    """
-    for source in sources:
-        if source.get_kind() in ['tar', 'zip']:
-            url = source.url
-            filename = url.rpartition('/')[2]
-            match = re.search(r'(\d+\.\d+(?:\.\d+)?)', filename)
-            if match:
-                return match.groups()[-1]
-        elif source.get_kind() in ['git', 'git_tag']:
-            ref = source.mirror.ref
-            match = re.search(r'(\d+\.\d+(?:\.\d+)?)', ref)
-            if match:
-                return match.groups()[-1]
-    return None
+    DEFAULT_VERSION_RE = re.compile(r'\d+\.\d+(?:\.\d+)?')
+
+    def __init__(self, match):
+        if match is None:
+            self.__match = self.DEFAULT_VERSION_RE
+        else:
+            self.__match = re.compile(match)
+
+    def _parse_version(self, text):
+        m = self.__match.search(text)
+        if not m:
+            return None
+        if self.__match.groups == 0:
+            return m.group(0)
+        else:
+            return '.'.join(m.groups())
+
+    def get_version(self, sources):
+        """
+        This method attempts to extract the source version
+        from a dependency. This data can generally be found
+        in the url for tar balls, or the ref for git repos.
+
+        :sources A list of BuildStream Sources
+        """
+        for source in sources:
+            if source.get_kind() in ['tar', 'zip']:
+                url = source.url
+                filename = url.rpartition('/')[2]
+                version = self._parse_version(filename)
+                if version is not None:
+                    return version
+            elif source.get_kind() in ['git', 'git_tag']:
+                ref = source.mirror.ref
+                version = self._parse_version(ref)
+                if version is not None:
+                    return version
+        return None
 
 
 def get_source_locations(sources):
