@@ -129,7 +129,7 @@ class CollectManifestElement(Element):
                 import_manifest = dep.get_public_data('cpe-manifest')
 
                 if import_manifest:
-                    import_manifest = import_manifest.as_dict()
+                    import_manifest = import_manifest.strip_node_info()
                     manifest['modules'].extend(import_manifest['modules'])
                 else:
                     cpe = self.extract_cpe(dep)
@@ -180,8 +180,7 @@ class CollectManifestElement(Element):
 
         for item in list_value:
             if isinstance(item, Mapping):
-                sub_dict = item.as_dict()
-                ret_list.append(sub_dict)
+                ret_list.append(item.strip_node_info())
             elif isinstance(item, list):
                 sub_list = self.dicts_from_list(item)
                 ret_list.append(sub_list)
