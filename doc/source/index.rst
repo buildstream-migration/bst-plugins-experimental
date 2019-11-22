@@ -40,6 +40,7 @@ bst-plugins-experimental package and enabled it in your `project configuration f
 
    sources/bazel_source
    sources/cargo
+   sources/deb
    sources/ostree
    sources/quilt
    sources/git_tag

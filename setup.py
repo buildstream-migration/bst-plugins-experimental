@@ -75,6 +75,7 @@ setup(name='bst-plugins-experimental',
               'qmake = bst_plugins_experimental.elements.qmake',
               'distutils = bst_plugins_experimental.elements.distutils',
               'bazel_source = bst_plugins_experimental.sources.bazel_source',
+              'deb = bst_plugins_experimental.sources.deb'
               'git_tag = bst_plugins_experimental.sources.git_tag',
               'quilt = bst_plugins_experimental.sources.quilt',
               'ostree = bst_plugins_experimental.sources.ostree',
