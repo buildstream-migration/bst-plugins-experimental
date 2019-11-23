@@ -72,8 +72,8 @@ clean: templates-clean
 templates:
 	mkdir -p source/elements
 	mkdir -p source/sources
-	$(call plugin-doc-skeleton,$(CURDIR)/../bst_plugins_experimental,elements)
-	$(call plugin-doc-skeleton,$(CURDIR)/../bst_plugins_experimental,sources)
+	$(call plugin-doc-skeleton,$(CURDIR)/../src/bst_plugins_experimental,elements)
+	$(call plugin-doc-skeleton,$(CURDIR)/../src/bst_plugins_experimental,sources)
 
 templates-clean:
 	rm -rf source/elements
@@ -84,7 +84,7 @@ templates-clean:
 #
 html devhelp: templates
 	@echo "Building $@..."
-	PYTHONPATH=$(CURDIR)/../bst_plugins_experimental \
+	PYTHONPATH=$(CURDIR)/../src/bst_plugins_experimental \
 	    $(SPHINXBUILD) -b $@ $(ALLSPHINXOPTS) "$(BUILDDIR)/$@" \
 	    $(wildcard source/*.rst) \
 	    $(wildcard source/elements/*.rst) \
