@@ -117,10 +117,10 @@ class DownloadableFileSource(Source):
 
             if self.ref and self.ref != new_ref:
                 detail = (
-                    "When tracking, new ref differs from current ref:\n"
-                    + "  Tracked URL: {}\n".format(self.url)
-                    + "  Current ref: {}\n".format(self.ref)
-                    + "  New ref: {}\n".format(new_ref)
+                    "When tracking, new ref differs from current ref:\n" +
+                    "  Tracked URL: {}\n".format(self.url) +
+                    "  Current ref: {}\n".format(self.ref) +
+                    "  New ref: {}\n".format(new_ref)
                 )
                 self.warn("Potential man-in-the-middle attack!", detail=detail)
 

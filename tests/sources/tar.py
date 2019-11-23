@@ -476,9 +476,9 @@ def test_malicious_out_of_basedir_hardlinks(cli, tmpdir, datafiles):
     # attributes set
     with tarfile.open(src_tar, "r:gz") as tar:
         assert any(
-            member.islnk()
-            and member.path == "contents/elsewhere/malicious"
-            and member.linkname == "../../../malicious_target.bst"
+            member.islnk() and
+            member.path == "contents/elsewhere/malicious" and
+            member.linkname == "../../../malicious_target.bst"
             for member in tar.getmembers()
         )
 
