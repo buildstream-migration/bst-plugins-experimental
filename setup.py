@@ -55,6 +55,7 @@ setup(name='bst-plugins-experimental',
       install_requires=install_requires,
       entry_points={
           'buildstream.plugins': [
+              'bazel_build = bst_plugins_experimental.elements.bazel_build',
               'cmake = bst_plugins_experimental.elements.cmake',
               'dpkg_build = bst_plugins_experimental.elements.dpkg_build',
               'dpkg_deploy = bst_plugins_experimental.elements.dpkg_deploy',
@@ -72,6 +73,7 @@ setup(name='bst-plugins-experimental',
               'modulebuild = bst_plugins_experimental.elements.modulebuild',
               'qmake = bst_plugins_experimental.elements.qmake',
               'distutils = bst_plugins_experimental.elements.distutils',
+              'bazel_source = bst_plugins_experimental.sources.bazel_source',
               'git_tag = bst_plugins_experimental.sources.git_tag',
               'quilt = bst_plugins_experimental.sources.quilt',
               'ostree = bst_plugins_experimental.sources.ostree',
@@ -83,6 +85,7 @@ setup(name='bst-plugins-experimental',
       extras_require={
           'ostree': ["PyGObject"],
           'cargo': ["pytoml"],
+          'bazel': ["requests"],
       },
       zip_safe=False)
 # eof setup()

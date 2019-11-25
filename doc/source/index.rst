@@ -14,6 +14,7 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    :maxdepth: 1
    :caption: Contained Elements
 
+   elements/bazel_build
    elements/cmake
    elements/dpkg_build
    elements/dpkg_deploy
@@ -37,6 +38,7 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    :maxdepth: 1
    :caption: Contained Sources
 
+   sources/bazel_source
    sources/cargo
    sources/ostree
    sources/quilt
