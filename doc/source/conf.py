@@ -32,7 +32,9 @@ sys.path.insert(0, os.path.abspath('..'))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinx.ext.extlinks',
+    'sphinx_click.ext',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -342,3 +344,18 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 autodoc_member_order = 'bysource'
+
+##############################
+# External links definitions #
+##############################
+
+# FIXME: this currently tracks master. Once BuildStream 2.0 is released,
+#        we should be changing this to the official docs page
+BASE_BUILDSTREAM_DOCS_URL = "https://buildstream.gitlab.io/buildstream"
+
+extlinks = {
+    "ext_core_source_builtins": (
+        "{}/buildstream.source.html#built-in-functionality".format(BASE_BUILDSTREAM_DOCS_URL),
+        None,
+    ),
+}

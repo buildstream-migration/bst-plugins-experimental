@@ -46,7 +46,7 @@ ostree - stage files from an OSTree repository
    # path to the public verifying GPG key for this remote.
    gpg-key: keys/runtime.gpg
 
-See :ref:`built-in functionality doumentation <core_source_builtins>` for
+See :ext_core_source_builtins:`built-in functionality documentation <>` for
 details on common configuration options for sources.
 """
 
