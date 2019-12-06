@@ -79,6 +79,9 @@ setup(name='bst-plugins-experimental',
               'ostree = bst_plugins_experimental.sources.ostree',
               'oci = bst_plugins_experimental.elements.oci'
               'cargo = bst_plugins_experimental.sources.cargo',
+          ],
+          'buildstream.tests.source_plugins': [
+              'bst_plugins_experimental = bst_plugins_experimental.testutils',
           ]
       },
       tests_require=test_requires + plugin_requires,
