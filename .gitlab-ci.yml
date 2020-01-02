@@ -1,5 +1,4 @@
-image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:30-master-86931906
-# Testsuite image at a2ca12e76296f072fb98075bee257b2b6eb2523b (08/10/2019)
+image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:30-${DOCKER_IMAGE_VERSION}
 
 cache:
   paths:
@@ -15,8 +14,14 @@ before_script:
   - mount
   - df -h
 
-  - adduser -m buildstream
+  - useradd -Um buildstream
   - chown -R buildstream:buildstream .
+
+variables:
+  # Version of the docker images we should use for all the images.
+  # This is taken from buildstream/buildstream-docker-images and is updated
+  # periodically.
+  DOCKER_IMAGE_VERSION: master-106676842
 
 #####################################################
 #                    Test stage                     #
@@ -28,21 +33,44 @@ before_script:
     PYTEST_ADDOPTS: "--color=yes"
   script:
     - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
-   
+
     - chown -R buildstream:buildstream .
 
     # Run the tests form the source distribution.
     # We run as a simple user to test for permission issues
     - su buildstream -c 'tox -- --integration'
 
-test-fixed:
+test-fixed-debian-9:
+  <<: *test-template
+  image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-debian:9-${DOCKER_IMAGE_VERSION}
+  variables:
+    <<: *test-variables
+    TOXENV: "py35-bst-fixed"
+
+test-fixed-ubuntu-18:
+  <<: *test-template
+  image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-ubuntu:18.04-${DOCKER_IMAGE_VERSION}
+  variables:
+    <<: *test-variables
+    TOXENV: "py36-bst-fixed"
+
+test-fixed-fedora-30:
   <<: *test-template
   variables:
     <<: *test-variables
     TOXENV: "py37-bst-fixed"
 
-test-master:
-  image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-latest
+test-fixed-python-38-debian:
+  <<: *test-template
+  image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-python:3.8-buster-${DOCKER_IMAGE_VERSION}
+  variables:
+    <<: *test-variables
+    TOXENV: "py38-bst-fixed"
+
+# NOTE: Tests against master are only run against only one distribution in
+# order to conserve CI resources.
+test-master-fedora-30:
+  image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-${DOCKER_IMAGE_VERSION}
   <<: *test-template
   variables:
     <<: *test-variables
