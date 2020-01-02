@@ -1,5 +1,4 @@
-image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:30-master-86931906
-# Testsuite image at a2ca12e76296f072fb98075bee257b2b6eb2523b (08/10/2019)
+image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:30-${DOCKER_IMAGE_VERSION}
 
 cache:
   paths:
@@ -17,6 +16,12 @@ before_script:
 
   - adduser -m buildstream
   - chown -R buildstream:buildstream .
+
+variables:
+  # Version of the docker images we should use for all the images.
+  # This is taken from buildstream/buildstream-docker-images and is updated
+  # periodically.
+  DOCKER_IMAGE_VERSION: master-106676842
 
 #####################################################
 #                    Test stage                     #
@@ -42,7 +47,7 @@ test-fixed:
     TOXENV: "py37-bst-fixed"
 
 test-master:
-  image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-latest
+  image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-${DOCKER_IMAGE_VERSION}
   <<: *test-template
   variables:
     <<: *test-variables
