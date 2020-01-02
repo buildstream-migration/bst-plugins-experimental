@@ -14,7 +14,7 @@ before_script:
   - mount
   - df -h
 
-  - adduser -m buildstream
+  - useradd -Um buildstream
   - chown -R buildstream:buildstream .
 
 variables:
