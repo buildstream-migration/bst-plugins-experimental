@@ -28,7 +28,7 @@ bazel cquery --experimental_repository_resolved_file=/path/to/manifest $targets
 ```
 
 This option is available for all versions of bazel documented, but for very
-early versions (<1.17.1) it may not be available.
+early versions (<0.17.1) it may not be available.
 
 If the upstream bazel project does not provide such a repository file, one may
 be introduced as a `local` or `patch` source. Failing that the plugin can be
@@ -49,7 +49,7 @@ The default configuration is:
 .. code:: yaml
 
    # Specify the bazel kind
-   kind: bazel
+   kind: bazel_source
 
    # Specify the path to the workspace directory
    workspace-dir: .
