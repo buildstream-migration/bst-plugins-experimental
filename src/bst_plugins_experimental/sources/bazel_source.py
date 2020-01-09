@@ -143,7 +143,7 @@ class BazelSource(Source):
                           detail="This may cause an error if there is no repository file in the bazel repo")
 
     def get_unique_key(self):
-        return [self.allow_host_bazel, self.repo_file, self.targets, self.workspace_dir, self.ref]
+        return [self.allow_host_bazel, self.repo_file, self.targets, self.workspace_dir, self.ref, self.skip_without_sha]
 
     def get_consistency(self):
         if os.path.exists(self._mirror) and os.listdir(self._mirror):
@@ -277,7 +277,7 @@ class BazelSource(Source):
                 self.log("{}: Downloading '{}' from url '{}' failed".format(self, name, url))
                 continue
 
-            if hashlib.sha256(response.content).hexdigest() != attributes['sha256']:
+            if 'sha256' in attributes and hashlib.sha256(response.content).hexdigest() != attributes['sha256']:
                 self.log("{}: Downloaded bazel dependency {} did not match sha256".format(self, name))
                 continue
 
