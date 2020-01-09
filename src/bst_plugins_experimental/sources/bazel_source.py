@@ -92,7 +92,7 @@ class BazelSource(Source):
     BST_REQUIRES_PREVIOUS_SOURCES_TRACK = True
 
     def configure(self, node):
-        node.validate_keys(['workspace-dir', 'allow-host-bazel', 'repo-file', 'targets', 'ref'] +
+        node.validate_keys(['workspace-dir', 'allow-host-bazel', 'repo-file', 'targets', 'ref', 'skip-without-sha'] +
                            Source.COMMON_CONFIG_KEYS)
 
         # Whether to allow falling back to a bazel installed on the host to generate
@@ -115,6 +115,9 @@ class BazelSource(Source):
 
         # The unique ref of this source. The SHA256 of the repository resolved file
         self.ref = node.get_str('ref', default=None)
+
+        # Whether to skip sources that are missing a SHA256 key to verify against
+        self.skip_without_sha = node.get_bool('skip-without-sha', default=True)
 
         self._distdir = '_bst_distdir'
 
@@ -256,7 +259,7 @@ class BazelSource(Source):
             self.log("{}: Bazel dependency '{}' has no urls, assume local and skip".format(self, name))
             return
 
-        if 'sha256' not in attributes:
+        if 'sha256' not in attributes and self.skip_on_no_sha:
             self.warn("{}: Bazel dependency '{}' has no sha256, skipping".format(self, name))
             return
 
