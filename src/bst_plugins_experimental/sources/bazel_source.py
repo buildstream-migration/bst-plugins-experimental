@@ -259,7 +259,7 @@ class BazelSource(Source):
             self.log("{}: Bazel dependency '{}' has no urls, assume local and skip".format(self, name))
             return
 
-        if 'sha256' not in attributes and self.skip_on_no_sha:
+        if 'sha256' not in attributes and self.skip_without_sha:
             self.warn("{}: Bazel dependency '{}' has no sha256, skipping".format(self, name))
             return
 
