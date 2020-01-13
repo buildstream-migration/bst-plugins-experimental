@@ -46,7 +46,7 @@ plugin_requires = parse_requirements('requirements/plugin-requirements.txt')
 test_requires = parse_requirements('requirements/test-requirements.txt')
 
 setup(name='bst-plugins-experimental',
-      version="0.12.0",
+      version="0.13.0",
       description="A collection of experimental BuildStream plugins.",
       license='LGPL',
       package_dir={'': 'src'},
