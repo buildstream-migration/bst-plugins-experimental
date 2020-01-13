@@ -126,8 +126,13 @@ from io import StringIO
 
 from configparser import RawConfigParser
 
-from buildstream import Source, SourceError, Consistency, SourceFetcher
+from buildstream import Source, SourceError, SourceFetcher
 from buildstream import utils
+
+try:
+    from buildstream import Consistency
+except ImportError:  # Bst >1.91.3
+    pass
 
 GIT_MODULES = '.gitmodules'
 
@@ -573,11 +578,14 @@ class GitTagSource(Source):
         return key
 
     def get_consistency(self):
-        if self.have_all_refs():
+        if self.is_cached():
             return Consistency.CACHED
         elif self.mirror.ref is not None:
             return Consistency.RESOLVED
         return Consistency.INCONSISTENT
+
+    def is_cached(self):
+        return self.have_all_refs()
 
     def load_ref(self, node):
         ref = node.get_str('ref', None)

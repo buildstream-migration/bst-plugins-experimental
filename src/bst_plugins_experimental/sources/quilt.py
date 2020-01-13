@@ -32,8 +32,13 @@
 """
 
 import os
-from buildstream import Source, SourceError, Consistency
+from buildstream import Source, SourceError
 from buildstream import utils
+
+try:
+    from buildstream import Consistency
+except ImportError:  # Bst >1.91.3
+    pass
 
 
 class QuiltSource(Source):
@@ -51,6 +56,12 @@ class QuiltSource(Source):
 
     def get_consistency(self):
         return Consistency.CACHED
+
+    def is_resolved(self):
+        return True
+
+    def is_cached(self):
+        return True
 
     def get_ref(self):
         return None  # pragma: nocover
