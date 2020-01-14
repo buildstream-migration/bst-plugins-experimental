@@ -121,6 +121,8 @@ pages:
 
 upload:
   stage: upload
+  before_script:
+  - pip3 install twine
   script:
   - python3 setup.py sdist
   - twine upload dist/*.tar.gz
