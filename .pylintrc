@@ -83,6 +83,7 @@ disable=#####################################
         fixme,
         missing-docstring,
         no-self-use,
+        no-else-continue,
         no-else-return,
         protected-access,
         too-few-public-methods,

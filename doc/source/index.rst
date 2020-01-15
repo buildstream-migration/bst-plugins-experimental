@@ -43,3 +43,4 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    sources/ostree
    sources/quilt
    sources/git_tag
+   sources/tar

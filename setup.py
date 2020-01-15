@@ -41,6 +41,7 @@ def parse_requirements(requirements_file):
     return reqs
 
 
+dev_requires = parse_requirements('requirements/dev-requirements.txt')
 install_requires = parse_requirements('requirements/install-requirements.txt')
 plugin_requires = parse_requirements('requirements/plugin-requirements.txt')
 test_requires = parse_requirements('requirements/test-requirements.txt')
@@ -79,12 +80,13 @@ setup(name='bst-plugins-experimental',
               'ostree = bst_plugins_experimental.sources.ostree',
               'oci = bst_plugins_experimental.elements.oci'
               'cargo = bst_plugins_experimental.sources.cargo',
+              'tar = bst_plugins_experimental.sources.tar',
           ],
           'buildstream.tests.source_plugins': [
               'bst_plugins_experimental = bst_plugins_experimental.testutils',
           ]
       },
-      tests_require=test_requires + plugin_requires,
+      tests_require=test_requires + plugin_requires + dev_requires,
       extras_require={
           'ostree': ["PyGObject"],
           'cargo': ["pytoml"],
