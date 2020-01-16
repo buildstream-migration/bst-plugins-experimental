@@ -81,7 +81,12 @@ import importlib.util
 import os
 import requests
 
-from buildstream import Consistency, Source, SourceError, utils
+from buildstream import Source, SourceError, utils
+
+try:
+    from buildstream import Consistency
+except ImportError:  # Bst >1.91.3
+    pass
 
 
 class BazelSource(Source):
@@ -143,11 +148,14 @@ class BazelSource(Source):
         return [self.allow_host_bazel, self.repo_file, self.targets, self.workspace_dir, self.ref]
 
     def get_consistency(self):
-        if os.path.exists(self._mirror) and os.listdir(self._mirror):
-            return Consistency.CACHED
         if not self.get_ref():
             return Consistency.INCONSISTENT
+        if self.is_cached():
+            return Consistency.CACHED
         return Consistency.RESOLVED
+
+    def is_cached(self):
+        return os.path.exists(self._mirror) and os.listdir(self._mirror)
 
     def get_ref(self):
         return self.ref

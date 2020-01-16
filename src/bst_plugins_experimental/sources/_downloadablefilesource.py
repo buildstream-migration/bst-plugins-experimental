@@ -7,8 +7,13 @@ import contextlib
 import shutil
 import netrc
 
-from buildstream import Source, SourceError, Consistency
+from buildstream import Source, SourceError
 from buildstream import utils
+
+try:
+    from buildstream import Consistency
+except ImportError:  # Bst >1.91.3
+    pass
 
 
 class _NetrcFTPOpener(urllib.request.FTPHandler):
@@ -88,15 +93,17 @@ class DownloadableFileSource(Source):
     def get_unique_key(self):
         return [self.original_url, self.ref]
 
+    def is_cached(self):
+        return os.path.isfile(self._get_mirror_file())
+
     def get_consistency(self):
         if self.ref is None:
             return Consistency.INCONSISTENT
 
-        if os.path.isfile(self._get_mirror_file()):
+        if self.is_cached():
             return Consistency.CACHED
 
-        else:
-            return Consistency.RESOLVED
+        return Consistency.RESOLVED
 
     def load_ref(self, node):
         self.ref = node.get_str("ref", None)

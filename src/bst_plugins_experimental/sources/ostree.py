@@ -53,8 +53,14 @@ details on common configuration options for sources.
 import os
 import shutil
 
-from buildstream import Source, SourceError, Consistency
+from buildstream import Source, SourceError
 from buildstream import utils
+
+try:
+    from buildstream import Consistency
+except ImportError:  # Bst >1.91.3
+    pass
+
 from ._ostree import OSTreeError
 from . import _ostree
 
@@ -164,11 +170,13 @@ class OSTreeSource(Source):
     def get_consistency(self):
         if self.ref is None:
             return Consistency.INCONSISTENT
-
-        self.ensure()
-        if _ostree.exists(self.repo, self.ref):
+        if self.is_cached():
             return Consistency.CACHED
         return Consistency.RESOLVED
+
+    def is_cached(self):
+        self.ensure()
+        return _ostree.exists(self.repo, self.ref)
 
     #
     # Local helpers

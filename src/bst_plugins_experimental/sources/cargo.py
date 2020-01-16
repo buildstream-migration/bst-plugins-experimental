@@ -61,9 +61,14 @@ import tarfile
 import urllib.error
 import urllib.request
 
-from buildstream import Source, SourceFetcher, SourceError
-from buildstream import utils, Consistency
 import pytoml
+from buildstream import Source, SourceFetcher, SourceError
+from buildstream import utils
+
+try:
+    from buildstream import Consistency
+except ImportError:  # Bst >1.91.3
+    pass
 
 
 # This automatically goes into .cargo/config
@@ -105,7 +110,7 @@ class Crate(SourceFetcher):
 
         # Just a defensive check, it is impossible for the
         # file to be already cached because Source.fetch() will
-        # not be called if the source is already Consistency.CACHED.
+        # not be called if the source is already cached.
         #
         if os.path.isfile(self._get_mirror_file()):
             return  # pragma: nocover
@@ -150,22 +155,25 @@ class Crate(SourceFetcher):
         except (tarfile.TarError, OSError) as e:
             raise SourceError("{}: Error staging source: {}".format(self, e)) from e
 
-    # get_consistency():
+    # is_cached()
     #
-    # Get the consistency of this Crate
+    # Get whether we have a local cached version of the source
     #
     # Returns:
-    #    (Consistency): The consistency state of this Crate
+    #   (bool): Whether we are cached or not
     #
-    def get_consistency(self):
+    def is_cached(self):
+        return os.path.isfile(self._get_mirror_file())
 
-        if self.sha is None:
-            return Consistency.INCONSISTENT
-
-        if os.path.isfile(self._get_mirror_file()):
-            return Consistency.CACHED
-
-        return Consistency.RESOLVED
+    # is_resolved()
+    #
+    # Get whether the current crate is resolved
+    #
+    # Returns:
+    #   (bool): Whether we have a sha or not
+    #
+    def is_resolved(self):
+        return self.sha is not None
 
     ########################################################
     #                   Private helpers                    #
@@ -194,7 +202,7 @@ class Crate(SourceFetcher):
                 # corrupted download.
                 if self.sha:
                     etag = self._get_etag(self.sha)
-                    if etag and self.get_consistency() == Consistency.CACHED:
+                    if etag and self.is_cached():
                         request.add_header('If-None-Match', etag)
 
                 with contextlib.closing(urllib.request.urlopen(request)) as response:
@@ -341,13 +349,20 @@ class CargoSource(Source):
         return [self.url, self.cargo_lock, self.vendor_dir, self.ref]
 
     def get_consistency(self):
-        if self.ref is None:
+        if not self.is_resolved():
             return Consistency.INCONSISTENT
 
-        consistency = Consistency.CACHED
-        for crate in self.crates:
-            consistency = min(consistency, crate.get_consistency())
-        return consistency
+        if self.is_cached():
+            return Consistency.CACHED
+        return Consistency.RESOLVED
+
+    def is_resolved(self):
+        return (self.ref is not None) and all(
+            crate.is_resolved() for crate in self.crates
+        )
+
+    def is_cached(self):
+        return all(crate.is_cached() for crate in self.crates)
 
     def load_ref(self, node):
         # XXX: this should be get_sequence, and parse_crate should expect nodes
