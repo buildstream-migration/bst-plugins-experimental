@@ -3,6 +3,12 @@ Next Version
 ================
 
 ===================
+bst-external 0.15.0
+===================
+
+o Adapt to new BuildStream plugin namespace in a non-breaking way.
+
+===================
 bst-external 0.14.0
 ===================
 
