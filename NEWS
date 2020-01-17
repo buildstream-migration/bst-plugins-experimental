@@ -2,6 +2,14 @@
 Next Version
 ================
 
+===============================
+bst-plugins-experimental 1.93.0
+===============================
+
+o bst-plugins-experimental has been adapted to work with BuildStream 1.93.0.
+  Since the new BuildStream update comes with some breaking changes, this
+  package no longer supports BuildStream 1.93.*.
+
 ===================
 bst-external 0.15.0
 ===================
