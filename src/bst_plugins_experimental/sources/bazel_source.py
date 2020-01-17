@@ -73,6 +73,11 @@ The default configuration is:
    # falling back to host bazel due to non-determinism.
    #
    ref: abcdef1234567890...
+
+** Configurable Warnings:**
+
+This plugin provides the following configurable warnings:
+    * missing-sha256: Fail when sources don't specify a sha256 attribute
 """
 
 import hashlib
@@ -317,13 +322,13 @@ class BazelSource(Source):
             )
             return
 
+        sha = True
         if "sha256" not in attributes:
             self.warn(
-                "{}: Bazel dependency '{}' has no sha256, skipping".format(
-                    self, name
-                )
+                "{}: Bazel dependency '{}' has no sha256".format(self, name),
+                warning_token="missing-sha256",
             )
-            return
+            sha = False
 
         urls = []
         if "url" in attributes and attributes["url"] != "":
@@ -346,7 +351,8 @@ class BazelSource(Source):
                 continue
 
             if (
-                hashlib.sha256(response.content).hexdigest()
+                sha
+                and hashlib.sha256(response.content).hexdigest()
                 != attributes["sha256"]
             ):
                 self.log(
