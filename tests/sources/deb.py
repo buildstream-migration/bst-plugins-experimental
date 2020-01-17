@@ -9,7 +9,6 @@ import pytest
 from buildstream._exceptions import ErrorDomain
 from buildstream import _yaml
 from buildstream.testing import cli  # pylint: disable=unused-import
-from buildstream.testing._utils.site import HAVE_ARPY
 from . import list_dir_contents
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "deb",)
@@ -19,7 +18,24 @@ deb_name = "a_deb.deb"
 
 def generate_project(project_dir, tmpdir):
     project_file = os.path.join(project_dir, "project.conf")
-    _yaml.roundtrip_dump({"name": "foo", "aliases": {"tmpdir": "file:///" + str(tmpdir)}}, project_file)
+    _yaml.roundtrip_dump(
+        {
+            "name": "foo",
+            "aliases": {
+                "tmpdir": "file:///" + str(tmpdir)
+            },
+            "plugins": [
+                {
+                    "origin": "pip",
+                    "package-name": "bst-plugins-experimental",
+                    "sources": {
+                        "deb": 0,
+                    }
+                }
+            ]
+        },
+        project_file,
+    )
 
 
 def _copy_deb(start_location, tmpdir):
@@ -29,7 +45,6 @@ def _copy_deb(start_location, tmpdir):
 
 
 # Test that without ref, consistency is set appropriately.
-@pytest.mark.skipif(HAVE_ARPY is False, reason="arpy is not available")
 @pytest.mark.datafiles(os.path.join(DATA_DIR, "no-ref"))
 def test_no_ref(cli, tmpdir, datafiles):
     project = str(datafiles)
@@ -38,7 +53,6 @@ def test_no_ref(cli, tmpdir, datafiles):
 
 
 # Test that when I fetch a nonexistent URL, errors are handled gracefully and a retry is performed.
-@pytest.mark.skipif(HAVE_ARPY is False, reason="arpy is not available")
 @pytest.mark.datafiles(os.path.join(DATA_DIR, "fetch"))
 def test_fetch_bad_url(cli, tmpdir, datafiles):
     project = str(datafiles)
@@ -51,7 +65,6 @@ def test_fetch_bad_url(cli, tmpdir, datafiles):
     result.assert_task_error(ErrorDomain.SOURCE, None)
 
 
-@pytest.mark.skipif(HAVE_ARPY is False, reason="arpy is not available")
 @pytest.mark.datafiles(os.path.join(DATA_DIR, "fetch"))
 def test_fetch_bad_ref(cli, tmpdir, datafiles):
     project = str(datafiles)
@@ -67,7 +80,6 @@ def test_fetch_bad_ref(cli, tmpdir, datafiles):
 
 
 # Test that when tracking with a ref set, there is a warning
-@pytest.mark.skipif(HAVE_ARPY is False, reason="arpy is not available")
 @pytest.mark.datafiles(os.path.join(DATA_DIR, "fetch"))
 def test_track_warning(cli, tmpdir, datafiles):
     project = str(datafiles)
@@ -83,7 +95,6 @@ def test_track_warning(cli, tmpdir, datafiles):
 
 
 # Test that a staged checkout matches what was tarred up, with the default first subdir
-@pytest.mark.skipif(HAVE_ARPY is False, reason="arpy is not available")
 @pytest.mark.datafiles(os.path.join(DATA_DIR, "fetch"))
 def test_stage_default_basedir(cli, tmpdir, datafiles):
     project = str(datafiles)
@@ -111,7 +122,6 @@ def test_stage_default_basedir(cli, tmpdir, datafiles):
 
 
 # Test that a staged checkout matches what was tarred up, with an empty base-dir
-@pytest.mark.skipif(HAVE_ARPY is False, reason="arpy is not available")
 @pytest.mark.datafiles(os.path.join(DATA_DIR, "no-basedir"))
 def test_stage_no_basedir(cli, tmpdir, datafiles):
     project = str(datafiles)
@@ -139,7 +149,6 @@ def test_stage_no_basedir(cli, tmpdir, datafiles):
 
 
 # Test that a staged checkout matches what was tarred up, with an explicit basedir
-@pytest.mark.skipif(HAVE_ARPY is False, reason="arpy is not available")
 @pytest.mark.datafiles(os.path.join(DATA_DIR, "explicit-basedir"))
 def test_stage_explicit_basedir(cli, tmpdir, datafiles):
     project = str(datafiles)
