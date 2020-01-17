@@ -56,11 +56,6 @@ import shutil
 from buildstream import Source, SourceError
 from buildstream import utils
 
-try:
-    from buildstream import Consistency
-except ImportError:  # Bst >1.91.3
-    pass
-
 from ._ostree import OSTreeError
 from . import _ostree
 
@@ -166,13 +161,6 @@ class OSTreeSource(Source):
             except (shutil.Error, OSError) as e:
                 raise SourceError("{}: Failed to move ostree checkout {} from '{}' to '{}'\n\n{}"
                                   .format(self, self.url, tmpdir, directory, e)) from e
-
-    def get_consistency(self):
-        if self.ref is None:
-            return Consistency.INCONSISTENT
-        if self.is_cached():
-            return Consistency.CACHED
-        return Consistency.RESOLVED
 
     def is_cached(self):
         self.ensure()

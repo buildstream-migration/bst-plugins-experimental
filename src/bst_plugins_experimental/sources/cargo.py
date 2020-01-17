@@ -65,11 +65,6 @@ import pytoml
 from buildstream import Source, SourceFetcher, SourceError
 from buildstream import utils
 
-try:
-    from buildstream import Consistency
-except ImportError:  # Bst >1.91.3
-    pass
-
 
 # This automatically goes into .cargo/config
 #
@@ -347,14 +342,6 @@ class CargoSource(Source):
 
     def get_unique_key(self):
         return [self.url, self.cargo_lock, self.vendor_dir, self.ref]
-
-    def get_consistency(self):
-        if not self.is_resolved():
-            return Consistency.INCONSISTENT
-
-        if self.is_cached():
-            return Consistency.CACHED
-        return Consistency.RESOLVED
 
     def is_resolved(self):
         return (self.ref is not None) and all(

@@ -35,11 +35,6 @@ import os
 from buildstream import Source, SourceError
 from buildstream import utils
 
-try:
-    from buildstream import Consistency
-except ImportError:  # Bst >1.91.3
-    pass
-
 
 class QuiltSource(Source):
     BST_REQUIRES_PREVIOUS_SOURCES_STAGE = True
@@ -53,9 +48,6 @@ class QuiltSource(Source):
 
     def get_unique_key(self):
         return [self.path]
-
-    def get_consistency(self):
-        return Consistency.CACHED
 
     def is_resolved(self):
         return True
