@@ -20,7 +20,12 @@ class Tar(Repo):
 
     def source_config(self, ref=None):
         tarball = os.path.join(self.repo, "file.tar.gz")
-        config = {"kind": "tar", "url": "file://" + tarball, "directory": "", "base-dir": ""}
+        config = {
+            "kind": "tar",
+            "url": "file://" + tarball,
+            "directory": "",
+            "base-dir": "",
+        }
         if ref is not None:
             config["ref"] = ref
 

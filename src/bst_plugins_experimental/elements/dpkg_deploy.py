@@ -146,19 +146,23 @@ class DpkgDeployElement(ScriptElement):
     BST_REQUIRED_VERSION_MINOR = 91
 
     def configure(self, node):
-        node.validate_keys(['build-commands', 'base', 'input'])
+        node.validate_keys(["build-commands", "base", "input"])
 
-        self.__input = self.node_subst_vars(node.get_scalar('input'))
-        self.layout_add(self.node_subst_vars(node.get_scalar('base')), "/")
-        self.layout_add(None, '/buildstream')
-        self.layout_add(self.__input,
-                        self.get_variable('build-root'))
+        self.__input = self.node_subst_vars(node.get_scalar("input"))
+        self.layout_add(self.node_subst_vars(node.get_scalar("base")), "/")
+        self.layout_add(None, "/buildstream")
+        self.layout_add(self.__input, self.get_variable("build-root"))
         self.unedited_cmds = {}
-        if 'build-commands' not in node:
-            raise ElementError("{}: Unexpectedly missing command: 'build-commands'"
-                               .format(self))
-        cmds = self.node_subst_sequence_vars(node.get_sequence('build-commands'))
-        self.unedited_cmds['build-commands'] = cmds
+        if "build-commands" not in node:
+            raise ElementError(
+                "{}: Unexpectedly missing command: 'build-commands'".format(
+                    self
+                )
+            )
+        cmds = self.node_subst_sequence_vars(
+            node.get_sequence("build-commands")
+        )
+        self.unedited_cmds["build-commands"] = cmds
 
         self.set_work_dir()
         self.set_install_root()
@@ -176,34 +180,48 @@ class DpkgDeployElement(ScriptElement):
         # then reconstitute the /DEBIAN files.
         input_elm = self.search(Scope.BUILD, self.__input)
         if not input_elm:
-            raise ElementError("{}: Failed to find input element {} in build-depends"
-                               .format(self.name, self.__input))
+            raise ElementError(
+                "{}: Failed to find input element {} in build-depends".format(
+                    self.name, self.__input
+                )
+            )
 
-        bstdata = input_elm.get_public_data('bst')
+        bstdata = input_elm.get_public_data("bst")
         if "dpkg-data" not in bstdata:
-            raise ElementError("{}: input element {} does not have any bst.dpkg-data public data"
-                               .format(self.name, self.__input))
+            raise ElementError(
+                "{}: input element {} does not have any bst.dpkg-data public data".format(
+                    self.name, self.__input
+                )
+            )
 
-        dpkg_data = bstdata.get_mapping('dpkg-data')
+        dpkg_data = bstdata.get_mapping("dpkg-data")
         for package, package_data in dpkg_data.items():
-            package_name = package_data.get_str("name",
-                                                "{}-{}".format(input_elm.normal_name, package))
+            package_name = package_data.get_str(
+                "name", "{}-{}".format(input_elm.normal_name, package)
+            )
             split_rules = bstdata.get_mapping("split-rules", {})
 
             if not ("split-rules" in bstdata and package in split_rules):
-                raise ElementError("{}: Input element {} does not have bst.split-rules.{}"
-                                   .format(self.name, self.__input.name, package))
+                raise ElementError(
+                    "{}: Input element {} does not have bst.split-rules.{}".format(
+                        self.name, self.__input.name, package
+                    )
+                )
 
             # FIXME: The package_splits variable is unused, which means the
             #        split rules from above are completely ignored, it appears
             #        that we are relying on Element.compute_manifest(), can
             #        we then remove this manual handling of split-rules ?
             #
-            package_splits = split_rules.get_str_list(package)  # pylint: disable=unused-variable
+            package_splits = split_rules.get_str_list(  # pylint: disable=unused-variable
+                package
+            )
 
             package_files = input_elm.compute_manifest(include=[package])
-            src = os.path.join(sandbox.get_directory(),
-                               self.get_variable("build-root").lstrip(os.sep))
+            src = os.path.join(
+                sandbox.get_directory(),
+                self.get_variable("build-root").lstrip(os.sep),
+            )
             dst = os.path.join(src, package)
             os.makedirs(dst, exist_ok=True)
 
@@ -221,16 +239,24 @@ class DpkgDeployElement(ScriptElement):
             # Recreate the DEBIAN files.
             # control is extracted verbatim, and is mandatory.
             if "control" not in package_data:
-                raise ElementError("{}: Cannot reconstitute package {}".format(self.name, package),
-                                   detail="There is no public.bst.dpkg-data.{}.control".format(package))
+                raise ElementError(
+                    "{}: Cannot reconstitute package {}".format(
+                        self.name, package
+                    ),
+                    detail="There is no public.bst.dpkg-data.{}.control".format(
+                        package
+                    ),
+                )
             controlpath = os.path.join(debiandir, "control")
-            controltext = package_data.get_str('control')
+            controltext = package_data.get_str("control")
             # Slightly ugly way of renaming the package
-            controltext = re.sub(r"^Package:\s*\S+",
-                                 "Package: {}".format(package_name),
-                                 controltext)
+            controltext = re.sub(
+                r"^Package:\s*\S+",
+                "Package: {}".format(package_name),
+                controltext,
+            )
             with open(controlpath, "w") as f:
-                f.write(controltext + '\n')
+                f.write(controltext + "\n")
 
             # Generate a DEBIAN/md5sums file from the artifact
             md5sums = {}
@@ -245,9 +271,9 @@ class DpkgDeployElement(ScriptElement):
 
             # scripts may exist
             package_scripts = bstdata.get_mapping("package-scripts", {})
-            if ("package-scripts" in bstdata and package in package_scripts):
+            if "package-scripts" in bstdata and package in package_scripts:
                 for script in ["postinst", "preinst", "postrm", "prerm"]:
-                    script_text = package_scripts.get_str(script, '')
+                    script_text = package_scripts.get_str(script, "")
                     if script_text:
                         filepath = os.path.join(debiandir, script)
                         with open(filepath, "w") as f:
@@ -257,15 +283,21 @@ class DpkgDeployElement(ScriptElement):
     def _packages_list(self):
         input_elm = self.search(Scope.BUILD, self.__input)
         if not input_elm:
-            detail = ("Available elements are {}"
-                      .format("\n".join([x.name for x in self.dependencies(Scope.BUILD)])))
-            raise ElementError("{} Failed to find element {}".format(self.name, self.__input),
-                               detail=detail)
+            detail = "Available elements are {}".format(
+                "\n".join([x.name for x in self.dependencies(Scope.BUILD)])
+            )
+            raise ElementError(
+                "{} Failed to find element {}".format(self.name, self.__input),
+                detail=detail,
+            )
 
         bstdata = input_elm.get_public_data("bst")
         if "dpkg-data" not in bstdata:
-            raise ElementError("{}: Can't get package list for {}, no bst.dpkg-data"
-                               .format(self.name, self.__input))
+            raise ElementError(
+                "{}: Can't get package list for {}, no bst.dpkg-data".format(
+                    self.name, self.__input
+                )
+            )
 
         dpkg_data = bstdata.get_mapping("dpkg-data", {})
         return " ".join(dpkg_data.keys())

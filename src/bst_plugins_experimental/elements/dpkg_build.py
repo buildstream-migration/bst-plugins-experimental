@@ -123,8 +123,8 @@ class DpkgElement(BuildElement):
         controlfile = os.path.join("debian", "control")
         controlpath = os.path.join(
             sandbox.get_directory(),
-            self.get_variable('build-root').lstrip(os.sep),
-            controlfile
+            self.get_variable("build-root").lstrip(os.sep),
+            controlfile,
         )
         with open(controlpath) as f:
             return re.findall(r"Package:\s*(.+)\n", f.read())
@@ -163,17 +163,24 @@ class DpkgElement(BuildElement):
         have_package_scripts = False
         for package in packages:
             if not self._get_workspace():  # If we're not using a workspace
-                package_path = os.path.join(sandbox.get_directory(),
-                                            self.get_variable('build-root').lstrip(os.sep),
-                                            'debian', package)
+                package_path = os.path.join(
+                    sandbox.get_directory(),
+                    self.get_variable("build-root").lstrip(os.sep),
+                    "debian",
+                    package,
+                )
             else:  # We have a workspace open for this dpkg_build element
                 workspace = self._get_workspace()
-                package_path = os.path.join(workspace.get_absolute_path(),
-                                            'debian', package)
+                package_path = os.path.join(
+                    workspace.get_absolute_path(), "debian", package
+                )
 
             # Exclude DEBIAN files because they're pulled in as public metadata
-            contents = ['/' + x for x in utils.list_relative_paths(package_path)
-                        if x != "." and not x.startswith("DEBIAN")]
+            contents = [
+                "/" + x
+                for x in utils.list_relative_paths(package_path)
+                if x != "." and not x.startswith("DEBIAN")
+            ]
 
             # Setup the new split rules
             new_split_rules[package] = contents
@@ -184,30 +191,37 @@ class DpkgElement(BuildElement):
             for content_file in contents:
                 for split_package, split_contents in new_split_rules.items():
                     for split_file in split_contents.as_str_list():
-                        content_file_path = os.path.join(package_path,
-                                                         content_file.lstrip(os.sep))
-                        split_file_path = os.path.join(os.path.dirname(package_path),
-                                                       split_package,
-                                                       split_file.lstrip(os.sep))
-                        if (content_file == split_file and
-                                os.path.isfile(content_file_path) and
-                                not filecmp.cmp(content_file_path, split_file_path)):
+                        content_file_path = os.path.join(
+                            package_path, content_file.lstrip(os.sep)
+                        )
+                        split_file_path = os.path.join(
+                            os.path.dirname(package_path),
+                            split_package,
+                            split_file.lstrip(os.sep),
+                        )
+                        if (
+                            content_file == split_file
+                            and os.path.isfile(content_file_path)
+                            and not filecmp.cmp(
+                                content_file_path, split_file_path
+                            )
+                        ):
                             bad_overlaps.add(content_file)
 
             # Store /DEBIAN metadata for each package.
             # DEBIAN/control goes into bst.dpkg-data.<package>.control
             controlpath = os.path.join(package_path, "DEBIAN", "control")
             if not os.path.exists(controlpath):
-                raise ElementError("{}: package {} doesn't have a DEBIAN/control in {}!"
-                                   .format(self.name, package, package_path))
+                raise ElementError(
+                    "{}: package {} doesn't have a DEBIAN/control in {}!".format(
+                        self.name, package, package_path
+                    )
+                )
             with open(controlpath, "r") as f:
                 controldata = f.read()
 
             # Setup the package data
-            new_dpkg_data[package] = {
-                "name": package,
-                "control": controldata
-            }
+            new_dpkg_data[package] = {"name": package, "control": controldata}
 
             # DEBIAN/{pre,post}{inst,rm} scripts go into bst.package-scripts.<package>.<script>
             package_scripts = Node.from_dict({})
@@ -231,8 +245,10 @@ class DpkgElement(BuildElement):
         self.set_public_data("bst", bstdata)
 
         if bad_overlaps:
-            self.warn('Destructive overlaps found in some files',
-                      detail='\n'.join(bad_overlaps))
+            self.warn(
+                "Destructive overlaps found in some files",
+                detail="\n".join(bad_overlaps),
+            )
 
         return collectdir
 

@@ -129,7 +129,7 @@ from configparser import RawConfigParser
 from buildstream import Source, SourceError, SourceFetcher
 from buildstream import utils
 
-GIT_MODULES = '.gitmodules'
+GIT_MODULES = ".gitmodules"
 
 
 # Because of handling of submodules, we maintain a GitMirror
@@ -137,15 +137,18 @@ GIT_MODULES = '.gitmodules'
 # might have at a given time
 #
 class GitTagMirror(SourceFetcher):
-
-    def __init__(self, source, path, url, ref, *, primary=False, full_clone=False):
+    def __init__(
+        self, source, path, url, ref, *, primary=False, full_clone=False
+    ):
 
         super().__init__()
         self.source = source
         self.path = path
         self.url = url
         self.primary = primary
-        self.mirror = os.path.join(source.get_mirror_directory(), utils.url_directory_name(url))
+        self.mirror = os.path.join(
+            source.get_mirror_directory(), utils.url_directory_name(url)
+        )
 
         self.mark_download_url(url)
         self.full_clone = full_clone
@@ -156,8 +159,12 @@ class GitTagMirror(SourceFetcher):
         if ref is None:
             self.fetch_mirror = None
         else:
-            ref_dirname = utils.url_directory_name('{}#{}'.format(self.url, ref))
-            self.fetch_mirror = os.path.join(self.source.get_mirror_directory(), ref_dirname)
+            ref_dirname = utils.url_directory_name(
+                "{}#{}".format(self.url, ref)
+            )
+            self.fetch_mirror = os.path.join(
+                self.source.get_mirror_directory(), ref_dirname
+            )
 
     def mirror_path(self):
         if os.path.exists(self.mirror):
@@ -175,80 +182,121 @@ class GitTagMirror(SourceFetcher):
             return
 
         if self.full_clone:
-            self.source.status("{}: Full clone requested"
-                               .format(self.source))
+            self.source.status("{}: Full clone requested".format(self.source))
             self.ensure_trackable(alias_override=alias_override)
             return
 
-        m = re.match(r'(?P<tag>.*)-0-g(?P<commit>.*)', self.ref)
+        m = re.match(r"(?P<tag>.*)-0-g(?P<commit>.*)", self.ref)
         if not m:
-            self.source.status("{}: Not fetching exact tag. Getting full clone."
-                               .format(self.source))
+            self.source.status(
+                "{}: Not fetching exact tag. Getting full clone.".format(
+                    self.source
+                )
+            )
             self.ensure_trackable(alias_override=alias_override)
             return
 
-        tag = m.group('tag')
-        commit = m.group('commit')
+        tag = m.group("tag")
+        commit = m.group("commit")
 
         with self.source.tempdir() as tmpdir:
-            self.source.call([self.source.host_git, 'init', '--bare', tmpdir],
-                             fail="Failed to init git repository",
-                             fail_temporarily=True)
+            self.source.call(
+                [self.source.host_git, "init", "--bare", tmpdir],
+                fail="Failed to init git repository",
+                fail_temporarily=True,
+            )
 
-            url = self.source.translate_url(self.url, alias_override=alias_override,
-                                            primary=self.primary)
+            url = self.source.translate_url(
+                self.url, alias_override=alias_override, primary=self.primary
+            )
 
-            self.source.call([self.source.host_git, 'remote', 'add', '--mirror=fetch', 'origin', url],
-                             cwd=tmpdir,
-                             fail="Failed to init git repository",
-                             fail_temporarily=True)
+            self.source.call(
+                [
+                    self.source.host_git,
+                    "remote",
+                    "add",
+                    "--mirror=fetch",
+                    "origin",
+                    url,
+                ],
+                cwd=tmpdir,
+                fail="Failed to init git repository",
+                fail_temporarily=True,
+            )
 
             _, refs = self.source.check_output(
-                [self.source.host_git, 'ls-remote', 'origin'],
+                [self.source.host_git, "ls-remote", "origin"],
                 cwd=tmpdir,
-                fail="Failed to list advertised remote refs from git repository {}".format(url),
-                fail_temporarily=True)
+                fail="Failed to list advertised remote refs from git repository {}".format(
+                    url
+                ),
+                fail_temporarily=True,
+            )
 
             advertised = False
 
             for ref_line in refs.splitlines():
-                ad_commit, ad_ref = ref_line.split('\t', 1)
+                ad_commit, ad_ref = ref_line.split("\t", 1)
                 if ad_commit == commit:
-                    if ad_ref in ['refs/tags/{tag}^{{}}'.format(tag=tag), 'refs/tags/{tag}'.format(tag=tag)]:
+                    if ad_ref in [
+                        "refs/tags/{tag}^{{}}".format(tag=tag),
+                        "refs/tags/{tag}".format(tag=tag),
+                    ]:
                         advertised = True
                         break
 
             if not advertised:
-                self.source.status("{}: {} is not advertised on {}, so a full clone is required"
-                                   .format(self.source, self.ref, url))
+                self.source.status(
+                    "{}: {} is not advertised on {}, so a full clone is required".format(
+                        self.source, self.ref, url
+                    )
+                )
 
                 self.ensure_trackable(alias_override=alias_override)
                 return
 
-            exit_code = self.source.call([self.source.host_git, 'fetch', '--depth=1', 'origin', tag],
-                                         cwd=tmpdir)
+            exit_code = self.source.call(
+                [self.source.host_git, "fetch", "--depth=1", "origin", tag],
+                cwd=tmpdir,
+            )
             if exit_code != 0:
-                self.source.status("{}: Failed to shallow clone from {}. Probably dumb HTTP server. Trying full clone."
-                                   .format(self.source, url))
+                self.source.status(
+                    "{}: Failed to shallow clone from {}. Probably dumb HTTP server. Trying full clone.".format(
+                        self.source, url
+                    )
+                )
 
                 self.ensure_trackable(alias_override=alias_override)
                 return
 
             # We need to have a ref to make it clonable
-            self.source.call([self.source.host_git, 'update-ref', 'HEAD', '{commit}^{{}}'.format(commit=commit)],
-                             cwd=tmpdir,
-                             fail="Failed to tag HEAD",
-                             fail_temporarily=True)
+            self.source.call(
+                [
+                    self.source.host_git,
+                    "update-ref",
+                    "HEAD",
+                    "{commit}^{{}}".format(commit=commit),
+                ],
+                cwd=tmpdir,
+                fail="Failed to tag HEAD",
+                fail_temporarily=True,
+            )
 
             try:
                 os.rename(tmpdir, self.fetch_mirror)
             except OSError as e:
                 if e.errno in (errno.ENOTEMPTY, errno.EEXIST):
-                    self.source.status("{}: Discarding duplicate clone of {}"
-                                       .format(self.source, url))
+                    self.source.status(
+                        "{}: Discarding duplicate clone of {}".format(
+                            self.source, url
+                        )
+                    )
                 else:
-                    raise SourceError("{}: Failed to move cloned git repository {} from '{}' to '{}': {}"
-                                      .format(self.source, url, tmpdir, self.fetch_mirror, e)) from e
+                    raise SourceError(
+                        "{}: Failed to move cloned git repository {} from '{}' to '{}': {}".format(
+                            self.source, url, tmpdir, self.fetch_mirror, e
+                        )
+                    ) from e
 
     # Ensures that the mirror exists
     def ensure_trackable(self, alias_override=None):
@@ -264,11 +312,23 @@ class GitTagMirror(SourceFetcher):
             # system configured tmpdir is not on the same partition.
             #
             with self.source.tempdir() as tmpdir:
-                url = self.source.translate_url(self.url, alias_override=alias_override,
-                                                primary=self.primary)
-                self.source.call([self.source.host_git, 'clone', '--mirror', '-n', url, tmpdir],
-                                 fail="Failed to clone git repository {}".format(url),
-                                 fail_temporarily=True)
+                url = self.source.translate_url(
+                    self.url,
+                    alias_override=alias_override,
+                    primary=self.primary,
+                )
+                self.source.call(
+                    [
+                        self.source.host_git,
+                        "clone",
+                        "--mirror",
+                        "-n",
+                        url,
+                        tmpdir,
+                    ],
+                    fail="Failed to clone git repository {}".format(url),
+                    fail_temporarily=True,
+                )
 
                 # Attempt atomic rename into destination, this will fail if
                 # another process beat us to the punch
@@ -280,49 +340,66 @@ class GitTagMirror(SourceFetcher):
                     # will fail with ENOTEMPTY or EEXIST, since an empty directory will
                     # be silently replaced
                     if e.errno in (errno.ENOTEMPTY, errno.EEXIST):
-                        self.source.status("{}: Discarding duplicate clone of {}"
-                                           .format(self.source, url))
+                        self.source.status(
+                            "{}: Discarding duplicate clone of {}".format(
+                                self.source, url
+                            )
+                        )
                     else:
-                        raise SourceError("{}: Failed to move cloned git repository {} from '{}' to '{}': {}"
-                                          .format(self.source, url, tmpdir, self.mirror, e)) from e
+                        raise SourceError(
+                            "{}: Failed to move cloned git repository {} from '{}' to '{}': {}".format(
+                                self.source, url, tmpdir, self.mirror, e
+                            )
+                        ) from e
 
     def _fetch(self, alias_override=None):
-        url = self.source.translate_url(self.url,
-                                        alias_override=alias_override,
-                                        primary=self.primary)
+        url = self.source.translate_url(
+            self.url, alias_override=alias_override, primary=self.primary
+        )
 
         mirror = self.mirror_path()
 
         if alias_override:
             remote_name = utils.url_directory_name(alias_override)
             _, remotes = self.source.check_output(
-                [self.source.host_git, 'remote'],
+                [self.source.host_git, "remote"],
                 fail="Failed to retrieve list of remotes in {}".format(mirror),
-                cwd=mirror
+                cwd=mirror,
             )
             if remote_name not in remotes:
                 self.source.call(
-                    [self.source.host_git, 'remote', 'add', remote_name, url],
-                    fail="Failed to add remote {} with url {}".format(remote_name, url),
-                    cwd=mirror
+                    [self.source.host_git, "remote", "add", remote_name, url],
+                    fail="Failed to add remote {} with url {}".format(
+                        remote_name, url
+                    ),
+                    cwd=mirror,
                 )
         else:
             remote_name = "origin"
 
-        self.source.call([self.source.host_git, 'fetch', remote_name, '--prune', '--tags', '--force'],
-                         fail="Failed to fetch from remote git repository: {}".format(url),
-                         fail_temporarily=True,
-                         cwd=self.mirror)
+        self.source.call(
+            [
+                self.source.host_git,
+                "fetch",
+                remote_name,
+                "--prune",
+                "--tags",
+                "--force",
+            ],
+            fail="Failed to fetch from remote git repository: {}".format(url),
+            fail_temporarily=True,
+            cwd=self.mirror,
+        )
 
     def fetch(self, alias_override=None):
         # Resolve the URL for the message
-        resolved_url = self.source.translate_url(self.url,
-                                                 alias_override=alias_override,
-                                                 primary=self.primary)
+        resolved_url = self.source.translate_url(
+            self.url, alias_override=alias_override, primary=self.primary
+        )
 
-        with self.source.timed_activity("Fetching from {}"
-                                        .format(resolved_url),
-                                        silent_nested=True):
+        with self.source.timed_activity(
+            "Fetching from {}".format(resolved_url), silent_nested=True
+        ):
             self.ensure_fetchable(alias_override)
             if not self.has_ref():
                 self._fetch(alias_override)
@@ -333,55 +410,85 @@ class GitTagMirror(SourceFetcher):
             return False
 
         # If the mirror doesnt exist, we also dont have the ref
-        if not os.path.exists(self.mirror) and not os.path.exists(self.fetch_mirror):
+        if not os.path.exists(self.mirror) and not os.path.exists(
+            self.fetch_mirror
+        ):
             return False
 
         mirror = self.mirror_path()
 
         # Check if the ref is really there
-        rc = self.source.call([self.source.host_git, 'cat-file', '-t', self.ref], cwd=mirror)
+        rc = self.source.call(
+            [self.source.host_git, "cat-file", "-t", self.ref], cwd=mirror
+        )
         return rc == 0
 
     def assert_ref(self):
         if not self.has_ref():
-            raise SourceError("{}: expected ref '{}' was not found in git repository: '{}'"
-                              .format(self.source, self.ref, self.url))
+            raise SourceError(
+                "{}: expected ref '{}' was not found in git repository: '{}'".format(
+                    self.source, self.ref, self.url
+                )
+            )
 
     def latest_commit(self, tracking, *, track_tags, track_args):
         if track_tags:
             exit_code, output = self.source.check_output(
-                [self.source.host_git, "describe", "--tags", "--abbrev=0"] + track_args + [tracking],
-                cwd=self.mirror)
+                [self.source.host_git, "describe", "--tags", "--abbrev=0"]
+                + track_args
+                + [tracking],
+                cwd=self.mirror,
+            )
 
             if exit_code == 128:
-                self.source.info("Unable to find tag for specified branch name '{}'".format(tracking))
+                self.source.info(
+                    "Unable to find tag for specified branch name '{}'".format(
+                        tracking
+                    )
+                )
                 _, output = self.source.check_output(
-                    [self.source.host_git, 'rev-parse', tracking],
-                    fail="Unable to find commit for specified branch name '{}'".format(tracking),
-                    cwd=self.mirror)
-            tracking = output.rstrip('\n')
+                    [self.source.host_git, "rev-parse", tracking],
+                    fail="Unable to find commit for specified branch name '{}'".format(
+                        tracking
+                    ),
+                    cwd=self.mirror,
+                )
+            tracking = output.rstrip("\n")
 
         else:
             _, output = self.source.check_output(
-                [self.source.host_git, 'rev-parse', tracking],
-                fail="Unable to find commit for specified branch name '{}'".format(tracking),
-                cwd=self.mirror)
+                [self.source.host_git, "rev-parse", tracking],
+                fail="Unable to find commit for specified branch name '{}'".format(
+                    tracking
+                ),
+                cwd=self.mirror,
+            )
 
-        ref = output.rstrip('\n')
+        ref = output.rstrip("\n")
 
         # Prefix the ref with the closest annotated tag, if available,
         # to make the ref human readable
         exit_code, output = self.source.check_output(
-            [self.source.host_git, 'describe', '--tags', '--abbrev=40', '--long'] + track_args + [ref],
-            cwd=self.mirror)
+            [
+                self.source.host_git,
+                "describe",
+                "--tags",
+                "--abbrev=40",
+                "--long",
+            ]
+            + track_args
+            + [ref],
+            cwd=self.mirror,
+        )
         if exit_code == 0:
-            ref = output.rstrip('\n')
+            ref = output.rstrip("\n")
 
         # Find the time of the commit to avoid stepping onto an older tag
         # on a different branch
         _, time = self.source.check_output(
-            [self.source.host_git, 'show', '-s', '--format=%ct', ref],
-            cwd=self.mirror)
+            [self.source.host_git, "show", "-s", "--format=%ct", ref],
+            cwd=self.mirror,
+        )
 
         return ref, time
 
@@ -393,29 +500,56 @@ class GitTagMirror(SourceFetcher):
         # We need to pass '--no-hardlinks' because there's nothing to
         # stop the build from overwriting the files in the .git directory
         # inside the sandbox.
-        self.source.call([self.source.host_git, 'clone', '--no-checkout', '--no-hardlinks', mirror, fullpath],
-                         fail="Failed to create git mirror {} in directory: {}".format(mirror, fullpath),
-                         fail_temporarily=True)
+        self.source.call(
+            [
+                self.source.host_git,
+                "clone",
+                "--no-checkout",
+                "--no-hardlinks",
+                mirror,
+                fullpath,
+            ],
+            fail="Failed to create git mirror {} in directory: {}".format(
+                mirror, fullpath
+            ),
+            fail_temporarily=True,
+        )
 
-        self.source.call([self.source.host_git, 'checkout', '--force', self.ref],
-                         fail="Failed to checkout git ref {}".format(self.ref),
-                         cwd=fullpath)
+        self.source.call(
+            [self.source.host_git, "checkout", "--force", self.ref],
+            fail="Failed to checkout git ref {}".format(self.ref),
+            cwd=fullpath,
+        )
 
     def init_workspace(self, directory):
         fullpath = os.path.join(directory, self.path)
         url = self.source.translate_url(self.url)
 
-        self.source.call([self.source.host_git, 'clone', '--no-checkout', self.mirror, fullpath],
-                         fail="Failed to clone git mirror {} in directory: {}".format(self.mirror, fullpath),
-                         fail_temporarily=True)
+        self.source.call(
+            [
+                self.source.host_git,
+                "clone",
+                "--no-checkout",
+                self.mirror,
+                fullpath,
+            ],
+            fail="Failed to clone git mirror {} in directory: {}".format(
+                self.mirror, fullpath
+            ),
+            fail_temporarily=True,
+        )
 
-        self.source.call([self.source.host_git, 'remote', 'set-url', 'origin', url],
-                         fail='Failed to add remote origin "{}"'.format(url),
-                         cwd=fullpath)
+        self.source.call(
+            [self.source.host_git, "remote", "set-url", "origin", url],
+            fail='Failed to add remote origin "{}"'.format(url),
+            cwd=fullpath,
+        )
 
-        self.source.call([self.source.host_git, 'checkout', '--force', self.ref],
-                         fail="Failed to checkout git ref {}".format(self.ref),
-                         cwd=fullpath)
+        self.source.call(
+            [self.source.host_git, "checkout", "--force", self.ref],
+            fail="Failed to checkout git ref {}".format(self.ref),
+            cwd=fullpath,
+        )
 
     # List the submodules (path/url tuples) present at the given ref of this repo
     def submodule_list(self):
@@ -423,7 +557,8 @@ class GitTagMirror(SourceFetcher):
 
         modules = "{}:{}".format(self.ref, GIT_MODULES)
         exit_code, output = self.source.check_output(
-            [self.source.host_git, 'show', modules], cwd=mirror)
+            [self.source.host_git, "show", modules], cwd=mirror
+        )
 
         # If git show reports error code 128 here, we take it to mean there is
         # no .gitmodules file to display for the given revision.
@@ -432,9 +567,11 @@ class GitTagMirror(SourceFetcher):
         elif exit_code != 0:
             raise SourceError(
                 "{plugin}: Failed to show gitmodules at ref {ref}".format(
-                    plugin=self, ref=self.ref))
+                    plugin=self, ref=self.ref
+                )
+            )
 
-        content = '\n'.join([l.strip() for l in output.splitlines()])
+        content = "\n".join([l.strip() for l in output.splitlines()])
 
         io = StringIO(content)
         parser = RawConfigParser()
@@ -443,8 +580,8 @@ class GitTagMirror(SourceFetcher):
         for section in parser.sections():
             # validate section name against the 'submodule "foo"' pattern
             if re.match(r'submodule "(.*)"', section):
-                path = parser.get(section, 'path')
-                url = parser.get(section, 'url')
+                path = parser.get(section, "path")
+                url = parser.get(section, "url")
 
                 yield (path, url)
 
@@ -458,30 +595,44 @@ class GitTagMirror(SourceFetcher):
 
         # list objects in the parent repo tree to find the commit
         # object that corresponds to the submodule
-        _, output = self.source.check_output([self.source.host_git, 'ls-tree', ref, submodule],
-                                             fail="ls-tree failed for commit {} and submodule: {}".format(
-                                                 ref, submodule),
-                                             cwd=mirror)
+        _, output = self.source.check_output(
+            [self.source.host_git, "ls-tree", ref, submodule],
+            fail="ls-tree failed for commit {} and submodule: {}".format(
+                ref, submodule
+            ),
+            cwd=mirror,
+        )
 
         # read the commit hash from the output
         fields = output.split()
-        if len(fields) >= 2 and fields[1] == 'commit':
+        if len(fields) >= 2 and fields[1] == "commit":
             submodule_commit = output.split()[2]
 
             # fail if the commit hash is invalid
             if len(submodule_commit) != 40:
-                raise SourceError("{}: Error reading commit information for submodule '{}'"
-                                  .format(self.source, submodule))
+                raise SourceError(
+                    "{}: Error reading commit information for submodule '{}'".format(
+                        self.source, submodule
+                    )
+                )
 
             return submodule_commit
 
         else:
-            detail = "The submodule '{}' is defined either in the BuildStream source\n".format(submodule) + \
-                     "definition, or in a .gitmodules file. But the submodule was never added to the\n" + \
-                     "underlying git repository with `git submodule add`."
+            detail = (
+                "The submodule '{}' is defined either in the BuildStream source\n".format(
+                    submodule
+                )
+                + "definition, or in a .gitmodules file. But the submodule was never added to the\n"
+                + "underlying git repository with `git submodule add`."
+            )
 
-            self.source.warn("{}: Ignoring inconsistent submodule '{}'"
-                             .format(self.source, submodule), detail=detail)
+            self.source.warn(
+                "{}: Ignoring inconsistent submodule '{}'".format(
+                    self.source, submodule
+                ),
+                detail=detail,
+            )
 
             return None
 
@@ -492,64 +643,70 @@ class GitTagSource(Source):
     BST_FORMAT_VERSION = 1
 
     def configure(self, node):
-        ref = node.get_str('ref', None)
+        ref = node.get_str("ref", None)
 
-        config_keys = ['url',
-                       'track',
-                       'track-tags',
-                       'track-extra',
-                       'ref',
-                       'submodules',
-                       'checkout-submodules',
-                       'match',
-                       'exclude',
-                       'full-clone']
+        config_keys = [
+            "url",
+            "track",
+            "track-tags",
+            "track-extra",
+            "ref",
+            "submodules",
+            "checkout-submodules",
+            "match",
+            "exclude",
+            "full-clone",
+        ]
         node.validate_keys(config_keys + Source.COMMON_CONFIG_KEYS)
 
-        self.original_url = node.get_str('url')
-        self.full_clone = node.get_bool('full-clone', False)
-        self.mirror = GitTagMirror(self, '', self.original_url, ref, primary=True)
-        self.tracking = node.get_str('track', None)
+        self.original_url = node.get_str("url")
+        self.full_clone = node.get_bool("full-clone", False)
+        self.mirror = GitTagMirror(
+            self, "", self.original_url, ref, primary=True
+        )
+        self.tracking = node.get_str("track", None)
         # FIXME: check if get_sequence would not be better
-        self.track_extra = node.get_str_list('track-extra', default=[])
-        self.track_tags = node.get_bool('track-tags', False)
+        self.track_extra = node.get_str_list("track-extra", default=[])
+        self.track_tags = node.get_bool("track-tags", False)
         # FIXME: check if get_sequence would not be better
-        self.match = node.get_str_list('match', [])
+        self.match = node.get_str_list("match", [])
         # FIXME: check if get_sequence would not be better
-        self.exclude = node.get_str_list('exclude', [])
+        self.exclude = node.get_str_list("exclude", [])
 
         # At this point we now know if the source has a ref and/or a track.
         # If it is missing both then we will be unable to track or build.
         if self.mirror.ref is None and self.tracking is None:
-            raise SourceError("{}: Git sources require a ref and/or track".format(self),
-                              reason="missing-track-and-ref")
+            raise SourceError(
+                "{}: Git sources require a ref and/or track".format(self),
+                reason="missing-track-and-ref",
+            )
 
-        self.checkout_submodules = node.get_bool('checkout-submodules', True)
+        self.checkout_submodules = node.get_bool("checkout-submodules", True)
         self.submodules = []
 
         # Parse a dict of submodule overrides, stored in the submodule_overrides
         # and submodule_checkout_overrides dictionaries.
         self.submodule_overrides = {}
         self.submodule_checkout_overrides = {}
-        modules = node.get_mapping('submodules', {})
+        modules = node.get_mapping("submodules", {})
         for path in modules.keys():
             submodule = modules.get_mapping(path)
-            url = submodule.get_str('url', None)
+            url = submodule.get_str("url", None)
 
             # Make sure to mark all URLs that are specified in the configuration
             if url:
                 self.mark_download_url(url, primary=False)
 
             self.submodule_overrides[path] = url
-            if 'checkout' in submodule:
-                checkout = submodule.get_bool('checkout')
+            if "checkout" in submodule:
+                checkout = submodule.get_bool("checkout")
                 self.submodule_checkout_overrides[path] = checkout
 
         self.mark_download_url(self.original_url)
 
     def preflight(self):
         # Check if git is installed, get the binary at the same time
-        self.host_git = utils.get_host_tool('git')
+        self.host_git = utils.get_host_tool("git")
 
     def get_unique_key(self):
         # Here we want to encode the local name of the repository and
@@ -568,7 +725,11 @@ class GitTagSource(Source):
             key.append(self.submodule_overrides)
 
         if self.submodule_checkout_overrides:
-            key.append({"submodule_checkout_overrides": self.submodule_checkout_overrides})
+            key.append(
+                {
+                    "submodule_checkout_overrides": self.submodule_checkout_overrides
+                }
+            )
 
         return key
 
@@ -576,7 +737,7 @@ class GitTagSource(Source):
         return self.have_all_refs()
 
     def load_ref(self, node):
-        ref = node.get_str('ref', None)
+        ref = node.get_str("ref", None)
         self.mirror.set_ref(ref)
 
     def get_ref(self):
@@ -584,7 +745,7 @@ class GitTagSource(Source):
 
     def set_ref(self, ref, node):
         self.mirror.set_ref(ref)
-        node['ref'] = ref
+        node["ref"] = ref
 
     def track(self):
 
@@ -594,9 +755,10 @@ class GitTagSource(Source):
 
         # Resolve the URL for the message
         resolved_url = self.translate_url(self.mirror.url)
-        with self.timed_activity("Tracking {} from {}"
-                                 .format(self.tracking, resolved_url),
-                                 silent_nested=True):
+        with self.timed_activity(
+            "Tracking {} from {}".format(self.tracking, resolved_url),
+            silent_nested=True,
+        ):
             self.mirror.ensure_trackable()
             self.mirror._fetch()
 
@@ -614,9 +776,16 @@ class GitTagSource(Source):
             # function, so directly constructing with dict() is nicer than dict
             # comprehension
             # pylint: disable=consider-using-dict-comprehension
-            candidates = dict([self.mirror.latest_commit(
-                branch, track_tags=self.track_tags, track_args=track_args)
-                for branch in branches])  # pylint: disable=bad-continuation
+            candidates = dict(
+                [
+                    self.mirror.latest_commit(
+                        branch,
+                        track_tags=self.track_tags,
+                        track_args=track_args,
+                    )
+                    for branch in branches
+                ]
+            )  # pylint: disable=bad-continuation
 
             # Find latest candidate ref from all branches
             # Update self.mirror.ref, node.ref
@@ -629,7 +798,9 @@ class GitTagSource(Source):
         self.mirror.ensure_trackable()
         self.refresh_submodules()
 
-        with self.timed_activity('Setting up workspace "{}"'.format(directory), silent_nested=True):
+        with self.timed_activity(
+            'Setting up workspace "{}"'.format(directory), silent_nested=True
+        ):
             self.mirror.init_workspace(directory)
             for mirror in self.submodules:
                 mirror.init_workspace(directory)
@@ -645,7 +816,9 @@ class GitTagSource(Source):
 
         # Stage the main repo in the specified directory
         #
-        with self.timed_activity("Staging {}".format(self.mirror.url), silent_nested=True):
+        with self.timed_activity(
+            "Staging {}".format(self.mirror.url), silent_nested=True
+        ):
             self.mirror.stage(directory)
             for mirror in self.submodules:
                 mirror.stage(directory)
@@ -665,7 +838,9 @@ class GitTagSource(Source):
 
         self.refresh_submodules()
         for mirror in self.submodules:
-            if not os.path.exists(mirror.mirror) and not os.path.exists(mirror.fetch_mirror):
+            if not os.path.exists(mirror.mirror) and not os.path.exists(
+                mirror.fetch_mirror
+            ):
                 return False
             if not mirror.has_ref():
                 return False

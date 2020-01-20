@@ -79,7 +79,10 @@ class DownloadableFileSource(Source):
         self.original_url = node.get_str("url")
         self.ref = node.get_str("ref", None)
         self.url = self.translate_url(self.original_url)
-        self._mirror_dir = os.path.join(self.get_mirror_directory(), utils.url_directory_name(self.original_url))
+        self._mirror_dir = os.path.join(
+            self.get_mirror_directory(),
+            utils.url_directory_name(self.original_url),
+        )
         self._warn_deprecated_etag(node)
 
     def preflight(self):
@@ -105,15 +108,17 @@ class DownloadableFileSource(Source):
         # there is no 'track' field in the source to determine what/whether
         # or not to update refs, because tracking a ref is always a conscious
         # decision by the user.
-        with self.timed_activity("Tracking {}".format(self.url), silent_nested=True):
+        with self.timed_activity(
+            "Tracking {}".format(self.url), silent_nested=True
+        ):
             new_ref = self._ensure_mirror()
 
             if self.ref and self.ref != new_ref:
                 detail = (
-                    "When tracking, new ref differs from current ref:\n" +
-                    "  Tracked URL: {}\n".format(self.url) +
-                    "  Current ref: {}\n".format(self.ref) +
-                    "  New ref: {}\n".format(new_ref)
+                    "When tracking, new ref differs from current ref:\n"
+                    + "  Tracked URL: {}\n".format(self.url)
+                    + "  Current ref: {}\n".format(self.ref)
+                    + "  New ref: {}\n".format(new_ref)
                 )
                 self.warn("Potential man-in-the-middle attack!", detail=detail)
 
@@ -130,18 +135,24 @@ class DownloadableFileSource(Source):
 
         # Download the file, raise hell if the sha256sums don't match,
         # and mirror the file otherwise.
-        with self.timed_activity("Fetching {}".format(self.url), silent_nested=True):
+        with self.timed_activity(
+            "Fetching {}".format(self.url), silent_nested=True
+        ):
             sha256 = self._ensure_mirror()
             if sha256 != self.ref:
                 raise SourceError(
-                    "File downloaded from {} has sha256sum '{}', not '{}'!".format(self.url, sha256, self.ref)
+                    "File downloaded from {} has sha256sum '{}', not '{}'!".format(
+                        self.url, sha256, self.ref
+                    )
                 )
 
     def _warn_deprecated_etag(self, node):
         etag = node.get_str("etag", None)
         if etag:
             provenance = node.get_scalar(etag).get_provenance()
-            self.warn('{} "etag" is deprecated and ignored.'.format(provenance))
+            self.warn(
+                '{} "etag" is deprecated and ignored.'.format(provenance)
+            )
 
     def _get_etag(self, ref):
         etagfilename = os.path.join(self._mirror_dir, "{}.etag".format(ref))
@@ -206,19 +217,32 @@ class DownloadableFileSource(Source):
                 # Because we use etag only for matching ref, currently specified ref is what
                 # we would have downloaded.
                 return self.ref
-            raise SourceError("{}: Error mirroring {}: {}".format(self, self.url, e), temporary=True) from e
+            raise SourceError(
+                "{}: Error mirroring {}: {}".format(self, self.url, e),
+                temporary=True,
+            ) from e
 
-        except (urllib.error.URLError, urllib.error.ContentTooShortError, OSError, ValueError) as e:
+        except (
+            urllib.error.URLError,
+            urllib.error.ContentTooShortError,
+            OSError,
+            ValueError,
+        ) as e:
             # Note that urllib.request.Request in the try block may throw a
             # ValueError for unknown url types, so we handle it here.
-            raise SourceError("{}: Error mirroring {}: {}".format(self, self.url, e), temporary=True) from e
+            raise SourceError(
+                "{}: Error mirroring {}: {}".format(self, self.url, e),
+                temporary=True,
+            ) from e
 
     def _get_mirror_file(self, sha=None):
         if sha is not None:
             return os.path.join(self._mirror_dir, sha)
 
         if self.__default_mirror_file is None:
-            self.__default_mirror_file = os.path.join(self._mirror_dir, self.ref)
+            self.__default_mirror_file = os.path.join(
+                self._mirror_dir, self.ref
+            )
 
         return self.__default_mirror_file
 
@@ -233,7 +257,9 @@ class DownloadableFileSource(Source):
                 #
                 # This will catch both cases.
                 #
-                DownloadableFileSource.__urlopener = urllib.request.build_opener()
+                DownloadableFileSource.__urlopener = (
+                    urllib.request.build_opener()
+                )
             except netrc.NetrcParseError as e:
                 self.warn("{}: While reading .netrc: {}".format(self, e))
                 return urllib.request.build_opener()
@@ -241,5 +267,7 @@ class DownloadableFileSource(Source):
                 netrc_pw_mgr = _NetrcPasswordManager(netrc_config)
                 http_auth = urllib.request.HTTPBasicAuthHandler(netrc_pw_mgr)
                 ftp_handler = _NetrcFTPOpener(netrc_config)
-                DownloadableFileSource.__urlopener = urllib.request.build_opener(http_auth, ftp_handler)
+                DownloadableFileSource.__urlopener = urllib.request.build_opener(
+                    http_auth, ftp_handler
+                )
         return DownloadableFileSource.__urlopener

@@ -92,55 +92,79 @@ class BazelSource(Source):
     BST_REQUIRES_PREVIOUS_SOURCES_TRACK = True
 
     def configure(self, node):
-        node.validate_keys(['workspace-dir', 'allow-host-bazel', 'repo-file', 'targets', 'ref'] +
-                           Source.COMMON_CONFIG_KEYS)
+        node.validate_keys(
+            [
+                "workspace-dir",
+                "allow-host-bazel",
+                "repo-file",
+                "targets",
+                "ref",
+            ]
+            + Source.COMMON_CONFIG_KEYS
+        )
 
         # Whether to allow falling back to a bazel installed on the host to generate
         # a "repository resolved file"
         #
-        self.allow_host_bazel = node.get_bool('allow-host-bazel', default=False)
+        self.allow_host_bazel = node.get_bool(
+            "allow-host-bazel", default=False
+        )
 
         # The path to the "repository resolved file". Defaults to .bst-sources
-        self.repo_file = node.get_str('repo-file', default='.bst-sources')
+        self.repo_file = node.get_str("repo-file", default=".bst-sources")
 
         # The targets to generate a repository resolved file for, defaults to all targets.
         # This only matters if we fall back to host bazel.
         #
-        self.targets = node.get_str_list('targets', default=[])
+        self.targets = node.get_str_list("targets", default=[])
 
         # The path to the bazel workspace. This can be used for repos which have
         # the bazel project in a subdirectory.
         #
-        self.workspace_dir = node.get_str('workspace-dir', default='.')
+        self.workspace_dir = node.get_str("workspace-dir", default=".")
 
         # The unique ref of this source. The SHA256 of the repository resolved file
-        self.ref = node.get_str('ref', default=None)
+        self.ref = node.get_str("ref", default=None)
 
-        self._distdir = '_bst_distdir'
+        self._distdir = "_bst_distdir"
 
         if not self.allow_host_bazel and self.targets:
-            self.warn("{}: `targets` specified but host bazel not allowed".format(self),
-                      detail="Setting targets only affects operation with host bazel")
+            self.warn(
+                "{}: `targets` specified but host bazel not allowed".format(
+                    self
+                ),
+                detail="Setting targets only affects operation with host bazel",
+            )
 
         # XXX: This is to avoid a bug in BuildStream, I think, in which setting
         # the default value of a SequenceNode causes an error. I *think* setting
         # the default to None causes a segfault too.
         #
         if not self.targets:
-            self.targets = ['//...']
+            self.targets = ["//..."]
 
         self.host_bazel = None
 
     def preflight(self):
         if self.allow_host_bazel:
             try:
-                self.host_bazel = utils.get_host_tool('bazel')
+                self.host_bazel = utils.get_host_tool("bazel")
             except utils.ProgramNotFoundError:
-                self.warn("{}: Host bazel allowed, but no suitable command found".format(self),
-                          detail="This may cause an error if there is no repository file in the bazel repo")
+                self.warn(
+                    "{}: Host bazel allowed, but no suitable command found".format(
+                        self
+                    ),
+                    detail="This may cause an error if there is no repository file in the bazel repo",
+                )
 
     def get_unique_key(self):
-        return [self.allow_host_bazel, self.repo_file, self.targets, self.workspace_dir, self.ref]
+        return [
+            self.allow_host_bazel,
+            self.repo_file,
+            self.targets,
+            self.workspace_dir,
+            self.ref,
+        ]
 
     def is_cached(self):
         return os.path.exists(self._mirror) and os.listdir(self._mirror)
@@ -149,10 +173,10 @@ class BazelSource(Source):
         return self.ref
 
     def load_ref(self, node):
-        self.ref = node.get_str('ref', None)
+        self.ref = node.get_str("ref", None)
 
     def set_ref(self, ref, node):
-        node['ref'] = self.ref = ref
+        node["ref"] = self.ref = ref
 
     def track(self, previous_sources_dir):
         workspace = os.path.join(previous_sources_dir, self.workspace_dir)
@@ -165,7 +189,7 @@ class BazelSource(Source):
         with open(repo_file) as repo:
             ref = hashlib.sha256()
             for line in repo.readlines():
-                ref.update(line.encode('utf-8'))
+                ref.update(line.encode("utf-8"))
         return ref.hexdigest()
 
     def fetch(self, previous_sources_dir):
@@ -178,15 +202,23 @@ class BazelSource(Source):
         with open(repo_file) as repo:
             ref = hashlib.sha256()
             for line in repo.readlines():
-                ref.update(line.encode('utf-8'))
+                ref.update(line.encode("utf-8"))
 
         # We don't check the source if the host bazel was used to generate a
         # repository resolved file, as it is not deterministically generated...
         #
         if used_host:
-            self.warn("{}: Not checking ref, using host bazel affects repo file".format(self))
+            self.warn(
+                "{}: Not checking ref, using host bazel affects repo file".format(
+                    self
+                )
+            )
         elif ref.hexdigest() != self.get_ref():
-            raise SourceError("{}: Ref {} does not match specified {}".format(self, ref.hexdigest(), self.get_ref()))
+            raise SourceError(
+                "{}: Ref {} does not match specified {}".format(
+                    self, ref.hexdigest(), self.get_ref()
+                )
+            )
 
         repo_contents = _import_repo_file(repo_file)
         dist_dir = os.path.join(self._mirror, self._distdir)
@@ -199,14 +231,17 @@ class BazelSource(Source):
 
     def stage(self, directory):
         with self.timed_activity("Staging Bazel sources", silent_nested=True):
-            utils.copy_files(self._mirror, os.path.join(directory, self.workspace_dir))
+            utils.copy_files(
+                self._mirror, os.path.join(directory, self.workspace_dir)
+            )
 
     # Directory where this source should stage its files
     #
     @property
     def _mirror(self):
-        return os.path.join(self.get_mirror_directory(),
-                            '{}-{}'.format(self.name, self.ref))
+        return os.path.join(
+            self.get_mirror_directory(), "{}-{}".format(self.name, self.ref)
+        )
 
     def _ensure_repo_file(self, repo_file, workspace):
         """ Ensures that the repository resolved file exists.
@@ -217,70 +252,119 @@ class BazelSource(Source):
             return False
 
         # Warn and drop out early if host bazel is not allowed, or there is no host bazel
-        self.warn("{}: Repository file '{}' not found, falling back to host bazel".format(self, self.repo_file))
+        self.warn(
+            "{}: Repository file '{}' not found, falling back to host bazel".format(
+                self, self.repo_file
+            )
+        )
         if not self.allow_host_bazel or not self.host_bazel:
-            raise SourceError("{}: No repository resolved file found and cannot fall back to host bazel"
-                              .format(self))
+            raise SourceError(
+                "{}: No repository resolved file found and cannot fall back to host bazel".format(
+                    self
+                )
+            )
 
         # Call a "fetch" with a temporary output base (in an attempt to keep the host clean)
         with self.tempdir() as tmpdir:
-            exit_code, _ = self.check_output([self.host_bazel, '--output_base', tmpdir, 'cquery',
-                                              '--experimental_repository_resolved_file={}'
-                                              .format(repo_file)] + self.targets,
-                                             fail="Failed to generate repository file with host bazel",
-                                             cwd=workspace)
-            self.call([self.host_bazel, '--output_base', tmpdir, 'shutdown'],
-                      fail="Failed to shutdown host bazel",
-                      cwd=workspace)
+            exit_code, _ = self.check_output(
+                [
+                    self.host_bazel,
+                    "--output_base",
+                    tmpdir,
+                    "cquery",
+                    "--experimental_repository_resolved_file={}".format(
+                        repo_file
+                    ),
+                ]
+                + self.targets,
+                fail="Failed to generate repository file with host bazel",
+                cwd=workspace,
+            )
+            self.call(
+                [self.host_bazel, "--output_base", tmpdir, "shutdown"],
+                fail="Failed to shutdown host bazel",
+                cwd=workspace,
+            )
 
             if exit_code != 0:
-                raise SourceError("{}: Failed to generate repository file with host bazel".format(self))
+                raise SourceError(
+                    "{}: Failed to generate repository file with host bazel".format(
+                        self
+                    )
+                )
 
             return True
 
     def _handle_single_source(self, source, directory):
         """ Parses and downloads a single external dependency
         """
-        if 'original_attributes' not in source.keys():
-            self.warn("{}: Bazel dependency has no 'original_attributes'".format(self))
+        if "original_attributes" not in source.keys():
+            self.warn(
+                "{}: Bazel dependency has no 'original_attributes'".format(
+                    self
+                )
+            )
             return
 
-        attributes = source['original_attributes']
-        name = attributes['name']
+        attributes = source["original_attributes"]
+        name = attributes["name"]
 
-        if 'urls' not in attributes and 'url' not in attributes:
-            self.log("{}: Bazel dependency '{}' has no urls, assume local and skip".format(self, name))
+        if "urls" not in attributes and "url" not in attributes:
+            self.log(
+                "{}: Bazel dependency '{}' has no urls, assume local and skip".format(
+                    self, name
+                )
+            )
             return
 
-        if 'sha256' not in attributes:
-            self.warn("{}: Bazel dependency '{}' has no sha256, skipping".format(self, name))
+        if "sha256" not in attributes:
+            self.warn(
+                "{}: Bazel dependency '{}' has no sha256, skipping".format(
+                    self, name
+                )
+            )
             return
 
         urls = []
-        if 'url' in attributes and attributes['url'] != '':
-            urls.append(attributes['url'])
-        if 'urls' in attributes:
-            urls += attributes['urls']
+        if "url" in attributes and attributes["url"] != "":
+            urls.append(attributes["url"])
+        if "urls" in attributes:
+            urls += attributes["urls"]
 
         for url in urls:
-            self.info("{}: Downloading bazel dependency '{}'".format(self, name))
+            self.info(
+                "{}: Downloading bazel dependency '{}'".format(self, name)
+            )
             response = requests.get(url)
 
             if response.status_code != 200:
-                self.log("{}: Downloading '{}' from url '{}' failed".format(self, name, url))
+                self.log(
+                    "{}: Downloading '{}' from url '{}' failed".format(
+                        self, name, url
+                    )
+                )
                 continue
 
-            if hashlib.sha256(response.content).hexdigest() != attributes['sha256']:
-                self.log("{}: Downloaded bazel dependency {} did not match sha256".format(self, name))
+            if (
+                hashlib.sha256(response.content).hexdigest()
+                != attributes["sha256"]
+            ):
+                self.log(
+                    "{}: Downloaded bazel dependency {} did not match sha256".format(
+                        self, name
+                    )
+                )
                 continue
 
-            filename = url.split('/')[-1]
+            filename = url.split("/")[-1]
 
-            with open(os.path.join(directory, filename), 'wb') as f:
+            with open(os.path.join(directory, filename), "wb") as f:
                 f.write(response.content)
             return
 
-        self.warn("{}: Failed to download bazel dependency {}".format(self, name))
+        self.warn(
+            "{}: Failed to download bazel dependency {}".format(self, name)
+        )
 
 
 def _import_repo_file(filename):
@@ -289,7 +373,9 @@ def _import_repo_file(filename):
         assignment, list and dict, this should work entirely reliably with
         a repository resolved file
     """
-    spec = importlib.util.spec_from_loader('tmp_module', SourceFileLoader('tmp_module', filename))
+    spec = importlib.util.spec_from_loader(
+        "tmp_module", SourceFileLoader("tmp_module", filename)
+    )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.resolved

@@ -63,8 +63,10 @@ class BazelElement(BuildElement):
         sandbox.mark_directory("/bazel-home")
 
         # Enable command batching across prepare() and assemble()
-        self.batch_prepare_assemble(SandboxFlags.ROOT_READ_ONLY,
-                                    collect=self.get_variable('install-root'))
+        self.batch_prepare_assemble(
+            SandboxFlags.ROOT_READ_ONLY,
+            collect=self.get_variable("install-root"),
+        )
 
 
 def setup():

@@ -39,22 +39,27 @@ class X86ImageElement(ScriptElement):
             "filesystem-tree-setup-commands",
             "filesystem-image-creation-commands",
             "partition-commands",
-            "final-commands"
+            "final-commands",
         ]
 
         node.validate_keys(command_steps + ["base", "input"])
 
         for step in command_steps:
             if step not in node:
-                raise ElementError("{}: Unexpectedly missing command step '{}'"
-                                   .format(self, step))
+                raise ElementError(
+                    "{}: Unexpectedly missing command step '{}'".format(
+                        self, step
+                    )
+                )
             cmds = self.node_subst_sequence_vars(node.get_sequence(step))
             self.add_commands(step, cmds)
 
-        self.layout_add(self.node_subst_vars(node.get_scalar('base')), "/")
-        self.layout_add(None, '/buildstream')
-        self.layout_add(self.node_subst_vars(node.get_scalar('input')),
-                        self.get_variable('build-root'))
+        self.layout_add(self.node_subst_vars(node.get_scalar("base")), "/")
+        self.layout_add(None, "/buildstream")
+        self.layout_add(
+            self.node_subst_vars(node.get_scalar("input")),
+            self.get_variable("build-root"),
+        )
 
         self.set_work_dir()
         self.set_install_root()

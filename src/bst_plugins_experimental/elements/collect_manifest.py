@@ -99,8 +99,8 @@ class CollectManifestElement(Element):
     BST_REQUIRED_VERSION_MINOR = 91
 
     def configure(self, node):
-        if 'path' in node:
-            self.path = self.node_subst_vars(node.get_scalar('path'))
+        if "path" in node:
+            self.path = self.node_subst_vars(node.get_scalar("path"))
         else:
             self.path = None
 
@@ -108,9 +108,7 @@ class CollectManifestElement(Element):
         pass
 
     def get_unique_key(self):
-        key = {
-            'path': self.path
-        }
+        key = {"path": self.path}
         return key
 
     def configure_sandbox(self, sandbox):
@@ -120,7 +118,7 @@ class CollectManifestElement(Element):
         pass
 
     def extract_cpe(self, dep):
-        cpe = dep.get_public_data('cpe')
+        cpe = dep.get_public_data("cpe")
 
         sources = list(dep.sources())
 
@@ -129,26 +127,26 @@ class CollectManifestElement(Element):
         else:
             cpe = cpe.strip_node_info()
 
-        if 'product' not in cpe:
-            cpe['product'] = os.path.basename(os.path.splitext(dep.name)[0])
+        if "product" not in cpe:
+            cpe["product"] = os.path.basename(os.path.splitext(dep.name)[0])
 
-        version_match = cpe.pop('version-match', None)
+        version_match = cpe.pop("version-match", None)
 
-        if 'version' not in cpe:
+        if "version" not in cpe:
             matcher = VersionMatcher(version_match)
             version = matcher.get_version(sources)
-            self.info("{} version {}".format(dep, version, ))
+            self.info("{} version {}".format(dep, version,))
 
             if version is None:
                 if version_match is None:
-                    self.status('Missing version to {}.'.format(dep))
+                    self.status("Missing version to {}.".format(dep))
                 else:
                     fmt = '{}: {}: version match string "{}" did not match anything.'
                     msg = fmt.format(self, dep, version_match)
                     raise ElementError(msg)
 
             if version:
-                cpe['version'] = version
+                cpe["version"] = version
 
         return cpe
 
@@ -172,26 +170,31 @@ class CollectManifestElement(Element):
 
     def assemble(self, sandbox):
         manifest = OrderedDict()
-        manifest['//NOTE'] = 'This is a generated manifest from buildstream files and not usable by flatpak-builder'
-        manifest['modules'] = []
+        manifest[
+            "//NOTE"
+        ] = "This is a generated manifest from buildstream files and not usable by flatpak-builder"
+        manifest["modules"] = []
 
         visited = set()
-        for top_dep in self.dependencies(Scope.BUILD,
-                                         recurse=False):
+        for top_dep in self.dependencies(Scope.BUILD, recurse=False):
             for dep in self.get_dependencies(top_dep, visited):
-                import_manifest = dep.get_public_data('cpe-manifest')
+                import_manifest = dep.get_public_data("cpe-manifest")
 
                 if import_manifest:
                     import_manifest = import_manifest.strip_node_info()
-                    manifest['modules'].extend(import_manifest['modules'])
+                    manifest["modules"].extend(import_manifest["modules"])
                 else:
                     cpe = self.extract_cpe(dep)
                     sources = self.extract_sources(dep)
 
                     if cpe:
-                        manifest['modules'].append({'name': dep.name,
-                                                    'x-cpe': cpe,
-                                                    'sources': sources})
+                        manifest["modules"].append(
+                            {
+                                "name": dep.name,
+                                "x-cpe": cpe,
+                                "sources": sources,
+                            }
+                        )
 
         if self.path:
             basedir = sandbox.get_directory()
@@ -201,16 +204,16 @@ class CollectManifestElement(Element):
                     version = int(path[-1]) + 1
                     new_path = list(path)
                     new_path[-1] = str(version)
-                    path = ''.join(new_path)
+                    path = "".join(new_path)
                 else:
-                    path = path + '-1'
+                    path = path + "-1"
             os.makedirs(os.path.dirname(path), exist_ok=True)
 
-            with open(path, 'w') as o:
+            with open(path, "w") as o:
                 json.dump(cleanup_provenance(manifest), o, indent=2)
 
         manifest_node = Node.from_dict(dict(manifest))
-        self.set_public_data('cpe-manifest', manifest_node)
+        self.set_public_data("cpe-manifest", manifest_node)
         return os.path.sep
 
     def nodes_from_list(self, list_value):
@@ -245,7 +248,7 @@ class CollectManifestElement(Element):
 
 class VersionMatcher:
 
-    DEFAULT_VERSION_RE = re.compile(r'\d+\.\d+(?:\.\d+)?')
+    DEFAULT_VERSION_RE = re.compile(r"\d+\.\d+(?:\.\d+)?")
 
     def __init__(self, match):
         if match is None:
@@ -260,7 +263,7 @@ class VersionMatcher:
         if self.__match.groups == 0:
             return m.group(0)
         else:
-            return '.'.join(m.groups())
+            return ".".join(m.groups())
 
     def get_version(self, sources):
         """
@@ -271,13 +274,13 @@ class VersionMatcher:
         :sources A list of BuildStream Sources
         """
         for source in sources:
-            if source.get_kind() in ['tar', 'zip']:
+            if source.get_kind() in ["tar", "zip"]:
                 url = source.url
-                filename = url.rpartition('/')[2]
+                filename = url.rpartition("/")[2]
                 version = self._parse_version(filename)
                 if version is not None:
                     return version
-            elif source.get_kind() in ['git', 'git_tag']:
+            elif source.get_kind() in ["git", "git_tag"]:
                 ref = source.mirror.ref
                 version = self._parse_version(ref)
                 if version is not None:
@@ -294,18 +297,40 @@ def get_source_locations(sources):
     """
     source_locations = []
     for source in sources:
-        if source.get_kind() in ['git']:
-            url = source.translate_url(source.mirror.url, alias_override=None, primary=source.mirror.primary)
-            source_locations.append({"type": source.get_kind(), "url": url, "commit": source.mirror.ref})
-        if source.get_kind() in ['git_tag']:
-            url = source.translate_url(source.mirror.url, alias_override=None, primary=source.mirror.primary)
-            source_locations.append({"type": "git", "x-bst-kind": source.get_kind(), "url": url,
-                                     "commit": source.mirror.ref})
-        if source.get_kind() in ['patch']:
-            patch = source.path.rpartition('/')[2]
+        if source.get_kind() in ["git"]:
+            url = source.translate_url(
+                source.mirror.url,
+                alias_override=None,
+                primary=source.mirror.primary,
+            )
+            source_locations.append(
+                {
+                    "type": source.get_kind(),
+                    "url": url,
+                    "commit": source.mirror.ref,
+                }
+            )
+        if source.get_kind() in ["git_tag"]:
+            url = source.translate_url(
+                source.mirror.url,
+                alias_override=None,
+                primary=source.mirror.primary,
+            )
+            source_locations.append(
+                {
+                    "type": "git",
+                    "x-bst-kind": source.get_kind(),
+                    "url": url,
+                    "commit": source.mirror.ref,
+                }
+            )
+        if source.get_kind() in ["patch"]:
+            patch = source.path.rpartition("/")[2]
             source_locations.append({"type": source.get_kind(), "path": patch})
-        if source.get_kind() in ['tar', 'zip']:
-            source_locations.append({"type": "archive", "url": source.url, "sha256": source.ref})
+        if source.get_kind() in ["tar", "zip"]:
+            source_locations.append(
+                {"type": "archive", "url": source.url, "sha256": source.ref}
+            )
 
     return source_locations
 
@@ -317,7 +342,7 @@ def cleanup_provenance(data):
     if isinstance(data, dict):
         ret = OrderedDict()
         for k, v in data.items():
-            if k != '__bst_provenance_info':
+            if k != "__bst_provenance_info":
                 ret[k] = cleanup_provenance(v)
         return ret
     elif isinstance(data, list):

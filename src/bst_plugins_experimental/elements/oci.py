@@ -225,7 +225,9 @@ from buildstream import Element, ElementError, Scope
 
 
 class blob:
-    def __init__(self, root, media_type=None, text=False, mode='oci', legacy_config=None):
+    def __init__(
+        self, root, media_type=None, text=False, mode="oci", legacy_config=None
+    ):
         self.root = root
         self.descriptor = None
         self.media_type = media_type
@@ -239,18 +241,20 @@ class blob:
 
     @contextmanager
     def create(self):
-        with tempfile.NamedTemporaryFile(mode='w+b', dir=self.root, delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w+b", dir=self.root, delete=False
+        ) as f:
             filename = f.name
             try:
                 if self.text:
-                    yield codecs.getwriter('utf-8')(f)
+                    yield codecs.getwriter("utf-8")(f)
                 else:
                     yield f
                 self.descriptor = {}
                 if self.media_type:
-                    self.descriptor['mediaType'] = self.media_type
+                    self.descriptor["mediaType"] = self.media_type
                 f.seek(0, 2)
-                self.descriptor['size'] = f.tell()
+                self.descriptor["size"] = f.tell()
                 f.seek(0)
                 h = hashlib.sha256()
                 while True:
@@ -258,26 +262,43 @@ class blob:
                     if not data:
                         break
                     h.update(data)
-                if self.mode == 'oci':
-                    self.descriptor['digest'] = 'sha256:{}'.format(h.hexdigest())
-                    os.makedirs(os.path.join(self.root, 'blobs', 'sha256'), exist_ok=True)
-                    self.filename = os.path.join(self.root, 'blobs', 'sha256', h.hexdigest())
+                if self.mode == "oci":
+                    self.descriptor["digest"] = "sha256:{}".format(
+                        h.hexdigest()
+                    )
+                    os.makedirs(
+                        os.path.join(self.root, "blobs", "sha256"),
+                        exist_ok=True,
+                    )
+                    self.filename = os.path.join(
+                        self.root, "blobs", "sha256", h.hexdigest()
+                    )
                 else:
-                    assert self.mode == 'docker'
-                    if self.media_type.endswith('+json'):
-                        self.filename = os.path.join(self.root, '{}.json'.format(h.hexdigest()))
-                        self.descriptor = '{}.json'.format(h.hexdigest())
-                    elif self.media_type.startswith('application/vnd.oci.image.layer.v1.tar'):
+                    assert self.mode == "docker"
+                    if self.media_type.endswith("+json"):
+                        self.filename = os.path.join(
+                            self.root, "{}.json".format(h.hexdigest())
+                        )
+                        self.descriptor = "{}.json".format(h.hexdigest())
+                    elif self.media_type.startswith(
+                        "application/vnd.oci.image.layer.v1.tar"
+                    ):
                         blobdir = os.path.join(self.root, h.hexdigest())
                         os.makedirs(blobdir)
-                        self.filename = os.path.join(blobdir, 'layer.tar')
-                        with open(os.path.join(blobdir, 'VERSION'), 'w') as f:
-                            f.write('1.0')
-                        self.legacy_config['id'] = h.hexdigest()
+                        self.filename = os.path.join(blobdir, "layer.tar")
+                        with open(os.path.join(blobdir, "VERSION"), "w") as f:
+                            f.write("1.0")
+                        self.legacy_config["id"] = h.hexdigest()
                         self.legacy_id = h.hexdigest()
-                        with open(os.path.join(blobdir, 'json'), 'w', encoding='utf-8') as f:
+                        with open(
+                            os.path.join(blobdir, "json"),
+                            "w",
+                            encoding="utf-8",
+                        ) as f:
                             json.dump(self.legacy_config, f)
-                        self.descriptor = os.path.join(h.hexdigest(), 'layer.tar')
+                        self.descriptor = os.path.join(
+                            h.hexdigest(), "layer.tar"
+                        )
                     else:
                         assert False
                 os.rename(filename, self.filename)
@@ -293,7 +314,7 @@ class blob:
 def safe_path(path):
     norm = os.path.normpath(path)
     if os.path.isabs(norm):
-        return os.path.relpath(norm, '/')
+        return os.path.relpath(norm, "/")
     else:
         return norm
 
@@ -303,138 +324,179 @@ class OciElement(Element):
     BST_REQUIRED_VERSION_MINOR = 91
 
     def configure(self, node):
-        node.validate_keys(['mode', 'gzip', 'images', 'annotations'])
+        node.validate_keys(["mode", "gzip", "images", "annotations"])
 
-        self.mode = node.get_str('mode', 'oci')
+        self.mode = node.get_str("mode", "oci")
         # FIXME: use a enum with node.get_enum here
-        if self.mode not in ['docker', 'oci']:
+        if self.mode not in ["docker", "oci"]:
             raise ElementError(
-                '{}: Mode must be "oci" or "docker"'.format(node.get_scalar('mode').get_provenance()))
+                '{}: Mode must be "oci" or "docker"'.format(
+                    node.get_scalar("mode").get_provenance()
+                )
+            )
 
-        self.gzip = node.get_bool('gzip', self.mode == 'oci')
+        self.gzip = node.get_bool("gzip", self.mode == "oci")
 
-        if 'annotations' not in node:
+        if "annotations" not in node:
             self.annotations = None
         else:
             self.annotations = {}
-            annotations = node.get_mapping('images')
+            annotations = node.get_mapping("images")
             for k, value in annotations.items():
                 v = self.node_subst_vars(value)
                 self.annotations[k] = v
 
         self.images = []
-        for image in node.get_sequence('images'):
-            image.validate_keys([
-                'parent', 'layer',
-                'architecture', 'variant',
-                'os', 'os.version', 'os.features',
-                'author', 'comment', 'config',
-                'annotations'
-            ] + (['tags'] if self.mode == 'docker' else []))
-            parent = image.get_mapping('parent', None)
+        for image in node.get_sequence("images"):
+            image.validate_keys(
+                [
+                    "parent",
+                    "layer",
+                    "architecture",
+                    "variant",
+                    "os",
+                    "os.version",
+                    "os.features",
+                    "author",
+                    "comment",
+                    "config",
+                    "annotations",
+                ]
+                + (["tags"] if self.mode == "docker" else [])
+            )
+            parent = image.get_mapping("parent", None)
             image_value = {}
             if parent:
-                parent.validate_keys(['element', 'image'])
+                parent.validate_keys(["element", "image"])
 
                 parent = {
-                    'element': parent.get_str('element'),
-                    'image': parent.get_int('image', 0),
+                    "element": parent.get_str("element"),
+                    "image": parent.get_int("image", 0),
                 }
 
-                image_value['parent'] = parent
-            if 'layer' in image:
-                image_value['layer'] = self.node_subst_sequence_vars(image.get_sequence('layer'))
+                image_value["parent"] = parent
+            if "layer" in image:
+                image_value["layer"] = self.node_subst_sequence_vars(
+                    image.get_sequence("layer")
+                )
 
-            image_value['architecture'] = \
-                self.node_subst_vars(image.get_scalar('architecture'))
+            image_value["architecture"] = self.node_subst_vars(
+                image.get_scalar("architecture")
+            )
 
-            if 'tags' in image:
-                image_value['tags'] = \
-                    self.node_subst_sequence_vars(image.get_sequence('tags'))
+            if "tags" in image:
+                image_value["tags"] = self.node_subst_sequence_vars(
+                    image.get_sequence("tags")
+                )
 
-            image_value['os'] = self.node_subst_vars(image.get_scalar('os'))
+            image_value["os"] = self.node_subst_vars(image.get_scalar("os"))
 
-            if 'os.version' in image:
-                image_value['os.version'] = \
-                    self.node_subst_vars(image.get_scalar('os.version'))
-            if 'os.features' in image:
-                image_value['os.features'] = \
-                    self.node_subst_sequence_vars(image.get_sequence('os.features'))
-            if 'os.features' in image:
-                image_value['variant'] = \
-                    self.node_subst_vars(image.get_scalar('variant'))
+            if "os.version" in image:
+                image_value["os.version"] = self.node_subst_vars(
+                    image.get_scalar("os.version")
+                )
+            if "os.features" in image:
+                image_value["os.features"] = self.node_subst_sequence_vars(
+                    image.get_sequence("os.features")
+                )
+            if "os.features" in image:
+                image_value["variant"] = self.node_subst_vars(
+                    image.get_scalar("variant")
+                )
 
-            if 'author' in image:
-                image_value['author'] = \
-                    self.node_subst_vars(image.get_scalar('author'))
+            if "author" in image:
+                image_value["author"] = self.node_subst_vars(
+                    image.get_scalar("author")
+                )
 
-            if 'comment' in image:
-                image_value['comment'] = \
-                    self.node_subst_vars(image.get_scalar('comment'))
+            if "comment" in image:
+                image_value["comment"] = self.node_subst_vars(
+                    image.get_scalar("comment")
+                )
 
-            if 'config' in image:
-                config = image.get_mapping('config')
+            if "config" in image:
+                config = image.get_mapping("config")
 
                 common_config = [
-                    'User', 'ExposedPorts',
-                    'Env', 'Entrypoint',
-                    'Cmd', 'Volumes',
-                    'WorkingDir'
+                    "User",
+                    "ExposedPorts",
+                    "Env",
+                    "Entrypoint",
+                    "Cmd",
+                    "Volumes",
+                    "WorkingDir",
                 ]
                 docker_config = [
-                    'Memory', 'MemorySwap',
-                    'CpuShares', 'Healthcheck',
+                    "Memory",
+                    "MemorySwap",
+                    "CpuShares",
+                    "Healthcheck",
                 ]
-                oci_config = [
-                    'Labels', 'StopSignals'
-                ]
+                oci_config = ["Labels", "StopSignals"]
 
-                config.validate_keys(common_config + (docker_config if self.mode == 'docker' else oci_config))
+                config.validate_keys(
+                    common_config
+                    + (docker_config if self.mode == "docker" else oci_config)
+                )
 
                 config_value = {}
-                for member in ['User', 'WorkingDir', 'StopSignal']:
+                for member in ["User", "WorkingDir", "StopSignal"]:
                     if member in config:
-                        config_value[member] = \
+                        config_value[member] = self.node_subst_vars(
+                            config.get_scalar(member)
+                        )
+
+                for member in ["Memory", "MemorySwap", "CpuShares"]:
+                    if member in config:
+                        config_value[member] = int(
                             self.node_subst_vars(config.get_scalar(member))
+                        )
 
-                for member in ['Memory', 'MemorySwap', 'CpuShares']:
+                for member in [
+                    "ExposedPort",
+                    "Volumes",
+                    "Env",
+                    "Entrypoint",
+                    "Cmd",
+                ]:
                     if member in config:
-                        config_value[member] = \
-                            int(self.node_subst_vars(config.get_scalar(member)))
+                        config_value[member] = self.node_subst_sequence_vars(
+                            config.get_sequence(member)
+                        )
 
-                for member in ['ExposedPort', 'Volumes',
-                               'Env', 'Entrypoint', 'Cmd']:
-                    if member in config:
-                        config_value[member] = \
-                            self.node_subst_sequence_vars(config.get_sequence(member))
-
-                if 'Labels' in config:
-                    labels = config.get_mapping('Labels')
-                    config_value['Labels'] = {}
+                if "Labels" in config:
+                    labels = config.get_mapping("Labels")
+                    config_value["Labels"] = {}
                     for k, v in labels.items():
-                        config_value['Labels'][k] = v
+                        config_value["Labels"][k] = v
 
-                if 'Healthcheck' in config:
-                    healthcheck = config.get_mapping('Healthcheck')
-                    healthcheck.validate_keys([
-                        'Test', 'Interval',
-                        'Timeout', 'Retries'
-                    ])
-                    config['Healthcheck'] = {}
-                    if 'Test' in healthcheck:
-                        config['Healthcheck']['Test'] = self.node_subst_sequence_vars(healthcheck.get_sequence('Test'))
-                    for member in ['Interval', 'Timeout', 'Retries']:
+                if "Healthcheck" in config:
+                    healthcheck = config.get_mapping("Healthcheck")
+                    healthcheck.validate_keys(
+                        ["Test", "Interval", "Timeout", "Retries"]
+                    )
+                    config["Healthcheck"] = {}
+                    if "Test" in healthcheck:
+                        config["Healthcheck"][
+                            "Test"
+                        ] = self.node_subst_sequence_vars(
+                            healthcheck.get_sequence("Test")
+                        )
+                    for member in ["Interval", "Timeout", "Retries"]:
                         if member in healthcheck:
-                            config['Healthcheck'][member] = \
-                                int(self.node_subst_sequence_vars(healthcheck.get_scalar(member)))
+                            config["Healthcheck"][member] = int(
+                                self.node_subst_sequence_vars(
+                                    healthcheck.get_scalar(member)
+                                )
+                            )
 
-                image_value['config'] = config_value
-            if 'annotations' in image:
-                image_value['annotations'] = {}
-                annotations = image.get_mapping('annotations')
+                image_value["config"] = config_value
+            if "annotations" in image:
+                image_value["annotations"] = {}
+                annotations = image.get_mapping("annotations")
                 for k, value in annotations.items():
                     v = self.node_subst_vars(value)
-                    image_value['annotations'][k] = v
+                    image_value["annotations"][k] = v
 
             self.images.append(image_value)
 
@@ -442,9 +504,11 @@ class OciElement(Element):
         pass
 
     def get_unique_key(self):
-        return {'annotations': self.annotations,
-                'images': self.images,
-                'gzip': self.gzip}
+        return {
+            "annotations": self.annotations,
+            "images": self.images,
+            "gzip": self.gzip,
+        }
 
     def configure_sandbox(self, sandbox):
         pass
@@ -453,10 +517,10 @@ class OciElement(Element):
         pass
 
     def _build_image(self, sandbox, image, root, output):
-        parent = os.path.join(root, 'parent')
-        parent_checkout = os.path.join(root, 'parent_checkout')
+        parent = os.path.join(root, "parent")
+        parent_checkout = os.path.join(root, "parent_checkout")
 
-        if 'layer' in image:
+        if "layer" in image:
             if os.path.exists(parent_checkout):
                 shutil.rmtree(parent_checkout)
             os.makedirs(os.path.join(parent_checkout))
@@ -468,121 +532,172 @@ class OciElement(Element):
         legacy_parent = None
 
         config = {}
-        if 'author' in image:
-            config['author'] = image['author']
-        config['architecture'] = image['architecture']
-        config['os'] = image['os']
-        if 'config' in image:
-            config['config'] = {}
-            for k, v in image['config'].items():
-                if k in ['ExposedPorts', 'Volumes']:
-                    config['config'][k] = {}
+        if "author" in image:
+            config["author"] = image["author"]
+        config["architecture"] = image["architecture"]
+        config["os"] = image["os"]
+        if "config" in image:
+            config["config"] = {}
+            for k, v in image["config"].items():
+                if k in ["ExposedPorts", "Volumes"]:
+                    config["config"][k] = {}
                     for value in v:
-                        config['config'][k][value] = {}
+                        config["config"][k][value] = {}
                 else:
-                    config['config'][k] = v
+                    config["config"][k] = v
 
-        if 'parent' in image:
+        if "parent" in image:
             if os.path.exists(parent):
                 shutil.rmtree(parent)
-            parent_dep = self.search(Scope.BUILD, image['parent']['element'])
+            parent_dep = self.search(Scope.BUILD, image["parent"]["element"])
             if not parent_dep:
-                raise ElementError('{}: Element not in dependencies: {}'.format(self, image['parent']['element']))
+                raise ElementError(
+                    "{}: Element not in dependencies: {}".format(
+                        self, image["parent"]["element"]
+                    )
+                )
 
-            parent_dep.stage_dependency_artifacts(sandbox, Scope.RUN,
-                                                  path='parent')
-            if not os.path.exists(os.path.join(parent, 'index.json')):
-                with open(os.path.join(parent, 'manifest.json'), 'r', encoding='utf-8') as f:
+            parent_dep.stage_dependency_artifacts(
+                sandbox, Scope.RUN, path="parent"
+            )
+            if not os.path.exists(os.path.join(parent, "index.json")):
+                with open(
+                    os.path.join(parent, "manifest.json"),
+                    "r",
+                    encoding="utf-8",
+                ) as f:
                     parent_index = json.load(f)
-                parent_image = parent_index[image['parent']['image']]
-                layers = parent_image['Layers']
+                parent_image = parent_index[image["parent"]["image"]]
+                layers = parent_image["Layers"]
 
-                with open(os.path.join(parent, safe_path(parent_image['Config'])), 'r', encoding='utf-8') as f:
+                with open(
+                    os.path.join(parent, safe_path(parent_image["Config"])),
+                    "r",
+                    encoding="utf-8",
+                ) as f:
                     image_config = json.load(f)
-                diff_ids = image_config['rootfs']['diff_ids']
+                diff_ids = image_config["rootfs"]["diff_ids"]
 
-                if 'history' in image_config:
-                    history = image_config['history']
+                if "history" in image_config:
+                    history = image_config["history"]
 
                 for i, layer in enumerate(layers):
-                    _, diff_id = diff_ids[i].split(':', 1)
-                    with open(os.path.join(parent, safe_path(layer)), 'rb') as origblob:
+                    _, diff_id = diff_ids[i].split(":", 1)
+                    with open(
+                        os.path.join(parent, safe_path(layer)), "rb"
+                    ) as origblob:
                         if self.gzip:
-                            targz_blob = blob(output,
-                                              media_type='application/vnd.oci.image.layer.v1.tar+gzip',
-                                              mode=self.mode)
+                            targz_blob = blob(
+                                output,
+                                media_type="application/vnd.oci.image.layer.v1.tar+gzip",
+                                mode=self.mode,
+                            )
                             with targz_blob.create() as gzipfile:
-                                with gzip.GzipFile(filename=diff_id, fileobj=gzipfile,
-                                                   mode='wb', mtime=1320937200) as gz:
+                                with gzip.GzipFile(
+                                    filename=diff_id,
+                                    fileobj=gzipfile,
+                                    mode="wb",
+                                    mtime=1320937200,
+                                ) as gz:
                                     shutil.copyfileobj(origblob, gz)
                             layer_descs.append(targz_blob.descriptor)
                             layer_files.append(targz_blob.filename)
                             legacy_parent = tar_blob.legacy_id
                         else:
-                            legacy_config = {
-                                'os': image['os']
-                            }
+                            legacy_config = {"os": image["os"]}
                             if legacy_parent:
-                                legacy_config['parent'] = legacy_parent
-                            tar_blob = blob(output,
-                                            media_type='application/vnd.oci.image.layer.v1.tar',
-                                            mode=self.mode)
+                                legacy_config["parent"] = legacy_parent
+                            tar_blob = blob(
+                                output,
+                                media_type="application/vnd.oci.image.layer.v1.tar",
+                                mode=self.mode,
+                            )
                             with tar_blob.create() as newfile:
                                 shutil.copyfileobj(origblob, newfile)
                             layer_descs.append(tar_blob.descriptor)
                             layer_files.append(tar_blob.filename)
                             legacy_parent = tar_blob.legacy_id
             else:
-                with open(os.path.join(parent, 'index.json'), 'r', encoding='utf-8') as f:
+                with open(
+                    os.path.join(parent, "index.json"), "r", encoding="utf-8"
+                ) as f:
                     parent_index = json.load(f)
-                parent_image_desc = \
-                    parent_index['manifests'][image['parent']['image']]
-                algo, h = parent_image_desc['digest'].split(':', 1)
-                with open(os.path.join(parent, 'blobs', safe_path(algo), safe_path(h)), 'r', encoding='utf-8') as f:
+                parent_image_desc = parent_index["manifests"][
+                    image["parent"]["image"]
+                ]
+                algo, h = parent_image_desc["digest"].split(":", 1)
+                with open(
+                    os.path.join(
+                        parent, "blobs", safe_path(algo), safe_path(h)
+                    ),
+                    "r",
+                    encoding="utf-8",
+                ) as f:
                     image_manifest = json.load(f)
-                algo, h = image_manifest['config']['digest'].split(':', 1)
-                with open(os.path.join(parent, 'blobs', safe_path(algo), safe_path(h)), 'r', encoding='utf-8') as f:
+                algo, h = image_manifest["config"]["digest"].split(":", 1)
+                with open(
+                    os.path.join(
+                        parent, "blobs", safe_path(algo), safe_path(h)
+                    ),
+                    "r",
+                    encoding="utf-8",
+                ) as f:
                     image_config = json.load(f)
-                diff_ids = image_config['rootfs']['diff_ids']
-                if 'history' in image_config:
-                    history = image_config['history']
-                for i, layer in enumerate(image_manifest['layers']):
-                    _, diff_id = diff_ids[i].split(':', 1)
-                    algo, h = layer['digest'].split(':', 1)
-                    origfile = os.path.join(parent, 'blobs', safe_path(algo), safe_path(h))
+                diff_ids = image_config["rootfs"]["diff_ids"]
+                if "history" in image_config:
+                    history = image_config["history"]
+                for i, layer in enumerate(image_manifest["layers"]):
+                    _, diff_id = diff_ids[i].split(":", 1)
+                    algo, h = layer["digest"].split(":", 1)
+                    origfile = os.path.join(
+                        parent, "blobs", safe_path(algo), safe_path(h)
+                    )
                     with ExitStack() as e:
-                        if 'layer' not in image and i + 1 == len(image_manifest['layers']):
+                        if "layer" not in image and i + 1 == len(
+                            image_manifest["layers"]
+                        ):
                             # The case were we do not add a layer, the last imported layer has to be fully reconfigured
                             legacy_config = {}
                             legacy_config.update(config)
                             if legacy_parent:
-                                legacy_config['parent'] = legacy_parent
+                                legacy_config["parent"] = legacy_parent
                         else:
-                            legacy_config = {
-                                'os': image['os']
-                            }
+                            legacy_config = {"os": image["os"]}
                         if legacy_parent:
-                            legacy_config['parent'] = legacy_parent
+                            legacy_config["parent"] = legacy_parent
                         if self.gzip:
-                            output_blob = blob(output,
-                                               media_type='application/vnd.oci.image.layer.v1.tar+gzip',
-                                               mode=self.mode)
+                            output_blob = blob(
+                                output,
+                                media_type="application/vnd.oci.image.layer.v1.tar+gzip",
+                                mode=self.mode,
+                            )
                         else:
-                            output_blob = blob(output,
-                                               media_type='application/vnd.oci.image.layer.v1.tar',
-                                               mode=self.mode, legacy_config=legacy_config)
+                            output_blob = blob(
+                                output,
+                                media_type="application/vnd.oci.image.layer.v1.tar",
+                                mode=self.mode,
+                                legacy_config=legacy_config,
+                            )
                         outp = e.enter_context(output_blob.create())
-                        inp = e.enter_context(open(origfile, 'rb'))
-                        if layer['mediaType'].endswith('+gzip'):
+                        inp = e.enter_context(open(origfile, "rb"))
+                        if layer["mediaType"].endswith("+gzip"):
                             if self.gzip:
                                 shutil.copyfileobj(inp, outp)
                             else:
-                                gz = e.enter_context(gzip.open(filename=inp, mode='rb'))
+                                gz = e.enter_context(
+                                    gzip.open(filename=inp, mode="rb")
+                                )
                                 shutil.copyfileobj(gz, outp)
                         else:
                             if self.gzip:
-                                gz = e.enter_context(gzip.GzipFile(filename=diff_id, fileobj=outp,
-                                                                   mode='wb', mtime=1320937200))
+                                gz = e.enter_context(
+                                    gzip.GzipFile(
+                                        filename=diff_id,
+                                        fileobj=outp,
+                                        mode="wb",
+                                        mtime=1320937200,
+                                    )
+                                )
                                 shutil.copyfileobj(inp, gz)
                             else:
                                 shutil.copyfileobj(inp, outp)
@@ -591,18 +706,22 @@ class OciElement(Element):
                     layer_files.append(output_blob.filename)
                     legacy_parent = output_blob.legacy_id
 
-        if 'parent' in image and 'layer' in image:
+        if "parent" in image and "layer" in image:
             unpacked = False
             if isinstance(parent_dep, OciElement):
                 # Here we read the parent configuration to checkout
                 # the artifact which is much faster than unpacking the tar
                 # files.
                 layers = []
-                parent_image = image['parent']['image']
-                for layer in parent_dep.images[parent_image]['layer']:
+                parent_image = image["parent"]["image"]
+                for layer in parent_dep.images[parent_image]["layer"]:
                     layer_dep = parent_dep.search(Scope.BUILD, layer)
                     if not layer_dep:
-                        raise ElementError('{}: Element not in dependencies: {}'.format(parent_dep, layer))
+                        raise ElementError(
+                            "{}: Element not in dependencies: {}".format(
+                                parent_dep, layer
+                            )
+                        )
 
                     # We need to verify dependencies. If not in current
                     # element's dependencies, then we cannnot safely assume
@@ -610,45 +729,62 @@ class OciElement(Element):
                     # dependencies either removed or not pulled.
                     if layer_dep != self.search(Scope.BUILD, layer):
                         self.warn(
-                            'In order to optimize building of {}, you should add {} as build dependency'.format(
-                                self.name, layer))
+                            "In order to optimize building of {}, you should add {} as build dependency".format(
+                                self.name, layer
+                            )
+                        )
                         layers = None
                         break
 
                     layers.append(layer_dep)
                 if layers is not None:
-                    with self.timed_activity('Checking out layer from {}'.format(parent_dep.name)):
+                    with self.timed_activity(
+                        "Checking out layer from {}".format(parent_dep.name)
+                    ):
                         for layer_dep in layers:
-                            layer_dep.stage_dependency_artifacts(sandbox, Scope.RUN,
-                                                                 path='parent_checkout')
+                            layer_dep.stage_dependency_artifacts(
+                                sandbox, Scope.RUN, path="parent_checkout"
+                            )
                         unpacked = True
 
             if not unpacked:
                 for layer in layer_files:
                     if self.gzip:
-                        mode = 'r:gz'
+                        mode = "r:gz"
                     else:
-                        mode = 'r:'
-                    with self.timed_activity('Decompressing layer {}'.format(layer)):
+                        mode = "r:"
+                    with self.timed_activity(
+                        "Decompressing layer {}".format(layer)
+                    ):
                         with tarfile.open(layer, mode=mode) as t:
                             members = []
                             for info in t.getmembers():
-                                if '/../' in info.name:
+                                if "/../" in info.name:
                                     continue
-                                if info.name.startswith('../'):
+                                if info.name.startswith("../"):
                                     continue
 
                                 dirname, basename = os.path.split(info.name)
-                                if basename == '.wh..wh..opq':
-                                    for entry in os.listdir(os.path.join(parent_checkout, dirname)):
-                                        full_entry = os.path.join(parent_checkout, dirname, entry)
-                                        if os.path.islink(full_entry) or not os.path.isdir(full_entry):
+                                if basename == ".wh..wh..opq":
+                                    for entry in os.listdir(
+                                        os.path.join(parent_checkout, dirname)
+                                    ):
+                                        full_entry = os.path.join(
+                                            parent_checkout, dirname, entry
+                                        )
+                                        if os.path.islink(
+                                            full_entry
+                                        ) or not os.path.isdir(full_entry):
                                             os.unlink(full_entry)
                                         else:
                                             shutil.rmtree(full_entry)
-                                elif basename.startswith('.wh.'):
-                                    full_entry = os.path.join(parent_checkout, dirname, basename[4:])
-                                    if os.path.islink(full_entry) or not os.path.isdir(full_entry):
+                                elif basename.startswith(".wh."):
+                                    full_entry = os.path.join(
+                                        parent_checkout, dirname, basename[4:]
+                                    )
+                                    if os.path.islink(
+                                        full_entry
+                                    ) or not os.path.isdir(full_entry):
                                         os.unlink(full_entry)
                                     else:
                                         shutil.rmtree(full_entry)
@@ -660,36 +796,51 @@ class OciElement(Element):
         legacy_config = {}
         legacy_config.update(config)
         if legacy_parent:
-            legacy_config['parent'] = legacy_parent
+            legacy_config["parent"] = legacy_parent
 
-        if 'layer' in image:
-            for name in image['layer']:
+        if "layer" in image:
+            for name in image["layer"]:
                 dep = self.search(Scope.BUILD, name)
-                dep.stage_dependency_artifacts(sandbox, Scope.RUN, path='layer')
+                dep.stage_dependency_artifacts(
+                    sandbox, Scope.RUN, path="layer"
+                )
 
-            layer = os.path.join(root, 'layer')
-            with self.timed_activity('Transforming into layer'):
+            layer = os.path.join(root, "layer")
+            with self.timed_activity("Transforming into layer"):
                 for topdir, dirs, files in os.walk(parent_checkout):
                     for f in itertools.chain(files, dirs):
-                        rel = os.path.relpath(os.path.join(topdir, f), parent_checkout)
-                        if not os.path.lexists(os.path.join(layer, rel)) \
-                           and os.path.lexists(os.path.dirname(os.path.join(layer, rel))):
-                            whfile = os.path.join(layer, os.path.relpath(topdir, parent_checkout), '.wh.' + f)
-                            with open(whfile, 'w') as f:
+                        rel = os.path.relpath(
+                            os.path.join(topdir, f), parent_checkout
+                        )
+                        if not os.path.lexists(
+                            os.path.join(layer, rel)
+                        ) and os.path.lexists(
+                            os.path.dirname(os.path.join(layer, rel))
+                        ):
+                            whfile = os.path.join(
+                                layer,
+                                os.path.relpath(topdir, parent_checkout),
+                                ".wh." + f,
+                            )
+                            with open(whfile, "w") as f:
                                 pass
 
-                if 'parent' in image:
+                if "parent" in image:
                     for topdir, dirs, files in os.walk(layer):
                         for f in files:
                             new = os.path.join(topdir, f)
-                            rel = os.path.relpath(os.path.join(topdir, f), layer)
+                            rel = os.path.relpath(
+                                os.path.join(topdir, f), layer
+                            )
                             old = os.path.join(parent_checkout, rel)
                             if os.path.lexists(old):
                                 old_st = os.lstat(old)
                                 new_st = os.lstat(new)
                                 if old_st.st_mode != new_st.st_mode:
                                     continue
-                                if int(old_st.st_mtime) != int(new_st.st_mtime):
+                                if int(old_st.st_mtime) != int(
+                                    new_st.st_mtime
+                                ):
                                     continue
                                 if stat.S_ISLNK(old_st.st_mode):
                                     if os.readlink(old) == os.readlink(new):
@@ -698,9 +849,9 @@ class OciElement(Element):
                                     if filecmp.cmp(new, old):
                                         os.unlink(new)
 
-            with tempfile.TemporaryFile(mode='w+b') as tfile:
-                with tarfile.open(fileobj=tfile, mode='w:') as t:
-                    with self.timed_activity('Building layer tar'):
+            with tempfile.TemporaryFile(mode="w+b") as tfile:
+                with tarfile.open(fileobj=tfile, mode="w:") as t:
+                    with self.timed_activity("Building layer tar"):
                         for topdir, dirs, files in os.walk(layer):
                             dirs.sort()
                             for f in itertools.chain(sorted(files), dirs):
@@ -718,17 +869,21 @@ class OciElement(Element):
                                 elif stat.S_ISREG(st.st_mode):
                                     tinfo.type = tarfile.REGTYPE
                                     tinfo.size = st.st_size
-                                    with open(path, 'rb') as fd:
+                                    with open(path, "rb") as fd:
                                         t.addfile(tinfo, fd)
                                 elif stat.S_ISLNK(st.st_mode):
                                     tinfo.type = tarfile.SYMTYPE
                                     tinfo.linkname = os.readlink(path)
                                     t.addfile(tinfo, None)
                                 else:
-                                    raise ElementError('{}: Unexpected file type for: {}'.format(self, arcname))
+                                    raise ElementError(
+                                        "{}: Unexpected file type for: {}".format(
+                                            self, arcname
+                                        )
+                                    )
                 tfile.seek(0)
                 tar_hash = hashlib.sha256()
-                with self.timed_activity('Hashing layer'):
+                with self.timed_activity("Hashing layer"):
                     while True:
                         data = tfile.read(16 * 1024)
                         if not data:
@@ -736,84 +891,101 @@ class OciElement(Element):
                         tar_hash.update(data)
                 tfile.seek(0)
                 if self.gzip:
-                    targz_blob = blob(output, media_type='application/vnd.oci.image.layer.v1.tar+gzip', mode=self.mode)
-                    with self.timed_activity('Compressing layer'):
+                    targz_blob = blob(
+                        output,
+                        media_type="application/vnd.oci.image.layer.v1.tar+gzip",
+                        mode=self.mode,
+                    )
+                    with self.timed_activity("Compressing layer"):
                         with targz_blob.create() as gzipfile:
-                            with gzip.GzipFile(filename=tar_hash.hexdigest(), fileobj=gzipfile,
-                                               mode='wb', mtime=1320937200) as gz:
+                            with gzip.GzipFile(
+                                filename=tar_hash.hexdigest(),
+                                fileobj=gzipfile,
+                                mode="wb",
+                                mtime=1320937200,
+                            ) as gz:
                                 shutil.copyfileobj(tfile, gz)
                     layer_descs.append(targz_blob.descriptor)
                 else:
-                    copied_blob = blob(output,
-                                       media_type='application/vnd.oci.image.layer.v1.tar',
-                                       mode=self.mode, legacy_config=legacy_config)
+                    copied_blob = blob(
+                        output,
+                        media_type="application/vnd.oci.image.layer.v1.tar",
+                        mode=self.mode,
+                        legacy_config=legacy_config,
+                    )
                     with copied_blob.create() as copiedfile:
                         shutil.copyfileobj(tfile, copiedfile)
                     layer_descs.append(copied_blob.descriptor)
                     legacy_parent = copied_blob.legacy_id
 
-            diff_ids.append('sha256:{}'.format(tar_hash.hexdigest()))
+            diff_ids.append("sha256:{}".format(tar_hash.hexdigest()))
 
         if not history:
             history = []
         hist_entry = {}
-        if 'layer' not in image:
-            hist_entry['empty_layer'] = True
-        if 'author' in image:
-            hist_entry['author'] = image['author']
-        if 'comment' in image:
-            hist_entry['comment'] = image['comment']
+        if "layer" not in image:
+            hist_entry["empty_layer"] = True
+        if "author" in image:
+            hist_entry["author"] = image["author"]
+        if "comment" in image:
+            hist_entry["comment"] = image["comment"]
         history.append(hist_entry)
 
-        config['rootfs'] = {'type': 'layers',
-                            'diff_ids': diff_ids}
-        config['history'] = history
-        config_blob = blob(output, media_type='application/vnd.oci.image.config.v1+json', text=True, mode=self.mode)
+        config["rootfs"] = {"type": "layers", "diff_ids": diff_ids}
+        config["history"] = history
+        config_blob = blob(
+            output,
+            media_type="application/vnd.oci.image.config.v1+json",
+            text=True,
+            mode=self.mode,
+        )
         with config_blob.create() as configfile:
             json.dump(config, configfile)
 
-        if self.mode == 'docker':
+        if self.mode == "docker":
             manifest = {
-                'Config': config_blob.descriptor,
-                'Layers': layer_descs
+                "Config": config_blob.descriptor,
+                "Layers": layer_descs,
             }
             legacy_repositories = {}
-            if 'tags' in image:
-                manifest['RepoTags'] = image['tags']
-                for tag in image['tags']:
-                    name, version = tag.split(':', 1)
+            if "tags" in image:
+                manifest["RepoTags"] = image["tags"]
+                for tag in image["tags"]:
+                    name, version = tag.split(":", 1)
                     if name not in legacy_repositories:
                         legacy_repositories[name] = {}
                     legacy_repositories[name][version] = legacy_parent
 
             return manifest, legacy_repositories
         else:
-            manifest = {
-                'schemaVersion': 2
-            }
-            manifest['layers'] = layer_descs
-            manifest['config'] = config_blob.descriptor
-            if 'annotations' in image:
-                manifest['annotations'] = image['annotations']
-            manifest_blob = blob(output, media_type='application/vnd.oci.image.manifest.v1+json', text=True)
+            manifest = {"schemaVersion": 2}
+            manifest["layers"] = layer_descs
+            manifest["config"] = config_blob.descriptor
+            if "annotations" in image:
+                manifest["annotations"] = image["annotations"]
+            manifest_blob = blob(
+                output,
+                media_type="application/vnd.oci.image.manifest.v1+json",
+                text=True,
+            )
             with manifest_blob.create() as manifestfile:
                 json.dump(manifest, manifestfile)
             platform = {
-                'os': image['os'],
-                'architecture': image['architecture']
+                "os": image["os"],
+                "architecture": image["architecture"],
             }
-            if 'os.version' in image:
-                platform['os.version'] = image['os.version']
-            if 'os.features' in image:
-                platform['os.features'] = image['os.features']
-            if 'variant' in image:
-                platform['variant'] = image['variant']
-            manifest_blob.descriptor['platform'] = platform
+            if "os.version" in image:
+                platform["os.version"] = image["os.version"]
+            if "os.features" in image:
+                platform["os.features"] = image["os.features"]
+            if "variant" in image:
+                platform["variant"] = image["variant"]
+            manifest_blob.descriptor["platform"] = platform
             return manifest_blob.descriptor, {}
 
     def assemble(self, sandbox):
         root = sandbox.get_directory()
-        output = os.path.join(root, 'output')
+        output = os.path.join(root, "output")
         os.makedirs(output)
 
         manifests = []
@@ -821,36 +993,44 @@ class OciElement(Element):
 
         image_counter = 1
         for image in self.images:
-            with self.timed_activity('Creating image {}'.format(image_counter)):
-                manifest, legacy_repositories_part = self._build_image(sandbox, image, root, output)
+            with self.timed_activity(
+                "Creating image {}".format(image_counter)
+            ):
+                manifest, legacy_repositories_part = self._build_image(
+                    sandbox, image, root, output
+                )
                 manifests.append(manifest)
                 legacy_repositories.update(legacy_repositories_part)
 
             image_counter += 1
 
-        if self.mode == 'docker':
-            with open(os.path.join(output, 'manifest.json'), 'w', encoding='utf-8') as f:
+        if self.mode == "docker":
+            with open(
+                os.path.join(output, "manifest.json"), "w", encoding="utf-8"
+            ) as f:
                 json.dump(manifests, f)
-            with open(os.path.join(output, 'repositories'), 'w', encoding='utf-8') as f:
+            with open(
+                os.path.join(output, "repositories"), "w", encoding="utf-8"
+            ) as f:
                 json.dump(legacy_repositories, f)
         else:
-            index = {
-                'schemaVersion': 2
-            }
-            index['manifests'] = manifests
+            index = {"schemaVersion": 2}
+            index["manifests"] = manifests
             if self.annotations:
-                index['annotations'] = self.annotations
+                index["annotations"] = self.annotations
 
-            with open(os.path.join(output, 'index.json'), 'w', encoding='utf-8') as f:
+            with open(
+                os.path.join(output, "index.json"), "w", encoding="utf-8"
+            ) as f:
                 json.dump(index, f)
 
-            oci_layout = {
-                'imageLayoutVersion': '1.0.0'
-            }
-            with open(os.path.join(output, 'oci-layout'), 'w', encoding='utf-8') as f:
+            oci_layout = {"imageLayoutVersion": "1.0.0"}
+            with open(
+                os.path.join(output, "oci-layout"), "w", encoding="utf-8"
+            ) as f:
                 json.dump(oci_layout, f)
 
-        return 'output'
+        return "output"
 
 
 def setup():

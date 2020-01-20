@@ -42,12 +42,17 @@ def _assemble_tar_lz(workingdir, srcdir, dstfile):
 
 def generate_project(project_dir, tmpdir):
     project_file = os.path.join(project_dir, "project.conf")
-    _yaml.roundtrip_dump({"name": "foo", "aliases": {"tmpdir": "file:///" + str(tmpdir)}}, project_file)
+    _yaml.roundtrip_dump(
+        {"name": "foo", "aliases": {"tmpdir": "file:///" + str(tmpdir)}},
+        project_file,
+    )
 
 
 def generate_project_file_server(base_url, project_dir):
     project_file = os.path.join(project_dir, "project.conf")
-    _yaml.roundtrip_dump({"name": "foo", "aliases": {"tmpdir": base_url}}, project_file)
+    _yaml.roundtrip_dump(
+        {"name": "foo", "aliases": {"tmpdir": base_url}}, project_file
+    )
 
 
 # Test that without ref, consistency is set appropriately.
@@ -122,7 +127,16 @@ def test_stage_default_basedir(cli, tmpdir, datafiles, srcdir):
     result.assert_success()
     result = cli.run(project=project, args=["build", "target.bst"])
     result.assert_success()
-    result = cli.run(project=project, args=["artifact", "checkout", "target.bst", "--directory", checkoutdir])
+    result = cli.run(
+        project=project,
+        args=[
+            "artifact",
+            "checkout",
+            "target.bst",
+            "--directory",
+            checkoutdir,
+        ],
+    )
     result.assert_success()
 
     # Check that the content of the first directory is checked out (base-dir: '*')
@@ -151,7 +165,16 @@ def test_stage_no_basedir(cli, tmpdir, datafiles, srcdir):
     result.assert_success()
     result = cli.run(project=project, args=["build", "target.bst"])
     result.assert_success()
-    result = cli.run(project=project, args=["artifact", "checkout", "target.bst", "--directory", checkoutdir])
+    result = cli.run(
+        project=project,
+        args=[
+            "artifact",
+            "checkout",
+            "target.bst",
+            "--directory",
+            checkoutdir,
+        ],
+    )
     result.assert_success()
 
     # Check that the full content of the tarball is checked out (base-dir: '')
@@ -180,7 +203,16 @@ def test_stage_explicit_basedir(cli, tmpdir, datafiles, srcdir):
     result.assert_success()
     result = cli.run(project=project, args=["build", "target.bst"])
     result.assert_success()
-    result = cli.run(project=project, args=["artifact", "checkout", "target.bst", "--directory", checkoutdir])
+    result = cli.run(
+        project=project,
+        args=[
+            "artifact",
+            "checkout",
+            "target.bst",
+            "--directory",
+            checkoutdir,
+        ],
+    )
     result.assert_success()
 
     # Check that the content of the first directory is checked out (base-dir: '*')
@@ -202,12 +234,21 @@ def test_stage_contains_links(cli, tmpdir, datafiles):
     src_tar = os.path.join(str(tmpdir), "a.tar.gz")
 
     # Create a hardlink, we wont trust git to store that info for us
-    os.makedirs(os.path.join(str(datafiles), "content", "base-directory", "subdir2"), exist_ok=True)
-    file1 = os.path.join(str(datafiles), "content", "base-directory", "subdir1", "file.txt")
-    file2 = os.path.join(str(datafiles), "content", "base-directory", "subdir2", "file.txt")
+    os.makedirs(
+        os.path.join(str(datafiles), "content", "base-directory", "subdir2"),
+        exist_ok=True,
+    )
+    file1 = os.path.join(
+        str(datafiles), "content", "base-directory", "subdir1", "file.txt"
+    )
+    file2 = os.path.join(
+        str(datafiles), "content", "base-directory", "subdir2", "file.txt"
+    )
     os.link(file1, file2)
 
-    _assemble_tar(os.path.join(str(datafiles), "content"), "base-directory", src_tar)
+    _assemble_tar(
+        os.path.join(str(datafiles), "content"), "base-directory", src_tar
+    )
 
     # Track, fetch, build, checkout
     result = cli.run(project=project, args=["source", "track", "target.bst"])
@@ -216,7 +257,16 @@ def test_stage_contains_links(cli, tmpdir, datafiles):
     result.assert_success()
     result = cli.run(project=project, args=["build", "target.bst"])
     result.assert_success()
-    result = cli.run(project=project, args=["artifact", "checkout", "target.bst", "--directory", checkoutdir])
+    result = cli.run(
+        project=project,
+        args=[
+            "artifact",
+            "checkout",
+            "target.bst",
+            "--directory",
+            checkoutdir,
+        ],
+    )
     result.assert_success()
 
     # Check that the content of the first directory is checked out (base-dir: '*')
@@ -239,13 +289,26 @@ def test_stage_default_basedir_lzip(cli, tmpdir, datafiles, srcdir):
     _assemble_tar_lz(os.path.join(str(datafiles), "content"), srcdir, src_tar)
 
     # Track, fetch, build, checkout
-    result = cli.run(project=project, args=["source", "track", "target-lz.bst"])
+    result = cli.run(
+        project=project, args=["source", "track", "target-lz.bst"]
+    )
     result.assert_success()
-    result = cli.run(project=project, args=["source", "fetch", "target-lz.bst"])
+    result = cli.run(
+        project=project, args=["source", "fetch", "target-lz.bst"]
+    )
     result.assert_success()
     result = cli.run(project=project, args=["build", "target-lz.bst"])
     result.assert_success()
-    result = cli.run(project=project, args=["artifact", "checkout", "target-lz.bst", "--directory", checkoutdir])
+    result = cli.run(
+        project=project,
+        args=[
+            "artifact",
+            "checkout",
+            "target-lz.bst",
+            "--directory",
+            checkoutdir,
+        ],
+    )
     result.assert_success()
 
     # Check that the content of the first directory is checked out (base-dir: '*')
@@ -260,7 +323,9 @@ def test_stage_default_basedir_lzip(cli, tmpdir, datafiles, srcdir):
 # b - root directory has read-only permission
 # c - contains one file that has no read nor write permissions. Base-dir set to '' to extract root of tarball
 @pytest.mark.datafiles(os.path.join(DATA_DIR, "read-only"))
-@pytest.mark.parametrize("tar_name, base_dir", [("a", "*"), ("b", "*"), ("c", "")])
+@pytest.mark.parametrize(
+    "tar_name, base_dir", [("a", "*"), ("b", "*"), ("c", "")]
+)
 def test_read_only_dir(cli, tmpdir, datafiles, tar_name, base_dir):
     try:
         project = str(datafiles)
@@ -272,7 +337,14 @@ def test_read_only_dir(cli, tmpdir, datafiles, tar_name, base_dir):
         _yaml.roundtrip_dump(
             {
                 "kind": "import",
-                "sources": [{"kind": "tar", "url": "tmpdir:/{}".format(tar_file), "ref": "foo", "base-dir": base_dir}],
+                "sources": [
+                    {
+                        "kind": "tar",
+                        "url": "tmpdir:/{}".format(tar_file),
+                        "ref": "foo",
+                        "base-dir": base_dir,
+                    }
+                ],
             },
             bst_path,
         )
@@ -295,11 +367,17 @@ def test_read_only_dir(cli, tmpdir, datafiles, tar_name, base_dir):
         env = {"TMP": tmpdir_str}
 
         # Track, fetch, build, checkout
-        result = cli.run(project=project, args=["source", "track", "target.bst"], env=env)
+        result = cli.run(
+            project=project, args=["source", "track", "target.bst"], env=env
+        )
         result.assert_success()
-        result = cli.run(project=project, args=["source", "fetch", "target.bst"], env=env)
+        result = cli.run(
+            project=project, args=["source", "fetch", "target.bst"], env=env
+        )
         result.assert_success()
-        result = cli.run(project=project, args=["build", "target.bst"], env=env)
+        result = cli.run(
+            project=project, args=["build", "target.bst"], env=env
+        )
         result.assert_success()
 
     finally:
@@ -341,13 +419,26 @@ def test_use_netrc(cli, datafiles, server_type, tmpdir):
 
         server.start()
 
-        result = cli.run(project=project, args=["source", "track", "target.bst"])
+        result = cli.run(
+            project=project, args=["source", "track", "target.bst"]
+        )
         result.assert_success()
-        result = cli.run(project=project, args=["source", "fetch", "target.bst"])
+        result = cli.run(
+            project=project, args=["source", "fetch", "target.bst"]
+        )
         result.assert_success()
         result = cli.run(project=project, args=["build", "target.bst"])
         result.assert_success()
-        result = cli.run(project=project, args=["artifact", "checkout", "target.bst", "--directory", checkoutdir])
+        result = cli.run(
+            project=project,
+            args=[
+                "artifact",
+                "checkout",
+                "target.bst",
+                "--directory",
+                checkoutdir,
+            ],
+        )
         result.assert_success()
 
         original_dir = os.path.join(str(datafiles), "content", "a")
@@ -375,7 +466,9 @@ def test_netrc_already_specified_user(cli, datafiles, server_type, tmpdir):
     with create_file_server(server_type) as server:
         server.add_user("otheruser", "12345", file_server_files)
         parts = urllib.parse.urlsplit(server.base_url())
-        base_url = urllib.parse.urlunsplit([parts[0], "otheruser@{}".format(parts[1]), *parts[2:]])
+        base_url = urllib.parse.urlunsplit(
+            [parts[0], "otheruser@{}".format(parts[1]), *parts[2:]]
+        )
         generate_project_file_server(base_url, project)
 
         src_tar = os.path.join(file_server_files, "a.tar.gz")
@@ -383,7 +476,9 @@ def test_netrc_already_specified_user(cli, datafiles, server_type, tmpdir):
 
         server.start()
 
-        result = cli.run(project=project, args=["source", "track", "target.bst"])
+        result = cli.run(
+            project=project, args=["source", "track", "target.bst"]
+        )
         result.assert_main_error(ErrorDomain.STREAM, None)
         result.assert_task_error(ErrorDomain.SOURCE, None)
 
@@ -400,7 +495,11 @@ def test_homeless_environment(cli, tmpdir, datafiles):
     _assemble_tar(os.path.join(str(datafiles), "content"), "a", src_tar)
 
     # Use a track, make sure the plugin tries to find a ~/.netrc
-    result = cli.run(project=project, args=["source", "track", "target.bst"], env={"HOME": None})
+    result = cli.run(
+        project=project,
+        args=["source", "track", "target.bst"],
+        env={"HOME": None},
+    )
     result.assert_success()
 
 
@@ -430,7 +529,9 @@ def test_out_of_basedir_hardlinks(cli, tmpdir, datafiles):
     # attributes set
     with tarfile.open(src_tar, "r:gz") as tar:
         assert any(
-            member.islnk() and member.path == "contents/to_extract/a" and member.linkname == "contents/elsewhere/a"
+            member.islnk()
+            and member.path == "contents/to_extract/a"
+            and member.linkname == "contents/elsewhere/a"
             for member in tar.getmembers()
         )
 
@@ -441,7 +542,16 @@ def test_out_of_basedir_hardlinks(cli, tmpdir, datafiles):
     result.assert_success()
     result = cli.run(project=project, args=["build", "target.bst"])
     result.assert_success()
-    result = cli.run(project=project, args=["artifact", "checkout", "target.bst", "--directory", checkoutdir])
+    result = cli.run(
+        project=project,
+        args=[
+            "artifact",
+            "checkout",
+            "target.bst",
+            "--directory",
+            checkoutdir,
+        ],
+    )
     result.assert_success()
 
     original_dir = os.path.join(str(datafiles), "contents", "to_extract")
@@ -476,14 +586,18 @@ def test_malicious_out_of_basedir_hardlinks(cli, tmpdir, datafiles):
     # attributes set
     with tarfile.open(src_tar, "r:gz") as tar:
         assert any(
-            member.islnk() and
-            member.path == "contents/elsewhere/malicious" and
-            member.linkname == "../../../malicious_target.bst"
+            member.islnk()
+            and member.path == "contents/elsewhere/malicious"
+            and member.linkname == "../../../malicious_target.bst"
             for member in tar.getmembers()
         )
 
     # Try to execute the exploit
-    result = cli.run(project=project, args=["source", "track", "malicious_target.bst"])
+    result = cli.run(
+        project=project, args=["source", "track", "malicious_target.bst"]
+    )
     result.assert_success()
-    result = cli.run(project=project, args=["source", "fetch", "malicious_target.bst"])
+    result = cli.run(
+        project=project, args=["source", "fetch", "malicious_target.bst"]
+    )
     result.assert_main_error(ErrorDomain.STREAM, None)

@@ -71,7 +71,11 @@ class DebSource(TarSource):
         with open(self._get_mirror_file(), "rb") as deb_file:
             arpy_archive = arpy.Archive(fileobj=deb_file)
             arpy_archive.read_all_headers()
-            data_tar_arpy = [v for k, v in arpy_archive.archived_files.items() if b"data.tar" in k][0]
+            data_tar_arpy = [
+                v
+                for k, v in arpy_archive.archived_files.items()
+                if b"data.tar" in k
+            ][0]
             # ArchiveFileData is not enough like a file object for tarfile to use.
             # Monkey-patching a seekable method makes it close enough for TarFile to open.
             data_tar_arpy.seekable = lambda *args: True
