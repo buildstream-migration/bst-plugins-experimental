@@ -75,6 +75,10 @@ confidence=
 #    some issues that just grew out of control. Resolving these would
 #    be nice, but too much work atm.
 #
+# 3) Messages related to formatting
+#    Since we use Black for formatting, there's no need to use pylint
+#    to also check for those things.
+#
 
 disable=#####################################
         # Messages that are of no use to us #
@@ -118,6 +122,13 @@ disable=#####################################
         # Pylint does not like the idea of abstract methods, and shouts at us
         # for overriding Source.fetch, Source.track
         arguments-differ,
+
+        ##################################
+        # Messages related to formatting #
+        ##################################
+        bad-continuation,
+        line-too-long,
+        superfluous-parens,
 
 
 # Enable the message, report, category or checker with the given id(s). You can
