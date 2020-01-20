@@ -28,7 +28,7 @@ bazel cquery --experimental_repository_resolved_file=/path/to/manifest $targets
 ```
 
 This option is available for all versions of bazel documented, but for very
-early versions (<1.17.1) it may not be available.
+early versions (<0.17.1) it may not be available.
 
 If the upstream bazel project does not provide such a repository file, one may
 be introduced as a `local` or `patch` source. Failing that the plugin can be
@@ -49,7 +49,7 @@ The default configuration is:
 .. code:: yaml
 
    # Specify the bazel kind
-   kind: bazel
+   kind: bazel_source
 
    # Specify the path to the workspace directory
    workspace-dir: .
@@ -260,15 +260,21 @@ class BazelSource(Source):
         attributes = source['original_attributes']
         name = attributes['name']
 
-        if 'urls' not in attributes.keys():
+        if 'urls' not in attributes and 'url' not in attributes:
             self.log("{}: Bazel dependency '{}' has no urls, assume local and skip".format(self, name))
             return
 
-        if 'sha256' not in attributes.keys():
+        if 'sha256' not in attributes:
             self.warn("{}: Bazel dependency '{}' has no sha256, skipping".format(self, name))
             return
 
-        for url in attributes['urls']:
+        urls = []
+        if 'url' in attributes and attributes['url'] != '':
+            urls.append(attributes['url'])
+        if 'urls' in attributes:
+            urls += attributes['urls']
+
+        for url in urls:
             self.info("{}: Downloading bazel dependency '{}'".format(self, name))
             response = requests.get(url)
 
