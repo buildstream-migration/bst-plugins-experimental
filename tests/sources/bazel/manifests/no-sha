@@ -1,0 +1,8 @@
+resolved = [
+    {
+        "original_attributes": {
+            "name": "foo",
+            "url": "https://gitlab.com/BuildStream/bst-plugins-experimental/blob/77791775a66d1647eb8ee9d10efb4a9ac597633a/src/bst_plugins_experimental/sources/bazel_source.py",
+        }
+    }
+]

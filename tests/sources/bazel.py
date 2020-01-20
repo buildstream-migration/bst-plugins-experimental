@@ -24,12 +24,8 @@
 import os
 import pytest
 
-from buildstream.testing.runcli import (  # pylint: disable=unused-import
-    cli_integration as cli,
-)
-from buildstream.testing.integration import (  # pylint: disable=unused-import
-    integration_cache,
-)
+from buildstream.testing import cli  # pylint: disable=unused-import
+from buildstream._exceptions import ErrorDomain
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "bazel",)
 
@@ -52,5 +48,17 @@ def test_multi_url(cli, datafiles):
 
     result = cli.run(project=project, args=["source", "fetch", element_name])
     assert result.exit_code == 0
+
+    assert cli.get_element_state(project, element_name) == "buildable"
+
+
+@pytest.mark.datafiles(DATA_DIR)
+def test_no_sha(cli, datafiles):
+    project = str(datafiles)
+    element_name = "no-sha.bst"
+
+    result = cli.run(project=project, args=["source", "fetch", element_name])
+    result.assert_main_error(ErrorDomain.STREAM, None)
+    result.assert_task_error(ErrorDomain.PLUGIN, "bazel_source:missing-sha256")
 
     assert cli.get_element_state(project, element_name) == "buildable"
