@@ -83,11 +83,6 @@ import requests
 
 from buildstream import Source, SourceError, utils
 
-try:
-    from buildstream import Consistency
-except ImportError:  # Bst >1.91.3
-    pass
-
 
 class BazelSource(Source):
     # pylint: disable=attribute-defined-outside-init
@@ -146,13 +141,6 @@ class BazelSource(Source):
 
     def get_unique_key(self):
         return [self.allow_host_bazel, self.repo_file, self.targets, self.workspace_dir, self.ref]
-
-    def get_consistency(self):
-        if not self.get_ref():
-            return Consistency.INCONSISTENT
-        if self.is_cached():
-            return Consistency.CACHED
-        return Consistency.RESOLVED
 
     def is_cached(self):
         return os.path.exists(self._mirror) and os.listdir(self._mirror)

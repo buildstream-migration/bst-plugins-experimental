@@ -129,11 +129,6 @@ from configparser import RawConfigParser
 from buildstream import Source, SourceError, SourceFetcher
 from buildstream import utils
 
-try:
-    from buildstream import Consistency
-except ImportError:  # Bst >1.91.3
-    pass
-
 GIT_MODULES = '.gitmodules'
 
 
@@ -576,13 +571,6 @@ class GitTagSource(Source):
             key.append({"submodule_checkout_overrides": self.submodule_checkout_overrides})
 
         return key
-
-    def get_consistency(self):
-        if self.is_cached():
-            return Consistency.CACHED
-        elif self.mirror.ref is not None:
-            return Consistency.RESOLVED
-        return Consistency.INCONSISTENT
 
     def is_cached(self):
         return self.have_all_refs()
