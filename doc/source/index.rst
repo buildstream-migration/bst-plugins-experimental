@@ -33,6 +33,7 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    elements/qmake
    elements/distutils
    elements/oci
+   elements/pip
 
 .. toctree::
    :maxdepth: 1
