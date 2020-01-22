@@ -19,6 +19,7 @@
 #        Tristan Maat <tristan.maat@codethink.co.uk>
 #        James Ennis  <james.ennis@codethink.co.uk>
 
+import os
 import sys
 
 try:
@@ -41,10 +42,25 @@ def parse_requirements(requirements_file):
 
 install_requires = parse_requirements('requirements/install-requirements.txt')
 
+
+###############################################################################
+#                             Parse README                                    #
+###############################################################################
+with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                       'README.rst')) as readme:
+    long_description = readme.read()
+
+
 setup(name='bst-plugins-experimental',
       version="1.93.0",
       description="A collection of experimental BuildStream plugins.",
+      long_description=long_description,
+      long_description_content_type='text/x-rst; charset=UTF-8',
       license='LGPL',
+      url='https://gitlab.com/BuildStream/bst-plugins-experimental',
+      project_urls={
+          'Documentation': 'https://buildstream.gitlab.io/bst-plugins-experimental/',
+      },
       package_dir={'': 'src'},
       packages=find_packages(where='src'),
       include_package_data=True,
