@@ -6,7 +6,6 @@ cache:
 
 stages:
   - test
-  - docs
   - upload
 
 before_script:
@@ -77,6 +76,14 @@ test-master-fedora-30:
     TOXENV: "py37-bst-master"
   allow_failure: true
 
+docs:
+  stage: test
+  script:
+  - tox -e docs
+  artifacts:
+    paths:
+    - doc/build/html
+
 lint:
   stage: test
   script:
@@ -87,29 +94,19 @@ format-check:
   script:
   - tox -e format-check
 
-# Automatically build documentation, only for merges which land
-# on master branch.
-#
-# Note: We still do not enforce a consistent installation of python2
-#       or sphinx, as python2 will significantly grow the backing image.
-#
+
 
 #####################################################
-#                  Docs stage                       #
+#               Upload stage                        #
 #####################################################
 
+# Release documentation on all pushes to master branch.
+#
 pages:
-  stage: docs
+  stage: upload
+  dependencies:
+  - docs
   script:
-  - dnf install -y python2 make
-  # Pin sphinx as docs will not build at latest version
-  - pip3 install sphinx==1.8.5
-  - pip3 install sphinx-click
-  # Pin sphinx_rtd_theme because search functionality breaks
-  # at the latest version
-  - pip3 install sphinx_rtd_theme>=0.4.2
-  - pip3 install --user .
-  - make -C doc
   - mv doc/build/html public
   artifacts:
     paths:
@@ -117,14 +114,9 @@ pages:
   only:
   - master
 
-
 # Automatically upload to PyPI when a release is tagged.
-
-#####################################################
-#               Upload stage                        #
-#####################################################
-
-upload:
+#
+pypi-release:
   stage: upload
   before_script:
   - pip3 install twine
