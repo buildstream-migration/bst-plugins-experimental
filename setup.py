@@ -33,18 +33,13 @@ except ImportError:
 #                          Gather Requirements                                #
 ###############################################################################
 
-
 def parse_requirements(requirements_file):
     with open(requirements_file, 'r') as f:
         reqs = [line.strip() for line in f.readlines()
                 if not line.strip().startswith('#') and line != '']
     return reqs
 
-
-dev_requires = parse_requirements('requirements/dev-requirements.txt')
 install_requires = parse_requirements('requirements/install-requirements.txt')
-plugin_requires = parse_requirements('requirements/plugin-requirements.txt')
-test_requires = parse_requirements('requirements/test-requirements.txt')
 
 setup(name='bst-plugins-experimental',
       version="1.93.0",
@@ -89,7 +84,6 @@ setup(name='bst-plugins-experimental',
               'bst_plugins_experimental = bst_plugins_experimental.testutils',
           ]
       },
-      tests_require=test_requires + plugin_requires + dev_requires,
       extras_require={
           'ostree': ["PyGObject"],
           'cargo': ["pytoml"],
