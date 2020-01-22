@@ -27,7 +27,8 @@
 import os
 
 import gi
-gi.require_version('OSTree', '1.0')
+
+gi.require_version("OSTree", "1.0")
 from gi.repository import GLib, Gio, OSTree  # noqa
 from gi.repository.GLib import Variant, VariantDict  # noqa
 
@@ -52,18 +53,19 @@ def ensure(path, compress):
     # Use local-only GIO, don't use the DBus-based GVfs backend.
     # GVfs/DBus uses background threads, which can cause problems
     # with BuildStream's fork-based process model.
-    os.environ['GIO_USE_VFS'] = 'local'
+    os.environ["GIO_USE_VFS"] = "local"
 
     # create also succeeds on existing repository
     repo = OSTree.Repo.new(Gio.File.new_for_path(path))
-    mode = OSTree.RepoMode.ARCHIVE_Z2 if compress \
-        else OSTree.RepoMode.BARE_USER
+    mode = (
+        OSTree.RepoMode.ARCHIVE_Z2 if compress else OSTree.RepoMode.BARE_USER
+    )
 
     repo.create(mode)
 
     # Disble OSTree's built in minimum-disk-space check.
     config = repo.copy_config()
-    config.set_string('core', 'min-free-space-percent', '0')
+    config.set_string("core", "min-free-space-percent", "0")
     repo.write_config(config)
     repo.reload_config()
 
@@ -114,7 +116,9 @@ def checkout(repo, path, commit_, user=False):
     try:
         repo.checkout_at(options, AT_FDCWD, path, commit_)
     except GLib.GError as e:
-        raise OSTreeError("Failed to checkout commit '{}': {}".format(commit_, e.message)) from e
+        raise OSTreeError(
+            "Failed to checkout commit '{}': {}".format(commit_, e.message)
+        ) from e
 
 
 # exists():
@@ -192,10 +196,10 @@ def fetch(repo, remote="origin", ref=None, progress=None):
     #  ostree --repo=repo pull --mirror freedesktop:runtime/org.freedesktop.Sdk/x86_64/1.4
     def progress_callback(info):
         status = async_progress.get_status()
-        outstanding_fetches = async_progress.get_uint('outstanding-fetches')
-        bytes_transferred = async_progress.get_uint64('bytes-transferred')
-        fetched = async_progress.get_uint('fetched')
-        requested = async_progress.get_uint('requested')
+        outstanding_fetches = async_progress.get_uint("outstanding-fetches")
+        bytes_transferred = async_progress.get_uint64("bytes-transferred")
+        fetched = async_progress.get_uint("fetched")
+        requested = async_progress.get_uint("requested")
 
         if status:
             progress(0.0, status)
@@ -206,16 +210,19 @@ def fetch(repo, remote="origin", ref=None, progress=None):
             else:
                 percent = (fetched * 1.0 / requested) * 100
 
-            progress(percent,
-                     "Receiving objects: {:d}% ({:d}/{:d}) {}".format(int(percent), fetched,
-                                                                      requested, formatted_bytes))
+            progress(
+                percent,
+                "Receiving objects: {:d}% ({:d}/{:d}) {}".format(
+                    int(percent), fetched, requested, formatted_bytes
+                ),
+            )
         else:
             progress(100.0, "Writing Objects")
 
     async_progress = None
     if progress is not None:
         async_progress = OSTree.AsyncProgress.new()
-        async_progress.connect('changed', progress_callback)
+        async_progress.connect("changed", progress_callback)
 
     # FIXME: This hangs the process and ignores keyboard interrupt,
     #        fix this using the Gio.Cancellable
@@ -224,15 +231,19 @@ def fetch(repo, remote="origin", ref=None, progress=None):
         refs = [ref]
 
     try:
-        repo.pull(remote,
-                  refs,
-                  OSTree.RepoPullFlags.MIRROR,
-                  async_progress,
-                  None)  # Gio.Cancellable
+        repo.pull(
+            remote, refs, OSTree.RepoPullFlags.MIRROR, async_progress, None
+        )  # Gio.Cancellable
     except GLib.GError as e:
         if ref is not None:
-            raise OSTreeError("Failed to fetch ref '{}' from '{}': {}".format(ref, remote, e.message)) from e
-        raise OSTreeError("Failed to fetch from '{}': {}".format(remote, e.message)) from e
+            raise OSTreeError(
+                "Failed to fetch ref '{}' from '{}': {}".format(
+                    ref, remote, e.message
+                )
+            ) from e
+        raise OSTreeError(
+            "Failed to fetch from '{}': {}".format(remote, e.message)
+        ) from e
 
 
 # configure_remote():
@@ -254,18 +265,22 @@ def configure_remote(repo, remote, url, key_url=None):
     options = None  # or GLib.Variant of type a{sv}
     if key_url is None:
         vd = VariantDict.new()
-        vd.insert_value('gpg-verify', Variant.new_boolean(False))
+        vd.insert_value("gpg-verify", Variant.new_boolean(False))
         options = vd.end()
 
     try:
-        repo.remote_change(None,      # Optional OSTree.Sysroot
-                           OSTree.RepoRemoteChange.ADD_IF_NOT_EXISTS,
-                           remote,    # Remote name
-                           url,       # Remote url
-                           options,   # Remote options
-                           None)      # Optional Gio.Cancellable
+        repo.remote_change(
+            None,  # Optional OSTree.Sysroot
+            OSTree.RepoRemoteChange.ADD_IF_NOT_EXISTS,
+            remote,  # Remote name
+            url,  # Remote url
+            options,  # Remote options
+            None,
+        )  # Optional Gio.Cancellable
     except GLib.GError as e:
-        raise OSTreeError("Failed to configure remote '{}': {}".format(remote, e.message)) from e
+        raise OSTreeError(
+            "Failed to configure remote '{}': {}".format(remote, e.message)
+        ) from e
 
     # Remote needs to exist before adding key
     if key_url is not None:
@@ -274,4 +289,8 @@ def configure_remote(repo, remote, url, key_url=None):
             stream = gfile.read()
             repo.remote_gpg_import(remote, stream, None, 0, None)
         except GLib.GError as e:
-            raise OSTreeError("Failed to add gpg key from url '{}': {}".format(key_url, e.message)) from e
+            raise OSTreeError(
+                "Failed to add gpg key from url '{}': {}".format(
+                    key_url, e.message
+                )
+            ) from e

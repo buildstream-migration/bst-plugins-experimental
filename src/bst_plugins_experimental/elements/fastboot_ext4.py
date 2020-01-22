@@ -36,25 +36,26 @@ class FastbootExt4ImageElement(ScriptElement):
     BST_REQUIRED_VERSION_MINOR = 91
 
     def configure(self, node):
-        command_steps = [
-            "create_dev_proc_shadow",
-            "create_img",
-            "install_img"
-        ]
+        command_steps = ["create_dev_proc_shadow", "create_img", "install_img"]
 
         node.validate_keys(command_steps + ["base", "input"])
 
         for step in command_steps:
             if step not in node:
-                raise ElementError("{}: Unexpectedly missing command step '{}'"
-                                   .format(self, step))
+                raise ElementError(
+                    "{}: Unexpectedly missing command step '{}'".format(
+                        self, step
+                    )
+                )
             cmds = self.node_subst_sequence_vars(node.get_sequence(step))
             self.add_commands(step, cmds)
 
-        self.layout_add(self.node_subst_vars(node.get_scalar('base')), "/")
-        self.layout_add(None, '/buildstream')
-        self.layout_add(self.node_subst_vars(node.get_scalar('input')),
-                        self.get_variable('build-root'))
+        self.layout_add(self.node_subst_vars(node.get_scalar("base")), "/")
+        self.layout_add(None, "/buildstream")
+        self.layout_add(
+            self.node_subst_vars(node.get_scalar("input")),
+            self.get_variable("build-root"),
+        )
 
         self.set_work_dir()
         self.set_install_root()

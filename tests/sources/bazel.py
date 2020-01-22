@@ -24,32 +24,33 @@
 import os
 import pytest
 
-from buildstream.testing.runcli import cli_integration as cli  # pylint: disable=unused-import
-from buildstream.testing.integration import integration_cache  # pylint: disable=unused-import
-
-DATA_DIR = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    'bazel',
+from buildstream.testing.runcli import (  # pylint: disable=unused-import
+    cli_integration as cli,
 )
+from buildstream.testing.integration import (  # pylint: disable=unused-import
+    integration_cache,
+)
+
+DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "bazel",)
 
 
 @pytest.mark.datafiles(DATA_DIR)
 def test_basic(cli, datafiles):
     project = str(datafiles)
-    element_name = 'basic.bst'
+    element_name = "basic.bst"
 
-    result = cli.run(project=project, args=['source', 'fetch', element_name])
+    result = cli.run(project=project, args=["source", "fetch", element_name])
     assert result.exit_code == 0
 
-    assert cli.get_element_state(project, element_name) == 'buildable'
+    assert cli.get_element_state(project, element_name) == "buildable"
 
 
 @pytest.mark.datafiles(DATA_DIR)
 def test_multi_url(cli, datafiles):
     project = str(datafiles)
-    element_name = 'multi-url.bst'
+    element_name = "multi-url.bst"
 
-    result = cli.run(project=project, args=['source', 'fetch', element_name])
+    result = cli.run(project=project, args=["source", "fetch", element_name])
     assert result.exit_code == 0
 
-    assert cli.get_element_state(project, element_name) == 'buildable'
+    assert cli.get_element_state(project, element_name) == "buildable"

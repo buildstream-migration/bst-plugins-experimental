@@ -82,6 +82,11 @@ lint:
   script:
   - tox -e lint
 
+format-check:
+  stage: test
+  script:
+  - tox -e format-check
+
 # Automatically build documentation, only for merges which land
 # on master branch.
 #

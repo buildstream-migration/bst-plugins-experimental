@@ -66,13 +66,21 @@ class QuiltSource(Source):
 
     def stage(self, directory):
         patch_dir = os.path.join(directory, self.path)
-        with self.timed_activity("quilt: Applying patches: {}".format(patch_dir)):
+        with self.timed_activity(
+            "quilt: Applying patches: {}".format(patch_dir)
+        ):
             if not os.path.isdir(patch_dir):
-                raise SourceError("Directory does not exist '{}'".format(patch_dir),
-                                  reason="no-dir-found")
+                raise SourceError(
+                    "Directory does not exist '{}'".format(patch_dir),
+                    reason="no-dir-found",
+                )
             # Call quilt command
             self.command = [self.host_quilt, "push", "-a"]
-            self.call(self.command, cwd=patch_dir, fail="Error occurred while calling {}".format(self.command))
+            self.call(
+                self.command,
+                cwd=patch_dir,
+                fail="Error occurred while calling {}".format(self.command),
+            )
 
 
 # Plugin entry point

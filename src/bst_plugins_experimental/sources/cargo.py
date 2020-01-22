@@ -68,12 +68,13 @@ from buildstream import utils
 
 # This automatically goes into .cargo/config
 #
-_default_vendor_config_template = \
-    '[source.crates-io]\n' + \
-    'registry = "{vendorurl}"\n' + \
-    'replace-with = "vendored-sources"\n' + \
-    '[source.vendored-sources]\n' + \
-    'directory = "{vendordir}"\n'
+_default_vendor_config_template = (
+    "[source.crates-io]\n"
+    + 'registry = "{vendorurl}"\n'
+    + 'replace-with = "vendored-sources"\n'
+    + "[source.vendored-sources]\n"
+    + 'directory = "{vendordir}"\n'
+)
 
 
 # Crate()
@@ -87,7 +88,6 @@ _default_vendor_config_template = \
 #    sha (str|None): The sha256 checksum of the downloaded crate
 #
 class Crate(SourceFetcher):
-
     def __init__(self, cargo, name, version, sha=None):
         super().__init__()
 
@@ -112,11 +112,16 @@ class Crate(SourceFetcher):
 
         # Download the crate
         crate_url = self._get_url(alias_override)
-        with self.cargo.timed_activity("Downloading: {}".format(crate_url), silent_nested=True):
+        with self.cargo.timed_activity(
+            "Downloading: {}".format(crate_url), silent_nested=True
+        ):
             sha256 = self._download(crate_url)
             if self.sha is not None and sha256 != self.sha:
-                raise SourceError("File downloaded from {} has sha256sum '{}', not '{}'!"
-                                  .format(crate_url, sha256, self.sha))
+                raise SourceError(
+                    "File downloaded from {} has sha256sum '{}', not '{}'!".format(
+                        crate_url, sha256, self.sha
+                    )
+                )
 
     ########################################################
     #        Helper APIs for the Cargo Source to use       #
@@ -138,17 +143,19 @@ class Crate(SourceFetcher):
                 members = tar.getmembers()
 
             if members:
-                dirname = members[0].name.split('/')[0]
+                dirname = members[0].name.split("/")[0]
                 package_dir = os.path.join(directory, dirname)
-                checksum_file = os.path.join(package_dir,
-                                             ".cargo-checksum.json")
-                with open(checksum_file, 'w') as f:
-                    checksum_data = {'package': self.sha,
-                                     'files': {}}
+                checksum_file = os.path.join(
+                    package_dir, ".cargo-checksum.json"
+                )
+                with open(checksum_file, "w") as f:
+                    checksum_data = {"package": self.sha, "files": {}}
                     json.dump(checksum_data, f)
 
         except (tarfile.TarError, OSError) as e:
-            raise SourceError("{}: Error staging source: {}".format(self, e)) from e
+            raise SourceError(
+                "{}: Error staging source: {}".format(self, e)
+            ) from e
 
     # is_cached()
     #
@@ -190,7 +197,7 @@ class Crate(SourceFetcher):
             with self.cargo.tempdir() as td:
                 default_name = os.path.basename(url)
                 request = urllib.request.Request(url)
-                request.add_header('Accept', '*/*')
+                request.add_header("Accept", "*/*")
 
                 # We do not use etag in case what we have in cache is
                 # not matching ref in order to be able to recover from
@@ -198,17 +205,19 @@ class Crate(SourceFetcher):
                 if self.sha:
                     etag = self._get_etag(self.sha)
                     if etag and self.is_cached():
-                        request.add_header('If-None-Match', etag)
+                        request.add_header("If-None-Match", etag)
 
-                with contextlib.closing(urllib.request.urlopen(request)) as response:
+                with contextlib.closing(
+                    urllib.request.urlopen(request)
+                ) as response:
                     info = response.info()
 
-                    etag = info['ETag'] if 'ETag' in info else None
+                    etag = info["ETag"] if "ETag" in info else None
 
                     filename = info.get_filename(default_name)
                     filename = os.path.basename(filename)
                     local_file = os.path.join(td, filename)
-                    with open(local_file, 'wb') as dest:
+                    with open(local_file, "wb") as dest:
                         shutil.copyfileobj(response, dest)
 
                 # Make sure url-specific mirror dir exists.
@@ -230,12 +239,20 @@ class Crate(SourceFetcher):
                 # Because we use etag only for matching sha, currently specified sha is what
                 # we would have downloaded.
                 return self.sha
-            raise SourceError("{}: Error mirroring {}: {}"
-                              .format(self, url, e), temporary=True) from e
+            raise SourceError(
+                "{}: Error mirroring {}: {}".format(self, url, e),
+                temporary=True,
+            ) from e
 
-        except (urllib.error.URLError, urllib.error.ContentTooShortError, OSError) as e:
-            raise SourceError("{}: Error mirroring {}: {}"
-                              .format(self, url, e), temporary=True) from e
+        except (
+            urllib.error.URLError,
+            urllib.error.ContentTooShortError,
+            OSError,
+        ) as e:
+            raise SourceError(
+                "{}: Error mirroring {}: {}".format(self, url, e),
+                temporary=True,
+            ) from e
 
     # _get_url()
     #
@@ -248,11 +265,10 @@ class Crate(SourceFetcher):
     #    (str): The URL for this crate
     #
     def _get_url(self, alias=None):
-        url = self.cargo.translate_url(self.cargo.url,
-                                       alias_override=alias)
-        return '{url}/{name}/{name}-{version}.crate'.format(url=url,
-                                                            name=self.name,
-                                                            version=self.version)
+        url = self.cargo.translate_url(self.cargo.url, alias_override=alias)
+        return "{url}/{name}/{name}-{version}.crate".format(
+            url=url, name=self.name, version=self.version
+        )
 
     # _get_etag()
     #
@@ -267,9 +283,11 @@ class Crate(SourceFetcher):
     #                locally downloaded
     #
     def _get_etag(self, sha):
-        etagfilename = os.path.join(self._get_mirror_dir(), '{}.etag'.format(sha))
+        etagfilename = os.path.join(
+            self._get_mirror_dir(), "{}.etag".format(sha)
+        )
         if os.path.exists(etagfilename):
-            with open(etagfilename, 'r') as etagfile:
+            with open(etagfilename, "r") as etagfile:
                 return etagfile.read()
 
         return None
@@ -283,7 +301,9 @@ class Crate(SourceFetcher):
     #    etag (str): The ETag to use for requests of this crate
     #
     def _store_etag(self, sha, etag):
-        etagfilename = os.path.join(self._get_mirror_dir(), '{}.etag'.format(sha))
+        etagfilename = os.path.join(
+            self._get_mirror_dir(), "{}.etag".format(sha)
+        )
         with utils.save_file_atomic(etagfilename) as etagfile:
             etagfile.write(etag)
 
@@ -292,10 +312,12 @@ class Crate(SourceFetcher):
     # Gets the local mirror directory for this upstream cargo repository
     #
     def _get_mirror_dir(self):
-        return os.path.join(self.cargo.get_mirror_directory(),
-                            utils.url_directory_name(self.cargo.url),
-                            self.name,
-                            self.version)
+        return os.path.join(
+            self.cargo.get_mirror_directory(),
+            utils.url_directory_name(self.cargo.url),
+            self.name,
+            self.version,
+        )
 
     # _get_mirror_file()
     #
@@ -325,15 +347,18 @@ class CargoSource(Source):
 
         # The url before any aliasing
         #
-        self.url = node.get_str('url', 'https://static.crates.io/crates')
+        self.url = node.get_str("url", "https://static.crates.io/crates")
         # XXX: should we use get_sequence here?
-        self.ref = node.get_sequence('ref', None)
+        self.ref = node.get_sequence("ref", None)
         if self.ref is not None:
             self.ref = self.ref.strip_node_info()
-        self.cargo_lock = node.get_str('cargo-lock', 'Cargo.lock')
-        self.vendor_dir = node.get_str('vendor-dir', 'crates')
+        self.cargo_lock = node.get_str("cargo-lock", "Cargo.lock")
+        self.vendor_dir = node.get_str("vendor-dir", "crates")
 
-        node.validate_keys(Source.COMMON_CONFIG_KEYS + ['url', 'ref', 'cargo-lock', 'vendor-dir'])
+        node.validate_keys(
+            Source.COMMON_CONFIG_KEYS
+            + ["url", "ref", "cargo-lock", "vendor-dir"]
+        )
 
         self.crates = self._parse_crates(self.ref)
 
@@ -353,14 +378,14 @@ class CargoSource(Source):
 
     def load_ref(self, node):
         # XXX: this should be get_sequence, and parse_crate should expect nodes
-        self.ref = node.get_sequence('ref', None)
+        self.ref = node.get_sequence("ref", None)
         self.crates = self._parse_crates(self.ref)
 
     def get_ref(self):
         return self.ref
 
     def set_ref(self, ref, node):
-        node['ref'] = self.ref = ref
+        node["ref"] = self.ref = ref
         self.crates = self._parse_crates(self.ref)
 
     def track(self, previous_sources_dir):
@@ -368,38 +393,47 @@ class CargoSource(Source):
         lockfile = os.path.join(previous_sources_dir, self.cargo_lock)
 
         try:
-            with open(lockfile, 'r') as f:
+            with open(lockfile, "r") as f:
                 try:
                     lock = pytoml.load(f)
                 except pytoml.core.TomlError as e:
-                    raise SourceError("Malformed Cargo.lock file at: {}".format(self.cargo_lock),
-                                      detail="{}".format(e)) from e
+                    raise SourceError(
+                        "Malformed Cargo.lock file at: {}".format(
+                            self.cargo_lock
+                        ),
+                        detail="{}".format(e),
+                    ) from e
         except FileNotFoundError as e:
-            raise SourceError("Failed to find Cargo.lock file at: {}".format(self.cargo_lock),
-                              detail="The cargo plugin expects to find a Cargo.lock file in\n" +
-                              "the sources staged before it in the source list, but none was found.") from e
+            raise SourceError(
+                "Failed to find Cargo.lock file at: {}".format(
+                    self.cargo_lock
+                ),
+                detail="The cargo plugin expects to find a Cargo.lock file in\n"
+                + "the sources staged before it in the source list, but none was found.",
+            ) from e
 
         # FIXME: Better validation would be good here, so we can raise more
         #        useful error messages in the case of a malformed Cargo.lock file.
         #
-        for package in lock['package']:
-            if 'source' not in package:
+        for package in lock["package"]:
+            if "source" not in package:
                 continue
-            new_ref += [{
-                'name': package['name'],
-                'version': str(package['version'])
-            }]
+            new_ref += [
+                {"name": package["name"], "version": str(package["version"])}
+            ]
 
         # Make sure the order we set it at track time is deterministic
-        new_ref = sorted(new_ref, key=lambda c: (c['name'], c['version']))
+        new_ref = sorted(new_ref, key=lambda c: (c["name"], c["version"]))
 
         # Download the crates and get their shas
         for crate_obj in new_ref:
-            crate = Crate(self, crate_obj['name'], crate_obj['version'])
+            crate = Crate(self, crate_obj["name"], crate_obj["version"])
 
             crate_url = crate._get_url()
-            with self.timed_activity("Downloading: {}".format(crate_url), silent_nested=True):
-                crate_obj['sha'] = crate._download(crate_url)
+            with self.timed_activity(
+                "Downloading: {}".format(crate_url), silent_nested=True
+            ):
+                crate_obj["sha"] = crate._download(crate_url)
 
         return new_ref
 
@@ -411,12 +445,13 @@ class CargoSource(Source):
             crate.stage(vendor_dir)
 
         # Stage our vendor config
-        vendor_config = _default_vendor_config_template.format(vendorurl=self.url,
-                                                               vendordir=self.vendor_dir)
-        conf_dir = os.path.join(directory, '.cargo')
-        conf_file = os.path.join(conf_dir, 'config')
+        vendor_config = _default_vendor_config_template.format(
+            vendorurl=self.url, vendordir=self.vendor_dir
+        )
+        conf_dir = os.path.join(directory, ".cargo")
+        conf_file = os.path.join(conf_dir, "config")
         os.makedirs(conf_dir, exist_ok=True)
-        with open(conf_file, 'w') as f:
+        with open(conf_file, "w") as f:
             f.write(vendor_config)
 
     def get_source_fetchers(self):
@@ -443,7 +478,12 @@ class CargoSource(Source):
             return []
 
         return [
-            Crate(self, crate['name'], crate['version'], sha=crate.get('sha', None))
+            Crate(
+                self,
+                crate["name"],
+                crate["version"],
+                sha=crate.get("sha", None),
+            )
             for crate in refs
         ]
 

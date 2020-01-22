@@ -60,20 +60,24 @@ class TarElement(Element):
     BST_FORBID_SOURCES = True
 
     def configure(self, node):
-        node.validate_keys(['filename', 'compression'])
-        self.filename = self.node_subst_vars(node.get_scalar('filename'))
-        self.compression = node.get_str('compression')
+        node.validate_keys(["filename", "compression"])
+        self.filename = self.node_subst_vars(node.get_scalar("filename"))
+        self.compression = node.get_str("compression")
 
-        if self.compression not in ['none', 'gzip', 'xz', 'bzip2']:
-            raise ElementError("{}: Invalid compression option {}".format(self, self.compression))
+        if self.compression not in ["none", "gzip", "xz", "bzip2"]:
+            raise ElementError(
+                "{}: Invalid compression option {}".format(
+                    self, self.compression
+                )
+            )
 
     def preflight(self):
         pass
 
     def get_unique_key(self):
         key = {}
-        key['filename'] = self.filename
-        key['compression'] = self.compression
+        key["filename"] = self.filename
+        key["compression"] = self.compression
         return key
 
     def configure_sandbox(self, sandbox):
@@ -84,27 +88,41 @@ class TarElement(Element):
 
     def assemble(self, sandbox):
         basedir = sandbox.get_directory()
-        inputdir = os.path.join(basedir, 'input')
-        outputdir = os.path.join(basedir, 'output')
+        inputdir = os.path.join(basedir, "input")
+        outputdir = os.path.join(basedir, "output")
         os.makedirs(inputdir, exist_ok=True)
         os.makedirs(outputdir, exist_ok=True)
 
         # Stage deps in the sandbox root
-        with self.timed_activity('Staging dependencies', silent_nested=True):
-            self.stage_dependency_artifacts(sandbox, Scope.BUILD, path='/input')
+        with self.timed_activity("Staging dependencies", silent_nested=True):
+            self.stage_dependency_artifacts(
+                sandbox, Scope.BUILD, path="/input"
+            )
 
-        with self.timed_activity('Creating tarball', silent_nested=True):
+        with self.timed_activity("Creating tarball", silent_nested=True):
 
             # Create an uncompressed tar archive
-            compress_map = {'none': '', 'gzip': 'gz', 'xz': 'xz', 'bzip2': 'bz2'}
-            extension_map = {'none': '.tar', 'gzip': '.tar.gz', 'xz': '.tar.xz', 'bzip2': '.tar.bz2'}
-            tarname = os.path.join(outputdir, self.filename + extension_map[self.compression])
-            mode = 'w:' + compress_map[self.compression]
+            compress_map = {
+                "none": "",
+                "gzip": "gz",
+                "xz": "xz",
+                "bzip2": "bz2",
+            }
+            extension_map = {
+                "none": ".tar",
+                "gzip": ".tar.gz",
+                "xz": ".tar.xz",
+                "bzip2": ".tar.bz2",
+            }
+            tarname = os.path.join(
+                outputdir, self.filename + extension_map[self.compression]
+            )
+            mode = "w:" + compress_map[self.compression]
             with tarfile.TarFile.open(name=tarname, mode=mode) as tar:
                 for f in os.listdir(inputdir):
                     tar.add(os.path.join(inputdir, f), arcname=f)
 
-        return '/output'
+        return "/output"
 
 
 def setup():

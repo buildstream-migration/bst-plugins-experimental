@@ -28,33 +28,25 @@ from buildstream import _yaml
 from buildstream.testing import cli  # pylint: disable=unused-import
 from buildstream.testing import create_repo
 
-DATA_DIR = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    'ostree',
-)
+DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ostree",)
 
 
-@pytest.mark.datafiles(os.path.join(DATA_DIR, 'template'))
+@pytest.mark.datafiles(os.path.join(DATA_DIR, "template"))
 def test_submodule_track_no_ref_or_track(cli, tmpdir, datafiles):
     project = str(datafiles)
 
     # Create the repo from 'repofiles' subdir
-    repo = create_repo('ostree', str(tmpdir))
-    repo.create(os.path.join(project, 'repofiles'))
+    repo = create_repo("ostree", str(tmpdir))
+    repo.create(os.path.join(project, "repofiles"))
 
     # Write out our test target
     ostreesource = repo.source_config(ref=None)
-    ostreesource.pop('track')
-    element = {
-        'kind': 'import',
-        'sources': [
-            ostreesource
-        ]
-    }
+    ostreesource.pop("track")
+    element = {"kind": "import", "sources": [ostreesource]}
 
-    _yaml.roundtrip_dump(element, os.path.join(project, 'target.bst'))
+    _yaml.roundtrip_dump(element, os.path.join(project, "target.bst"))
 
     # Track will encounter an inconsistent submodule without any ref
-    result = cli.run(project=project, args=['show', 'target.bst'])
+    result = cli.run(project=project, args=["show", "target.bst"])
     result.assert_main_error(ErrorDomain.SOURCE, "missing-track-and-ref")
     result.assert_task_error(None, None)

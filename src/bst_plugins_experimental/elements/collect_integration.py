@@ -40,32 +40,40 @@ class ExtractIntegrationElement(Element):
     BST_REQUIRED_VERSION_MINOR = 91
 
     def configure(self, node):
-        node.validate_keys([
-            'script-path',
-            'ignore'
-        ])
+        node.validate_keys(["script-path", "ignore"])
 
-        self.script_path = self.node_subst_vars(node.get_scalar('script-path'))
-        self.ignore = node.get_str_list('ignore', [])
+        self.script_path = self.node_subst_vars(node.get_scalar("script-path"))
+        self.ignore = node.get_str_list("ignore", [])
 
     def preflight(self):
         runtime_deps = list(self.dependencies(Scope.RUN, recurse=False))
         if runtime_deps:
-            raise ElementError("{}: Only build type dependencies supported by collect-integration elements"
-                               .format(self))
+            raise ElementError(
+                "{}: Only build type dependencies supported by collect-integration elements".format(
+                    self
+                )
+            )
 
         sources = list(self.sources())
         if sources:
-            raise ElementError("{}: collect-integration elements may not have sources".format(self))
+            raise ElementError(
+                "{}: collect-integration elements may not have sources".format(
+                    self
+                )
+            )
 
         for ignore in self.ignore:
             if self.search(Scope.BUILD, ignore) is None:
-                raise ElementError("{}: element {} is not in dependencies".format(self, ignore))
+                raise ElementError(
+                    "{}: element {} is not in dependencies".format(
+                        self, ignore
+                    )
+                )
 
     def get_unique_key(self):
         key = {
-            'script-path': self.script_path,
-            'ignore': sorted(set(self.ignore))
+            "script-path": self.script_path,
+            "ignore": sorted(set(self.ignore)),
         }
         return key
 
@@ -77,30 +85,40 @@ class ExtractIntegrationElement(Element):
 
     def assemble(self, sandbox):
         basedir = sandbox.get_directory()
-        script_path = os.path.join(basedir, self.script_path.lstrip(os.path.sep))
+        script_path = os.path.join(
+            basedir, self.script_path.lstrip(os.path.sep)
+        )
         os.makedirs(os.path.dirname(script_path), exist_ok=True)
 
         def opener(path, flags):
-            return os.open(path, flags, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+            return os.open(
+                path, flags, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO
+            )
 
         ignore_set = set()
         for ignore in self.ignore:
             ignore_set.add(self.search(Scope.BUILD, ignore))
 
-        with open(script_path, 'w', opener=opener) as f:
-            f.write('#!/bin/sh\n')
-            f.write('set -e\n\n')
+        with open(script_path, "w", opener=opener) as f:
+            f.write("#!/bin/sh\n")
+            f.write("set -e\n\n")
             for dependency in self.dependencies(Scope.BUILD):
                 if dependency in ignore_set:
                     continue
-                bstdata = dependency.get_public_data('bst')
+                bstdata = dependency.get_public_data("bst")
                 if bstdata is not None:
-                    if 'integration-commands' in bstdata:
-                        commands = dependency.node_subst_sequence_vars(bstdata.get_sequence('integration-commands'))
+                    if "integration-commands" in bstdata:
+                        commands = dependency.node_subst_sequence_vars(
+                            bstdata.get_sequence("integration-commands")
+                        )
 
-                        f.write('# integration commands from {}\n'.format(dependency.name))
+                        f.write(
+                            "# integration commands from {}\n".format(
+                                dependency.name
+                            )
+                        )
                         for cmd in commands:
-                            f.write('{}\n\n'.format(cmd))
+                            f.write("{}\n\n".format(cmd))
 
         return os.path.sep
 

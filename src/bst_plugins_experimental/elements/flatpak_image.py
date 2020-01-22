@@ -45,16 +45,14 @@ class FlatpakImageElement(Element):
     BST_STRICT_REBUILD = True
 
     def configure(self, node):
-        node.validate_keys([
-            'directory', 'include', 'exclude', 'metadata'
-        ])
-        self.directory = self.node_subst_vars(node.get_scalar('directory'))
-        self.include = node.get_str_list('include')
-        self.exclude = node.get_str_list('exclude')
+        node.validate_keys(["directory", "include", "exclude", "metadata"])
+        self.directory = self.node_subst_vars(node.get_scalar("directory"))
+        self.include = node.get_str_list("include")
+        self.exclude = node.get_str_list("exclude")
         self.metadata = configparser.ConfigParser()
         self.metadata.optionxform = str
         metadata_dict = {}
-        metadata_node = node.get_mapping('metadata')
+        metadata_node = node.get_mapping("metadata")
         for section, pairs in metadata_node.items():
             section_dict = {}
             for key, value in pairs.items():
@@ -66,20 +64,25 @@ class FlatpakImageElement(Element):
     def preflight(self):
         runtime_deps = list(self.dependencies(Scope.RUN, recurse=False))
         if runtime_deps:
-            raise ElementError("{}: Only build type dependencies supported by flatpak_image elements"
-                               .format(self))
+            raise ElementError(
+                "{}: Only build type dependencies supported by flatpak_image elements".format(
+                    self
+                )
+            )
 
         sources = list(self.sources())
         if sources:
-            raise ElementError("{}: flatpak_image elements may not have sources".format(self))
+            raise ElementError(
+                "{}: flatpak_image elements may not have sources".format(self)
+            )
 
     def get_unique_key(self):
         key = {}
-        key['directory'] = self.directory
-        key['include'] = sorted(self.include)
-        key['exclude'] = sorted(self.exclude)
-        key['metadata'] = self.metadata
-        key['version'] = 2              # Used to force rebuilds after editing the plugin
+        key["directory"] = self.directory
+        key["include"] = sorted(self.include)
+        key["exclude"] = sorted(self.exclude)
+        key["metadata"] = self.metadata
+        key["version"] = 2  # Used to force rebuilds after editing the plugin
         return key
 
     def configure_sandbox(self, sandbox):
@@ -89,44 +92,54 @@ class FlatpakImageElement(Element):
         pass
 
     def assemble(self, sandbox):
-        self.stage_sources(sandbox, 'input')
+        self.stage_sources(sandbox, "input")
 
         basedir = sandbox.get_directory()
-        allfiles = os.path.join(basedir, 'buildstream', 'allfiles')
-        reldirectory = os.path.relpath(self.directory, '/')
+        allfiles = os.path.join(basedir, "buildstream", "allfiles")
+        reldirectory = os.path.relpath(self.directory, "/")
         subdir = os.path.join(allfiles, reldirectory)
-        etcdir = os.path.join(allfiles, 'etc')
-        installdir = os.path.join(basedir, 'buildstream', 'install')
-        filesdir = os.path.join(installdir, 'files')
-        filesetcdir = os.path.join(filesdir, 'etc')
-        stagedir = os.path.join(os.sep, 'buildstream', 'allfiles')
+        etcdir = os.path.join(allfiles, "etc")
+        installdir = os.path.join(basedir, "buildstream", "install")
+        filesdir = os.path.join(installdir, "files")
+        filesetcdir = os.path.join(filesdir, "etc")
+        stagedir = os.path.join(os.sep, "buildstream", "allfiles")
 
         os.makedirs(allfiles, exist_ok=True)
         os.makedirs(filesdir, exist_ok=True)
-        if self.metadata.has_section('Application'):
-            os.makedirs(os.path.join(installdir, 'export'), exist_ok=True)
+        if self.metadata.has_section("Application"):
+            os.makedirs(os.path.join(installdir, "export"), exist_ok=True)
 
         for section in self.metadata.sections():
-            if section.startswith('Extension '):
+            if section.startswith("Extension "):
                 try:
-                    extensiondir = self.metadata.get(section, 'directory')
-                    os.makedirs(os.path.join(installdir, 'files', extensiondir), exist_ok=True)
+                    extensiondir = self.metadata.get(section, "directory")
+                    os.makedirs(
+                        os.path.join(installdir, "files", extensiondir),
+                        exist_ok=True,
+                    )
                 except PermissionError:
-                    raise ElementError("Permission denied: Cannot create {}".format(extensiondir))
+                    raise ElementError(
+                        "Permission denied: Cannot create {}".format(
+                            extensiondir
+                        )
+                    )
 
         with self.timed_activity("Creating flatpak image", silent_nested=True):
-            self.stage_dependency_artifacts(sandbox, Scope.BUILD,
-                                            path=stagedir,
-                                            include=self.include,
-                                            exclude=self.exclude)
+            self.stage_dependency_artifacts(
+                sandbox,
+                Scope.BUILD,
+                path=stagedir,
+                include=self.include,
+                exclude=self.exclude,
+            )
             utils.link_files(subdir, filesdir)
             if os.path.exists(etcdir):
                 utils.link_files(etcdir, filesetcdir)
 
-        metadatafile = os.path.join(installdir, 'metadata')
+        metadatafile = os.path.join(installdir, "metadata")
         with open(metadatafile, "w") as m:
             self.metadata.write(m)
-        return os.path.join(os.sep, 'buildstream', 'install')
+        return os.path.join(os.sep, "buildstream", "install")
 
 
 def setup():

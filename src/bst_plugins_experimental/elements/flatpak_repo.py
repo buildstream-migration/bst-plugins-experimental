@@ -35,66 +35,97 @@ class FlatpakRepoElement(ScriptElement):
     BST_REQUIRED_VERSION_MINOR = 91
 
     def configure(self, node):
-        node.validate_keys(['environment', 'copy-refs', 'repo-mode', 'arch', 'branch'])
+        node.validate_keys(
+            ["environment", "copy-refs", "repo-mode", "arch", "branch"]
+        )
 
-        self._env = node.get_str_list('environment')
+        self._env = node.get_str_list("environment")
 
         self._copy_refs = []
-        for subnode in node.get_str_list('copy-refs'):
-            subnode.validate_keys(['src', 'dest'])
-            self._copy_refs.append((self.node_subst_vars(subnode.get_scalar('src')),
-                                    self.node_subst_vars(subnode.get_scalar('dest'))))
+        for subnode in node.get_str_list("copy-refs"):
+            subnode.validate_keys(["src", "dest"])
+            self._copy_refs.append(
+                (
+                    self.node_subst_vars(subnode.get_scalar("src")),
+                    self.node_subst_vars(subnode.get_scalar("dest")),
+                )
+            )
 
-        self._arch = self.node_subst_vars(node.get_scalar('arch'))
-        self._branch = self.node_subst_vars(node.get_scalar('branch'))
+        self._arch = self.node_subst_vars(node.get_scalar("arch"))
+        self._branch = self.node_subst_vars(node.get_scalar("branch"))
 
         self.set_work_dir()
         self.set_root_read_only(True)
 
-        self._repo_mode = self.node_subst_vars(node.get_scalar('repo-mode'))
-        self.set_install_root('/buildstream/repo')
-        self.add_commands('init repository',
-                          ['ostree init --repo=/buildstream/repo --mode={}'.format(self._repo_mode)])
+        self._repo_mode = self.node_subst_vars(node.get_scalar("repo-mode"))
+        self.set_install_root("/buildstream/repo")
+        self.add_commands(
+            "init repository",
+            [
+                "ostree init --repo=/buildstream/repo --mode={}".format(
+                    self._repo_mode
+                )
+            ],
+        )
 
     def _layout_flatpaks(self, elements):
         def staging_dir(elt):
-            return '/buildstream/input/{}'.format(elt.name)
+            return "/buildstream/input/{}".format(elt.name)
 
         def export_command(elt):
-            return 'flatpak build-export --files=files --arch={} /buildstream/repo {} {}'\
-                .format(self._arch, staging_dir(elt), self._branch)
+            return "flatpak build-export --files=files --arch={} /buildstream/repo {} {}".format(
+                self._arch, staging_dir(elt), self._branch
+            )
 
         for elt in elements:
-            if elt.get_kind() == 'flatpak_image':
+            if elt.get_kind() == "flatpak_image":
                 self.layout_add(elt.name, staging_dir(elt))
-                self.add_commands('export {}'.format(elt.name), [export_command(elt)])
-            elif elt.get_kind() == 'stack':
-                self._layout_flatpaks(elt.dependencies(Scope.RUN, recurse=False))
+                self.add_commands(
+                    "export {}".format(elt.name), [export_command(elt)]
+                )
+            elif elt.get_kind() == "stack":
+                self._layout_flatpaks(
+                    elt.dependencies(Scope.RUN, recurse=False)
+                )
             else:
-                raise ElementError('Dependency {} is not of kind flatpak_image'.format(elt.name))
+                raise ElementError(
+                    "Dependency {} is not of kind flatpak_image".format(
+                        elt.name
+                    )
+                )
 
     def stage(self, sandbox):
         env = [self.search(Scope.BUILD, elt) for elt in self._env]
-        flatpaks = [elt for elt in self.dependencies(Scope.BUILD, recurse=False) if elt not in env]
+        flatpaks = [
+            elt
+            for elt in self.dependencies(Scope.BUILD, recurse=False)
+            if elt not in env
+        ]
 
         for elt in env:
-            self.layout_add(elt.name, '/')
+            self.layout_add(elt.name, "/")
 
         self._layout_flatpaks(flatpaks)
 
         for src, dest in self._copy_refs:
-            self.add_commands('copy ref {} -> {}'.format(src, dest),
-                              ['flatpak build-commit-from --src-ref={} /buildstream/repo {}'.format(src, dest)])
+            self.add_commands(
+                "copy ref {} -> {}".format(src, dest),
+                [
+                    "flatpak build-commit-from --src-ref={} /buildstream/repo {}".format(
+                        src, dest
+                    )
+                ],
+            )
 
         super(FlatpakRepoElement, self).stage(sandbox)
 
     def get_unique_key(self):
         return {
-            'environment': self._env,
-            'copy-refs': self._copy_refs,
-            'repo-mode': self._repo_mode,
-            'arch': self._arch,
-            'branch': self._branch
+            "environment": self._env,
+            "copy-refs": self._copy_refs,
+            "repo-mode": self._repo_mode,
+            "arch": self._arch,
+            "branch": self._branch,
         }
 
 

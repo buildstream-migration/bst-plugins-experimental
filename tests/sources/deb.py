@@ -21,18 +21,14 @@ def generate_project(project_dir, tmpdir):
     _yaml.roundtrip_dump(
         {
             "name": "foo",
-            "aliases": {
-                "tmpdir": "file:///" + str(tmpdir)
-            },
+            "aliases": {"tmpdir": "file:///" + str(tmpdir)},
             "plugins": [
                 {
                     "origin": "pip",
                     "package-name": "bst-plugins-experimental",
-                    "sources": {
-                        "deb": 0,
-                    }
+                    "sources": {"deb": 0,},
                 }
-            ]
+            ],
         },
         project_file,
     )
@@ -111,7 +107,16 @@ def test_stage_default_basedir(cli, tmpdir, datafiles):
     result.assert_success()
     result = cli.run(project=project, args=["build", "target.bst"])
     result.assert_success()
-    result = cli.run(project=project, args=["artifact", "checkout", "target.bst", "--directory", checkoutdir])
+    result = cli.run(
+        project=project,
+        args=[
+            "artifact",
+            "checkout",
+            "target.bst",
+            "--directory",
+            checkoutdir,
+        ],
+    )
     result.assert_success()
 
     # Check that the content of the first directory is checked out (base-dir: '')
@@ -138,7 +143,16 @@ def test_stage_no_basedir(cli, tmpdir, datafiles):
     result.assert_success()
     result = cli.run(project=project, args=["build", "target.bst"])
     result.assert_success()
-    result = cli.run(project=project, args=["artifact", "checkout", "target.bst", "--directory", checkoutdir])
+    result = cli.run(
+        project=project,
+        args=[
+            "artifact",
+            "checkout",
+            "target.bst",
+            "--directory",
+            checkoutdir,
+        ],
+    )
     result.assert_success()
 
     # Check that the full content of the tarball is checked out (base-dir: '')
@@ -165,7 +179,16 @@ def test_stage_explicit_basedir(cli, tmpdir, datafiles):
     result.assert_success()
     result = cli.run(project=project, args=["build", "target.bst"])
     result.assert_success()
-    result = cli.run(project=project, args=["artifact", "checkout", "target.bst", "--directory", checkoutdir])
+    result = cli.run(
+        project=project,
+        args=[
+            "artifact",
+            "checkout",
+            "target.bst",
+            "--directory",
+            checkoutdir,
+        ],
+    )
     result.assert_success()
 
     # Check that the content of the first directory is checked out (base-dir: '')

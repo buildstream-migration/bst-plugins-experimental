@@ -61,30 +61,39 @@ from . import _ostree
 
 
 class OSTreeSource(Source):
-
     def configure(self, node):
 
-        node.validate_keys(['url', 'ref', 'track', 'gpg-key', *Source.COMMON_CONFIG_KEYS])
+        node.validate_keys(
+            ["url", "ref", "track", "gpg-key", *Source.COMMON_CONFIG_KEYS]
+        )
 
-        self.original_url = node.get_str('url')
+        self.original_url = node.get_str("url")
         self.url = self.translate_url(self.original_url)
-        self.ref = node.get_str('ref', None)
-        self.tracking = node.get_str('track', None)
-        self.mirror = os.path.join(self.get_mirror_directory(),
-                                   utils.url_directory_name(self.original_url))
+        self.ref = node.get_str("ref", None)
+        self.tracking = node.get_str("track", None)
+        self.mirror = os.path.join(
+            self.get_mirror_directory(),
+            utils.url_directory_name(self.original_url),
+        )
 
         # At this point we now know if the source has a ref and/or a track.
         # If it is missing both then we will be unable to track or build.
         if self.ref is None and self.tracking is None:
-            raise SourceError("{}: OSTree sources require a ref and/or track".format(self),
-                              reason="missing-track-and-ref")
+            raise SourceError(
+                "{}: OSTree sources require a ref and/or track".format(self),
+                reason="missing-track-and-ref",
+            )
 
         # (optional) Not all repos are signed. But if they are, get the gpg key
         self.gpg_key_path = None
-        gpg_key_node = node.get_scalar('gpg-key', None)
+        gpg_key_node = node.get_scalar("gpg-key", None)
         if not gpg_key_node.is_none():
-            self.gpg_key = self.node_get_project_path(gpg_key_node, check_is_file=True)
-            self.gpg_key_path = os.path.join(self.get_project_directory(), self.gpg_key)
+            self.gpg_key = self.node_get_project_path(
+                gpg_key_node, check_is_file=True
+            )
+            self.gpg_key_path = os.path.join(
+                self.get_project_directory(), self.gpg_key
+            )
 
         # Our OSTree repo handle
         self.repo = None
@@ -96,13 +105,13 @@ class OSTreeSource(Source):
         return [self.original_url, self.ref]
 
     def load_ref(self, node):
-        self.ref = node.get_str('ref', None)
+        self.ref = node.get_str("ref", None)
 
     def get_ref(self):
         return self.ref
 
     def set_ref(self, ref, node):
-        node['ref'] = self.ref = ref
+        node["ref"] = self.ref = ref
 
     def track(self):
         # If self.tracking is not specified it's not an error, just silently return
@@ -111,13 +120,24 @@ class OSTreeSource(Source):
 
         self.ensure()
         remote_name = self.ensure_remote(self.url)
-        with self.timed_activity("Fetching tracking ref '{}' from origin: {}"
-                                 .format(self.tracking, self.url)):
+        with self.timed_activity(
+            "Fetching tracking ref '{}' from origin: {}".format(
+                self.tracking, self.url
+            )
+        ):
             try:
-                _ostree.fetch(self.repo, remote=remote_name, ref=self.tracking, progress=self.progress)
+                _ostree.fetch(
+                    self.repo,
+                    remote=remote_name,
+                    ref=self.tracking,
+                    progress=self.progress,
+                )
             except OSTreeError as e:
-                raise SourceError("{}: Failed to fetch tracking ref '{}' from origin {}\n\n{}"
-                                  .format(self, self.tracking, self.url, e)) from e
+                raise SourceError(
+                    "{}: Failed to fetch tracking ref '{}' from origin {}\n\n{}".format(
+                        self, self.tracking, self.url, e
+                    )
+                ) from e
 
         return _ostree.checksum(self.repo, self.tracking)
 
@@ -125,28 +145,45 @@ class OSTreeSource(Source):
         self.ensure()
         remote_name = self.ensure_remote(self.url)
         if not _ostree.exists(self.repo, self.ref):
-            with self.timed_activity("Fetching remote ref: {} from origin: {}"
-                                     .format(self.ref, self.url)):
+            with self.timed_activity(
+                "Fetching remote ref: {} from origin: {}".format(
+                    self.ref, self.url
+                )
+            ):
                 try:
-                    _ostree.fetch(self.repo, remote=remote_name, ref=self.ref, progress=self.progress)
+                    _ostree.fetch(
+                        self.repo,
+                        remote=remote_name,
+                        ref=self.ref,
+                        progress=self.progress,
+                    )
                 except OSTreeError as e:
-                    raise SourceError("{}: Failed to fetch ref '{}' from origin: {}\n\n{}"
-                                      .format(self, self.ref, self.url, e)) from e
+                    raise SourceError(
+                        "{}: Failed to fetch ref '{}' from origin: {}\n\n{}".format(
+                            self, self.ref, self.url, e
+                        )
+                    ) from e
 
     def stage(self, directory):
         self.ensure()
 
         # Checkout self.ref into the specified directory
         with self.tempdir() as tmpdir:
-            checkoutdir = os.path.join(tmpdir, 'checkout')
+            checkoutdir = os.path.join(tmpdir, "checkout")
 
-            with self.timed_activity("Staging ref: {} from origin: {}"
-                                     .format(self.ref, self.url)):
+            with self.timed_activity(
+                "Staging ref: {} from origin: {}".format(self.ref, self.url)
+            ):
                 try:
-                    _ostree.checkout(self.repo, checkoutdir, self.ref, user=True)
+                    _ostree.checkout(
+                        self.repo, checkoutdir, self.ref, user=True
+                    )
                 except OSTreeError as e:
-                    raise SourceError("{}: Failed to checkout ref '{}' from origin: {}\n\n{}"
-                                      .format(self, self.ref, self.url, e)) from e
+                    raise SourceError(
+                        "{}: Failed to checkout ref '{}' from origin: {}\n\n{}".format(
+                            self, self.ref, self.url, e
+                        )
+                    ) from e
 
             # The target directory is guaranteed to exist, here we must move the
             # content of out checkout into the existing target directory.
@@ -159,8 +196,11 @@ class OSTreeSource(Source):
                     source_path = os.path.join(checkoutdir, entry)
                     shutil.move(source_path, directory)
             except (shutil.Error, OSError) as e:
-                raise SourceError("{}: Failed to move ostree checkout {} from '{}' to '{}'\n\n{}"
-                                  .format(self, self.url, tmpdir, directory, e)) from e
+                raise SourceError(
+                    "{}: Failed to move ostree checkout {} from '{}' to '{}'\n\n{}".format(
+                        self, self.url, tmpdir, directory, e
+                    )
+                ) from e
 
     def is_cached(self):
         self.ensure()
@@ -177,18 +217,24 @@ class OSTreeSource(Source):
 
     def ensure_remote(self, url):
         if self.original_url == self.url:
-            remote_name = 'origin'
+            remote_name = "origin"
         else:
             remote_name = utils.url_directory_name(url)
 
         gpg_key = None
         if self.gpg_key_path:
-            gpg_key = 'file://' + self.gpg_key_path
+            gpg_key = "file://" + self.gpg_key_path
 
         try:
-            _ostree.configure_remote(self.repo, remote_name, url, key_url=gpg_key)
+            _ostree.configure_remote(
+                self.repo, remote_name, url, key_url=gpg_key
+            )
         except OSTreeError as e:
-            raise SourceError("{}: Failed to configure origin {}\n\n{}".format(self, self.url, e)) from e
+            raise SourceError(
+                "{}: Failed to configure origin {}\n\n{}".format(
+                    self, self.url, e
+                )
+            ) from e
         return remote_name
 
     def progress(self, percent, message):

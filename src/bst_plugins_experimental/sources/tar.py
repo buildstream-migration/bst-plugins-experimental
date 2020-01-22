@@ -81,7 +81,9 @@ class ReadableTarInfo(tarfile.TarInfo):
 
     @mode.setter
     def mode(self, permission):
-        self.__permission = permission  # pylint: disable=attribute-defined-outside-init
+        self.__permission = (
+            permission  # pylint: disable=attribute-defined-outside-init
+        )
 
 
 class TarSource(DownloadableFileSource):
@@ -91,7 +93,9 @@ class TarSource(DownloadableFileSource):
         super().configure(node)
 
         self.base_dir = node.get_str("base-dir", "*")
-        node.validate_keys(DownloadableFileSource.COMMON_CONFIG_KEYS + ["base-dir"])
+        node.validate_keys(
+            DownloadableFileSource.COMMON_CONFIG_KEYS + ["base-dir"]
+        )
 
     def preflight(self):
         self.host_lzip = None
@@ -106,7 +110,9 @@ class TarSource(DownloadableFileSource):
         assert self.host_lzip
         with TemporaryFile() as lzip_stdout:
             with open(self._get_mirror_file(), "r") as lzip_file:
-                self.call([self.host_lzip, "-d"], stdin=lzip_file, stdout=lzip_stdout)
+                self.call(
+                    [self.host_lzip, "-d"], stdin=lzip_file, stdout=lzip_stdout
+                )
 
             lzip_stdout.seek(0, 0)
             yield lzip_stdout
@@ -115,10 +121,14 @@ class TarSource(DownloadableFileSource):
     def _get_tar(self):
         if self.url.endswith(".lz"):
             with self._run_lzip() as lzip_dec:
-                with tarfile.open(fileobj=lzip_dec, mode="r:", tarinfo=ReadableTarInfo) as tar:
+                with tarfile.open(
+                    fileobj=lzip_dec, mode="r:", tarinfo=ReadableTarInfo
+                ) as tar:
                     yield tar
         else:
-            with tarfile.open(self._get_mirror_file(), tarinfo=ReadableTarInfo) as tar:
+            with tarfile.open(
+                self._get_mirror_file(), tarinfo=ReadableTarInfo
+            ) as tar:
                 yield tar
 
     def stage(self, directory):
@@ -129,12 +139,19 @@ class TarSource(DownloadableFileSource):
                     base_dir = self._find_base_dir(tar, self.base_dir)
 
                 if base_dir:
-                    tar.extractall(path=directory, members=self._extract_members(tar, base_dir, directory))
+                    tar.extractall(
+                        path=directory,
+                        members=self._extract_members(
+                            tar, base_dir, directory
+                        ),
+                    )
                 else:
                     tar.extractall(path=directory)
 
         except (tarfile.TarError, OSError) as e:
-            raise SourceError("{}: Error staging source: {}".format(self, e)) from e
+            raise SourceError(
+                "{}: Error staging source: {}".format(self, e)
+            ) from e
 
     # Override and translate which filenames to extract
     def _extract_members(self, tar, base_dir, target_dir):
@@ -152,7 +169,9 @@ class TarSource(DownloadableFileSource):
                 )
 
             if member.islnk():
-                linked_path = os.path.abspath(os.path.join(target_dir, member.linkname))
+                linked_path = os.path.abspath(
+                    os.path.join(target_dir, member.linkname)
+                )
                 if not linked_path.startswith(target_dir):
                     raise SourceError(
                         "{}: Tarfile attempts to hardlink outside the staging area: "
@@ -214,7 +233,9 @@ class TarSource(DownloadableFileSource):
                 # the final component
                 components = member_name.split("/")
                 for i in range(len(components) - 1):
-                    dir_component = "/".join([components[j] for j in range(i + 1)])
+                    dir_component = "/".join(
+                        [components[j] for j in range(i + 1)]
+                    )
                     if dir_component not in visited:
                         visited.add(dir_component)
                         try:
@@ -239,7 +260,11 @@ class TarSource(DownloadableFileSource):
         paths = self._list_tar_paths(tar)
         matches = sorted(list(utils.glob(paths, pattern)))
         if not matches:
-            raise SourceError("{}: Could not find base directory matching pattern: {}".format(self, pattern))
+            raise SourceError(
+                "{}: Could not find base directory matching pattern: {}".format(
+                    self, pattern
+                )
+            )
 
         return matches[0]
 
