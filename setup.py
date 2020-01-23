@@ -19,6 +19,7 @@
 #        Tristan Maat <tristan.maat@codethink.co.uk>
 #        James Ennis  <james.ennis@codethink.co.uk>
 
+import os
 import sys
 
 try:
@@ -33,23 +34,33 @@ except ImportError:
 #                          Gather Requirements                                #
 ###############################################################################
 
-
 def parse_requirements(requirements_file):
     with open(requirements_file, 'r') as f:
         reqs = [line.strip() for line in f.readlines()
                 if not line.strip().startswith('#') and line != '']
     return reqs
 
-
-dev_requires = parse_requirements('requirements/dev-requirements.txt')
 install_requires = parse_requirements('requirements/install-requirements.txt')
-plugin_requires = parse_requirements('requirements/plugin-requirements.txt')
-test_requires = parse_requirements('requirements/test-requirements.txt')
+
+
+###############################################################################
+#                             Parse README                                    #
+###############################################################################
+with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                       'README.rst')) as readme:
+    long_description = readme.read()
+
 
 setup(name='bst-plugins-experimental',
       version="1.93.0",
       description="A collection of experimental BuildStream plugins.",
+      long_description=long_description,
+      long_description_content_type='text/x-rst; charset=UTF-8',
       license='LGPL',
+      url='https://gitlab.com/BuildStream/bst-plugins-experimental',
+      project_urls={
+          'Documentation': 'https://buildstream.gitlab.io/bst-plugins-experimental/',
+      },
       package_dir={'': 'src'},
       packages=find_packages(where='src'),
       include_package_data=True,
@@ -89,7 +100,6 @@ setup(name='bst-plugins-experimental',
               'bst_plugins_experimental = bst_plugins_experimental.testutils',
           ]
       },
-      tests_require=test_requires + plugin_requires + dev_requires,
       extras_require={
           'ostree': ["PyGObject"],
           'cargo': ["pytoml"],

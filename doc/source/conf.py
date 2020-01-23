@@ -54,7 +54,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'BuildStream'
+project = 'BuildStream Experimental Plugins'
 copyright = '2017, Codethink Limited'
 author = 'Tristan Van Berkom'
 
