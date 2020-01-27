@@ -1,4 +1,4 @@
-image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:30-${DOCKER_IMAGE_VERSION}
+image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-${DOCKER_IMAGE_VERSION}
 
 cache:
   paths:
@@ -53,7 +53,7 @@ test-fixed-ubuntu-18:
     <<: *test-variables
     TOXENV: "py36-bst-fixed"
 
-test-fixed-fedora-30:
+test-fixed-fedora-31:
   <<: *test-template
   variables:
     <<: *test-variables
@@ -68,7 +68,7 @@ test-fixed-python-38-debian:
 
 # NOTE: Tests against master are only run against only one distribution in
 # order to conserve CI resources.
-test-master-fedora-30:
+test-master-fedora-31:
   image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-${DOCKER_IMAGE_VERSION}
   <<: *test-template
   variables:
