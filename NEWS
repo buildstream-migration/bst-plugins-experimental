@@ -2,6 +2,9 @@
 Next Version
 ================
 
+o Add pip source plugin
+o Add pip build element plugin
+
 ===============================
 bst-plugins-experimental 1.93.0
 ===============================

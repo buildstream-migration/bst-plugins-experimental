@@ -86,11 +86,13 @@ setup(name='bst-plugins-experimental',
               'modulebuild = bst_plugins_experimental.elements.modulebuild',
               'qmake = bst_plugins_experimental.elements.qmake',
               'distutils = bst_plugins_experimental.elements.distutils',
+              'pip = bst_plugins_experimental.elements.pip'
           ],
           'buildstream.plugins.sources': [
               'bazel_source = bst_plugins_experimental.sources.bazel_source',
               'deb = bst_plugins_experimental.sources.deb',
               'git_tag = bst_plugins_experimental.sources.git_tag',
+              'pip = bst_plugins_experimental.sources.pip',
               'quilt = bst_plugins_experimental.sources.quilt',
               'ostree = bst_plugins_experimental.sources.ostree',
               'cargo = bst_plugins_experimental.sources.cargo',
