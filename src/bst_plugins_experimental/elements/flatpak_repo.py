@@ -18,8 +18,9 @@
 
 """flatpak repository element
 
-A :mod:`ScriptElement <buildstream.scriptelement>` implementation for exporting
-a flatpak repository from a set of :ref:`flatpack images <flatpak_image>`.
+A `ScriptElement
+<https://docs.buildstream.build/master/buildstream.scriptelement.html#module-buildstream.scriptelement>`_
+implementation for exporting a flatpak repository from a set of :ref:`flatpack images <flatpak_image>`.
 
 The flatpak_repo default configuration:
   .. literalinclude:: ../../../bst_plugins_experimental/elements/flatpak_repo.yaml

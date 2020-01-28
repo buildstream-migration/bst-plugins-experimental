@@ -20,14 +20,15 @@
 """
 makemaker - Perl MakeMaker build element
 ========================================
-A :mod:`BuildElement <buildstream.buildelement>` implementation for using
-the Perl ExtUtil::MakeMaker build system
+A `BuildElement <https://docs.buildstream.build/master/buildstream.buildelement.html#module-buildstream.buildelement>`_
+implementation for using the Perl ExtUtil::MakeMaker build system
 
 The MakeMaker default configuration:
   .. literalinclude:: ../../../src/buildstream/plugins/elements/makemaker.yaml
      :language: yaml
 
-See :ref:`built-in functionality documentation <core_buildelement_builtins>` for
+See `built-in functionality documentation
+<https://docs.buildstream.build/master/buildstream.buildelement.html#core-buildelement-builtins>`_ for
 details on common configuration options for build elements.
 """
 

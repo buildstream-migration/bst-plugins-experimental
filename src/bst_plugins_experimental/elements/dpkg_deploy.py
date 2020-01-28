@@ -20,8 +20,9 @@
 
 """Dpkg deployment element
 
-A :mod:`ScriptElement <buildstream.scriptelement>` implementation for creating
-debian packages
+A `ScriptElement
+<https://docs.buildstream.build/master/buildstream.scriptelement.html#module-buildstream.scriptelement>`_
+implementation for creating debian packages
 
 Default Configuration
 ~~~~~~~~~~~~~~~~~~~~~

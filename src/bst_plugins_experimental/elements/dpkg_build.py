@@ -20,8 +20,9 @@
 
 """Dpkg build element
 
-A :mod:`BuildElement <buildstream.buildelement>` implementation for using
-dpkg elements
+A `BuildElement
+<https://docs.buildstream.build/master/buildstream.buildelement.html#module-buildstream.buildelement>`_
+implementation for using dpkg elements
 
 Default Configuration
 ~~~~~~~~~~~~~~~~~~~~~

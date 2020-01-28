@@ -18,8 +18,8 @@
 
 """x86 image build element
 
-A :mod:`ScriptElement <buildstream.scriptelement>` implementation for creating
-x86 disk images
+A `ScriptElement <https://docs.buildstream.build/master/buildstream.scriptelement.html#module-buildstream.scriptelement>`_
+implementation for creating x86 disk images
 
 The x86image default configuration:
   .. literalinclude:: ../../../bst_plugins_experimental/elements/x86image.yaml
