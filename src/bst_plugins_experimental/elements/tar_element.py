@@ -33,7 +33,7 @@ Default Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
 The tarball_element default configuration:
-  .. literalinclude:: ../../../bst_plugins_experimental/elements/tar_element.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/tar_element.yaml
      :language: yaml
 """
 

@@ -48,7 +48,7 @@ an example of that:
 
 Here is the default configuration for the ``cmake`` element in full:
 
-  .. literalinclude:: ../../../src/buildstream/plugins/elements/cmake.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/cmake.yaml
      :language: yaml
 
 See `built-in functionality documentation

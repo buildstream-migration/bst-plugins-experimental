@@ -24,7 +24,7 @@ A `BuildElement <https://docs.buildstream.build/master/buildstream.buildelement.
 implementation for using the Perl Module::Build build system
 
 The modulebuild default configuration:
-  .. literalinclude:: ../../../src/buildstream/plugins/elements/modulebuild.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/modulebuild.yaml
      :language: yaml
 
 See `built-in functionality documentation

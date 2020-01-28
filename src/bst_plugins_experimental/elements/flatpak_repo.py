@@ -23,7 +23,7 @@ A `ScriptElement
 implementation for exporting a flatpak repository from a set of :ref:`flatpack images <flatpak_image>`.
 
 The flatpak_repo default configuration:
-  .. literalinclude:: ../../../bst_plugins_experimental/elements/flatpak_repo.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/flatpak_repo.yaml
      :language: yaml
 """
 

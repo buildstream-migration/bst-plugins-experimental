@@ -31,7 +31,7 @@ implementation for using GNU make based build.
 
 Here is the default configuration for the ``make`` element in full:
 
-  .. literalinclude:: ../../../src/buildstream/plugins/elements/make.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/make.yaml
      :language: yaml
 
 See `built-in functionality documentation

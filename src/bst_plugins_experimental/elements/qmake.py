@@ -24,7 +24,7 @@ A `BuildElement <https://docs.buildstream.build/master/buildstream.buildelement.
 implementation for using the qmake build system
 
 The qmake default configuration:
-  .. literalinclude:: ../../../src/buildstream/plugins/elements/qmake.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/qmake.yaml
      :language: yaml
 
 See `built-in functionality documentation

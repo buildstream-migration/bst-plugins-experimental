@@ -25,7 +25,7 @@ A `BuildElement
 implementation for using python distutils
 
 The distutils default configuration:
-  .. literalinclude:: ../../../src/buildstream/plugins/elements/distutils.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/distutils.yaml
      :language: yaml
 
 See `built-in functionality documentation

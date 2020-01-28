@@ -45,7 +45,7 @@ an example of that:
 
 Here is the default configuration for the ``meson`` element in full:
 
-  .. literalinclude:: ../../../src/buildstream/plugins/elements/meson.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/meson.yaml
      :language: yaml
 
 See `built-in functionality documentation
