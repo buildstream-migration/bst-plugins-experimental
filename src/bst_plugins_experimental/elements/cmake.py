@@ -20,8 +20,9 @@
 """
 cmake - CMake build element
 ===========================
-This is a :mod:`BuildElement <buildstream.buildelement>` implementation for
-using the `CMake <https://cmake.org/>`_ build system.
+This is a `BuildElement
+<https://docs.buildstream.build/master/buildstream.buildelement.html#module-buildstream.buildelement>`_
+implementation for using the `CMake <https://cmake.org/>`_ build system.
 
 You will often want to pass additional arguments to the ``cmake`` program for
 specific configuration options. This should be done on a per-element basis by
@@ -47,10 +48,11 @@ an example of that:
 
 Here is the default configuration for the ``cmake`` element in full:
 
-  .. literalinclude:: ../../../src/buildstream/plugins/elements/cmake.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/cmake.yaml
      :language: yaml
 
-See :ref:`built-in functionality documentation <core_buildelement_builtins>` for
+See `built-in functionality documentation
+<https://docs.buildstream.build/master/buildstream.buildelement.html#core-buildelement-builtins>`_ for
 details on common configuration options for build elements.
 """
 

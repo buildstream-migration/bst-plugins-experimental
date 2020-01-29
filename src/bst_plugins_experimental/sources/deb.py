@@ -44,7 +44,8 @@ deb - stage files from .deb packages
    # Specify the basedir to return only the specified dir and its children
    base-dir: ''
 
-See :ref:`built-in functionality doumentation <core_source_builtins>` for
+See `built-in functionality doumentation
+<https://docs.buildstream.build/master/buildstream.source.html#core-source-builtins>`_ for
 details on common configuration options for sources.
 """
 

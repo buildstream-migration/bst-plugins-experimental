@@ -18,11 +18,12 @@
 
 """fastboot_ext4 image build element
 
-A :mod:`ScriptElement <buildstream.scriptelement>` implementation for creating
-fastboot ext4sparse images
+A `ScriptElement
+<https://docs.buildstream.build/master/buildstream.scriptelement.html#module-buildstream.scriptelement>`_
+implementation for creating fastboot ext4sparse images
 
 The fastboot default configuration:
-  .. literalinclude:: ../../../bst_plugins_experimental/elements/fastboot_ext4.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/fastboot_ext4.yaml
      :language: yaml
 """
 

@@ -20,14 +20,15 @@
 
 """Dpkg build element
 
-A :mod:`BuildElement <buildstream.buildelement>` implementation for using
-dpkg elements
+A `BuildElement
+<https://docs.buildstream.build/master/buildstream.buildelement.html#module-buildstream.buildelement>`_
+implementation for using dpkg elements
 
 Default Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
 The dpkg default configuration:
-  .. literalinclude:: ../../../bst_plugins_experimental/elements/dpkg_build.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/dpkg_build.yaml
      :language: yaml
 
 Public data

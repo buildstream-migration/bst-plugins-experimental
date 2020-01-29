@@ -20,14 +20,16 @@
 """
 distutils - Python distutils element
 ====================================
-A :mod:`BuildElement <buildstream.buildelement>` implementation for using
-python distutils
+A `BuildElement
+<https://docs.buildstream.build/master/buildstream.buildelement.html#module-buildstream.buildelement>`_
+implementation for using python distutils
 
 The distutils default configuration:
-  .. literalinclude:: ../../../src/buildstream/plugins/elements/distutils.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/distutils.yaml
      :language: yaml
 
-See :ref:`built-in functionality documentation <core_buildelement_builtins>` for
+See `built-in functionality documentation
+<https://docs.buildstream.build/master/buildstream.buildelement.html#core-buildelement-builtins>`_ for
 details on common configuration options for build elements.
 """
 

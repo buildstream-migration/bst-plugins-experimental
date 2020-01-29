@@ -18,11 +18,12 @@
 
 """fastboot_bootimg image build element
 
-A :mod:`ScriptElement <buildstream.scriptelement>` implementation for creating
-fastboot boot images
+A `ScriptElement
+<https://docs.buildstream.build/master/buildstream.scriptelement.html#module-buildstream.scriptelement>`_
+implementation for creating fastboot boot images
 
 The fastboot default configuration:
-  .. literalinclude:: ../../../bst_plugins_experimental/elements/fastboot_bootimg.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/fastboot_bootimg.yaml
      :language: yaml
 """
 

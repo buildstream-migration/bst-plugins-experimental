@@ -20,19 +20,22 @@
 """
 make - Make build element
 =========================
-This is a :mod:`BuildElement <buildstream.buildelement>` implementation for
-using GNU make based build.
+This is a `BuildElement
+<https://docs.buildstream.build/master/buildstream.scriptelement.html#module-buildstream.scriptelement>`_
+implementation for using GNU make based build.
 
 .. note::
 
-   The ``make`` element is available since :ref:`format version 9 <project_format_version>`
+   The ``make`` element is available since `format version 9
+   <https://docs.buildstream.build/master/format_project.html#project-format-version>`_
 
 Here is the default configuration for the ``make`` element in full:
 
-  .. literalinclude:: ../../../src/buildstream/plugins/elements/make.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/make.yaml
      :language: yaml
 
-See :ref:`built-in functionality documentation <core_buildelement_builtins>` for
+See `built-in functionality documentation
+<https://docs.buildstream.build/master/buildstream.buildelement.html#core-buildelement-builtins>`_ for
 details on common configuration options for build elements.
 """
 

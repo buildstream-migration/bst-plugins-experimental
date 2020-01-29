@@ -20,14 +20,15 @@
 
 """Dpkg deployment element
 
-A :mod:`ScriptElement <buildstream.scriptelement>` implementation for creating
-debian packages
+A `ScriptElement
+<https://docs.buildstream.build/master/buildstream.scriptelement.html#module-buildstream.scriptelement>`_
+implementation for creating debian packages
 
 Default Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
 The dpkg_deploy default configuration:
-  .. literalinclude:: ../../../bst_plugins_experimental/elements/dpkg_deploy.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/dpkg_deploy.yaml
      :language: yaml
 
 Public Data

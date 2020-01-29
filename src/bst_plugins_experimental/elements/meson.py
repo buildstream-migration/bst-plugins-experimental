@@ -17,8 +17,9 @@
 """
 meson - Meson build element
 ===========================
-This is a :mod:`BuildElement <buildstream.buildelement>` implementation for
-using `Meson <http://mesonbuild.com/>`_ build scripts.
+This is a `BuildElement
+<https://docs.buildstream.build/master/buildstream.buildelement.html#module-buildstream.buildelement>`_
+implementation for using `Meson <http://mesonbuild.com/>`_ build scripts.
 
 You will often want to pass additional arguments to ``meson``. This should
 be done on a per-element basis by setting the ``meson-local`` variable.  Here is
@@ -44,10 +45,11 @@ an example of that:
 
 Here is the default configuration for the ``meson`` element in full:
 
-  .. literalinclude:: ../../../src/buildstream/plugins/elements/meson.yaml
+  .. literalinclude:: ../../../src/bst_plugins_experimental/elements/meson.yaml
      :language: yaml
 
-See :ref:`built-in functionality documentation <core_buildelement_builtins>` for
+See `built-in functionality documentation
+<https://docs.buildstream.build/master/buildstream.buildelement.html#core-buildelement-builtins>`_ for
 details on common configuration options for build elements.
 """
 
