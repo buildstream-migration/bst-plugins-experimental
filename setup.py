@@ -106,6 +106,7 @@ setup(name='bst-plugins-experimental',
           'ostree': ["PyGObject"],
           'cargo': ["pytoml"],
           'bazel': ["requests"],
+          'deb': ["arpy"],
       },
       zip_safe=False)
 # eof setup()
