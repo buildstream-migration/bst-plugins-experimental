@@ -77,8 +77,13 @@ class ReadableTarInfo(tarfile.TarInfo):
 
     @property
     def mode(self):
-        # ensure file is readable by owner
-        return self.__permission | 0o400
+        # Respect umask instead of the file mode stored in the archive.
+        # The only bit used from the embedded mode is the executable bit for files.
+        umask = utils.get_umask()
+        if self.isdir() or bool(self.__permission | 0o100):
+            return 0o777 & ~umask
+        else:
+            return 0o666 & ~umask
 
     @mode.setter
     def mode(self, permission):
@@ -252,7 +257,7 @@ class TarSource(DownloadableFileSource):
             # Avoid considering the '.' directory, if any is included in the archive
             # this is to avoid the default 'base-dir: *' value behaving differently
             # depending on whether the tarball was encoded with a leading '.' or not
-            elif member_name == ".":
+            if member_name == ".":
                 continue
 
             yield member_name
