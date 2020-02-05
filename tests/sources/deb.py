@@ -6,8 +6,8 @@ import shutil
 
 import pytest
 
-from buildstream._exceptions import ErrorDomain
 from buildstream import _yaml
+from buildstream.exceptions import ErrorDomain
 from buildstream.testing import cli  # pylint: disable=unused-import
 from . import list_dir_contents
 
