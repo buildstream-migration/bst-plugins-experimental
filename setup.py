@@ -31,19 +31,6 @@ except ImportError:
     sys.exit(1)
 
 ###############################################################################
-#                          Gather Requirements                                #
-###############################################################################
-
-def parse_requirements(requirements_file):
-    with open(requirements_file, 'r') as f:
-        reqs = [line.strip() for line in f.readlines()
-                if not line.strip().startswith('#') and line != '']
-    return reqs
-
-install_requires = parse_requirements('requirements/install-requirements.txt')
-
-
-###############################################################################
 #                             Parse README                                    #
 ###############################################################################
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -64,7 +51,6 @@ setup(name='bst-plugins-experimental',
       package_dir={'': 'src'},
       packages=find_packages(where='src'),
       include_package_data=True,
-      install_requires=install_requires,
       entry_points={
           'buildstream.plugins.elements': [
               'bazel_build = bst_plugins_experimental.elements.bazel_build',
