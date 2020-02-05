@@ -2,6 +2,11 @@
 Next Version
 ================
 
+===============================
+bst-plugins-experimental 1.93.1
+===============================
+
+o Use `buildstream.exceptions` module available in BuildStream 1.93.1.
 o Add pip source plugin
 o Add pip build element plugin
 

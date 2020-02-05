@@ -24,8 +24,8 @@
 import os
 import pytest
 
+from buildstream.exceptions import ErrorDomain
 from buildstream.testing import cli  # pylint: disable=unused-import
-from buildstream._exceptions import ErrorDomain
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "bazel",)
 

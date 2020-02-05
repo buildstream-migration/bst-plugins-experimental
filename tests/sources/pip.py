@@ -4,8 +4,8 @@
 import os
 import pytest
 
-from buildstream._exceptions import ErrorDomain
 from buildstream import _yaml
+from buildstream.exceptions import ErrorDomain
 from buildstream.testing import cli  # pylint: disable=unused-import
 from bst_plugins_experimental.sources.pip import _match_package_name
 
