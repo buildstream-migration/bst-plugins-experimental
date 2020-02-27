@@ -34,7 +34,6 @@ provided by the 'metadata' field in a format useful to generate flatpaks.
 import configparser
 import os
 
-from buildstream import utils
 from buildstream import Element, ElementError, Scope
 
 
@@ -43,6 +42,7 @@ class FlatpakImageElement(Element):
     BST_REQUIRED_VERSION_MAJOR = 1
     BST_REQUIRED_VERSION_MINOR = 91
     BST_STRICT_REBUILD = True
+    BST_VIRTUAL_DIRECTORY = True
 
     def configure(self, node):
         node.validate_keys(["directory", "include", "exclude", "metadata"])
@@ -94,35 +94,20 @@ class FlatpakImageElement(Element):
     def assemble(self, sandbox):
         self.stage_sources(sandbox, "input")
 
-        basedir = sandbox.get_directory()
-        allfiles = os.path.join(basedir, "buildstream", "allfiles")
+        basedir = sandbox.get_virtual_directory()
+        allfiles = basedir.descend("buildstream", "allfiles", create=True)
         reldirectory = os.path.relpath(self.directory, "/")
-        subdir = os.path.join(allfiles, reldirectory)
-        etcdir = os.path.join(allfiles, "etc")
-        installdir = os.path.join(basedir, "buildstream", "install")
-        filesdir = os.path.join(installdir, "files")
-        filesetcdir = os.path.join(filesdir, "etc")
+        installdir = basedir.descend("buildstream", "install", create=True)
+        filesdir = installdir.descend("files", create=True)
         stagedir = os.path.join(os.sep, "buildstream", "allfiles")
 
-        os.makedirs(allfiles, exist_ok=True)
-        os.makedirs(filesdir, exist_ok=True)
         if self.metadata.has_section("Application"):
-            os.makedirs(os.path.join(installdir, "export"), exist_ok=True)
+            installdir.descend("export", create=True)
 
         for section in self.metadata.sections():
             if section.startswith("Extension "):
-                try:
-                    extensiondir = self.metadata.get(section, "directory")
-                    os.makedirs(
-                        os.path.join(installdir, "files", extensiondir),
-                        exist_ok=True,
-                    )
-                except PermissionError:
-                    raise ElementError(
-                        "Permission denied: Cannot create {}".format(
-                            extensiondir
-                        )
-                    )
+                extensiondir = self.metadata.get(section, "directory")
+                installdir.descend("files", *extensiondir.split(os.path.sep), create=True)
 
         with self.timed_activity("Creating flatpak image", silent_nested=True):
             self.stage_dependency_artifacts(
@@ -132,12 +117,15 @@ class FlatpakImageElement(Element):
                 include=self.include,
                 exclude=self.exclude,
             )
-            utils.link_files(subdir, filesdir)
-            if os.path.exists(etcdir):
-                utils.link_files(etcdir, filesetcdir)
+            if allfiles.exists(*reldirectory.split(os.path.sep)):
+                subdir = allfiles.descend(*reldirectory.split(os.path.sep))
+                filesdir.import_files(subdir)
+            if allfiles.exists("etc"):
+                etcdir = allfiles.descend("etc")
+                filesetcdir = filesdir.descend("etc", create=True)
+                filesetcdir.import_files(etcdir)
 
-        metadatafile = os.path.join(installdir, "metadata")
-        with open(metadatafile, "w") as m:
+        with installdir.open_file("metadata", mode="w") as m:
             self.metadata.write(m)
         return os.path.join(os.sep, "buildstream", "install")
 
