@@ -38,6 +38,7 @@ from buildstream import Element, ElementError, Scope
 class ExtractIntegrationElement(Element):
     BST_REQUIRED_VERSION_MAJOR = 1
     BST_REQUIRED_VERSION_MINOR = 91
+    BST_VIRTUAL_DIRECTORY = True
 
     def configure(self, node):
         node.validate_keys(["script-path", "ignore"])
@@ -84,22 +85,17 @@ class ExtractIntegrationElement(Element):
         pass
 
     def assemble(self, sandbox):
-        basedir = sandbox.get_directory()
-        script_path = os.path.join(
-            basedir, self.script_path.lstrip(os.path.sep)
-        )
-        os.makedirs(os.path.dirname(script_path), exist_ok=True)
-
-        def opener(path, flags):
-            return os.open(
-                path, flags, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO
-            )
+        basedir = sandbox.get_virtual_directory()
+        script_dirname = os.path.dirname(self.script_path)
+        script_filename = os.path.basename(self.script_path)
+        script_vdir = basedir.descend(*script_dirname.lstrip(os.path.sep).split(os.path.sep), create=True)
 
         ignore_set = set()
         for ignore in self.ignore:
             ignore_set.add(self.search(Scope.BUILD, ignore))
 
-        with open(script_path, "w", opener=opener) as f:
+        with script_vdir.open_file(script_filename, mode="w") as f:
+            os.chmod(f.name, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
             f.write("#!/bin/sh\n")
             f.write("set -e\n\n")
             for dependency in self.dependencies(Scope.BUILD):
