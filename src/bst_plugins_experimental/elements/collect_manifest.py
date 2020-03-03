@@ -97,6 +97,7 @@ class CollectManifestElement(Element):
     BST_FORMAT_VERSION = 2
     BST_REQUIRED_VERSION_MAJOR = 1
     BST_REQUIRED_VERSION_MINOR = 91
+    BST_VIRTUAL_DIRECTORY = True
 
     def configure(self, node):
         if "path" in node:
@@ -197,19 +198,20 @@ class CollectManifestElement(Element):
                         )
 
         if self.path:
-            basedir = sandbox.get_directory()
-            path = os.path.join(basedir, self.path.lstrip(os.path.sep))
-            if os.path.isfile(path):
-                if path[-1].isdigit():
-                    version = int(path[-1]) + 1
-                    new_path = list(path)
-                    new_path[-1] = str(version)
-                    path = "".join(new_path)
+            basedir = sandbox.get_virtual_directory()
+            dirname = os.path.dirname(self.path)
+            filename = os.path.basename(self.path)
+            vdir = basedir.descend(*dirname.lstrip(os.path.sep).split(os.path.sep), create=True)
+            if vdir.exists(filename):
+                if filename[-1].isdigit():
+                    version = int(filename[-1]) + 1
+                    new_filename = list(filename)
+                    new_filename[-1] = str(version)
+                    filename = "".join(new_filename)
                 else:
-                    path = path + "-1"
-            os.makedirs(os.path.dirname(path), exist_ok=True)
+                    filename = filename + "-1"
 
-            with open(path, "w") as o:
+            with vdir.open_file(filename, mode="w") as o:
                 json.dump(cleanup_provenance(manifest), o, indent=2)
 
         manifest_node = Node.from_dict(dict(manifest))
