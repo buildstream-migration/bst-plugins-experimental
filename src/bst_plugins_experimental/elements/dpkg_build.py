@@ -163,18 +163,12 @@ class DpkgElement(BuildElement):
         new_package_scripts = Node.from_dict({})
         have_package_scripts = False
         for package in packages:
-            if not self._get_workspace():  # If we're not using a workspace
-                package_path = os.path.join(
-                    sandbox.get_directory(),
-                    self.get_variable("build-root").lstrip(os.sep),
-                    "debian",
-                    package,
-                )
-            else:  # We have a workspace open for this dpkg_build element
-                workspace = self._get_workspace()
-                package_path = os.path.join(
-                    workspace.get_absolute_path(), "debian", package
-                )
+            package_path = os.path.join(
+                sandbox.get_directory(),
+                self.get_variable("build-root").lstrip(os.sep),
+                "debian",
+                package,
+            )
 
             # Exclude DEBIAN files because they're pulled in as public metadata
             contents = [
