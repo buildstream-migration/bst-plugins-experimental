@@ -76,6 +76,14 @@ test-master-fedora-31:
     TOXENV: "py37-bst-master"
   allow_failure: true
 
+test-master-buildbox-run:
+  <<: *test-template
+  variables:
+    <<: *test-variables
+    TOXENV: "py37-bst-master"
+    BST_FORCE_SANDBOX: "buildbox-run"
+  allow_failure: true
+
 docs:
   stage: test
   script:
