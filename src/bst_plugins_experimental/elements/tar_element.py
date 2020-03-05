@@ -38,7 +38,6 @@ The tarball_element default configuration:
 """
 
 import tarfile
-import os
 
 from buildstream import Element, Scope, ElementError
 
@@ -47,6 +46,9 @@ class TarElement(Element):
 
     BST_REQUIRED_VERSION_MAJOR = 1
     BST_REQUIRED_VERSION_MINOR = 91
+
+    # Supports virtual directories (required for remote execution)
+    BST_VIRTUAL_DIRECTORY = True
 
     # The tarball's output is its dependencies, so
     # we must rebuild if they change
@@ -87,11 +89,9 @@ class TarElement(Element):
         pass
 
     def assemble(self, sandbox):
-        basedir = sandbox.get_directory()
-        inputdir = os.path.join(basedir, "input")
-        outputdir = os.path.join(basedir, "output")
-        os.makedirs(inputdir, exist_ok=True)
-        os.makedirs(outputdir, exist_ok=True)
+        basedir = sandbox.get_virtual_directory()
+        inputdir = basedir.descend("input", create=True)
+        outputdir = basedir.descend("output", create=True)
 
         # Stage deps in the sandbox root
         with self.timed_activity("Staging dependencies", silent_nested=True):
@@ -114,13 +114,10 @@ class TarElement(Element):
                 "xz": ".tar.xz",
                 "bzip2": ".tar.bz2",
             }
-            tarname = os.path.join(
-                outputdir, self.filename + extension_map[self.compression]
-            )
-            mode = "w:" + compress_map[self.compression]
-            with tarfile.TarFile.open(name=tarname, mode=mode) as tar:
-                for f in os.listdir(inputdir):
-                    tar.add(os.path.join(inputdir, f), arcname=f)
+            with outputdir.open_file(self.filename + extension_map[self.compression], mode="wb") as outputfile:
+                mode = "w:" + compress_map[self.compression]
+                with tarfile.TarFile.open(fileobj=outputfile, mode=mode) as tar:
+                    inputdir.export_to_tar(tar, "")
 
         return "/output"
 
