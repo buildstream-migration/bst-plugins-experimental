@@ -95,7 +95,7 @@ class Crate(SourceFetcher):
         self.name = name
         self.version = str(version)
         self.sha = sha
-        self.mark_download_url(self.cargo.url)
+        self.mark_download_url(self._get_url())
 
     ########################################################
     #     SourceFetcher API method implementations         #
@@ -446,7 +446,8 @@ class CargoSource(Source):
 
         # Stage our vendor config
         vendor_config = _default_vendor_config_template.format(
-            vendorurl=self.url, vendordir=self.vendor_dir
+            vendorurl=self.translate_url(self.url),
+            vendordir=self.vendor_dir
         )
         conf_dir = os.path.join(directory, ".cargo")
         conf_file = os.path.join(conf_dir, "config")
