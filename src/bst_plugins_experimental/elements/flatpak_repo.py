@@ -43,7 +43,7 @@ class FlatpakRepoElement(ScriptElement):
         self._env = node.get_str_list("environment")
 
         self._copy_refs = []
-        for subnode in node.get_str_list("copy-refs"):
+        for subnode in node.get_sequence("copy-refs"):
             subnode.validate_keys(["src", "dest"])
             self._copy_refs.append(
                 (
