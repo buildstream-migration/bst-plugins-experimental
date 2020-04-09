@@ -1,0 +1,4 @@
+config:
+  buildfile-dir: "%{prefix}"
+  copts: []
+  bazel-rule: "BST.BAZEL_NONE_RULE"
