@@ -1,3 +1,8 @@
+include:
+  - template: Code-Quality.gitlab-ci.yml
+  - template: License-Scanning.gitlab-ci.yml
+  - template: SAST.gitlab-ci.yml
+
 image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-${DOCKER_IMAGE_VERSION}
 
 cache:
@@ -9,32 +14,43 @@ stages:
   - upload
 
 variables:
+  # SAST related variables
+  SAST_DISABLE_DIND: "true"
+  SAST_GOSEC_LEVEL: 2
+  CI_PROJECT_REPOSITORY_LANGUAGES: "python"
+
+  # Our own variables
   # Version of the docker images we should use for all the images.
   # This is taken from buildstream/buildstream-docker-images and is updated
   # periodically.
   DOCKER_IMAGE_VERSION: master-140747994
+  PYTEST_ADDOPTS: "--color=yes"
+  INTEGRATION_CACHE: "${CI_PROJECT_DIR}/cache/integration-cache"
+  PYTEST_ARGS: "--color=yes --integration"
+  TEST_COMMAND: "tox -- ${PYTEST_ARGS}"
 
 #####################################################
 #                    Test stage                     #
 #####################################################
 
+# Run premerge commits
+#
 .test-template: &test-template
   stage: test
-  variables: &test-variables
-    PYTEST_ADDOPTS: "--color=yes"
+
+  before_script:
+  # Diagnostics
+  - mount
+  - df -h
+  - tox --version
+
   script:
-    # Diagnostics
-    - mount
-    - df -h
+  - mkdir -p "${INTEGRATION_CACHE}"
+  - useradd -Um buildstream
+  - chown -R buildstream:buildstream .
 
-    # Common setup
-    - useradd -Um buildstream
-    - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
-    - chown -R buildstream:buildstream .
-
-    # Run the tests form the source distribution.
-    # We run as a simple user to test for permission issues
-    - su buildstream -c 'tox -- --integration'
+  # Run the tests as a simple user to test for permission issues
+  - su buildstream -c "${TEST_COMMAND}"
 
 test-fixed-debian-10:
   <<: *test-template
@@ -43,7 +59,6 @@ test-fixed-debian-10:
     - apt update -y
     - apt install -y git-lfs
   variables:
-    <<: *test-variables
     TOXENV: "py37-bst-fixed"
 
 test-fixed-ubuntu-18:
@@ -62,7 +77,6 @@ test-fixed-ubuntu-18:
       EOF
 
   variables:
-    <<: *test-variables
     TOXENV: "py36-bst-fixed"
 
 test-fixed-fedora-31:
@@ -70,7 +84,6 @@ test-fixed-fedora-31:
   before_script:
     - dnf install -y git-lfs
   variables:
-    <<: *test-variables
     TOXENV: "py37-bst-fixed"
 
 test-fixed-python-38-debian:
@@ -80,7 +93,6 @@ test-fixed-python-38-debian:
     - apt update -y
     - apt install -y git-lfs
   variables:
-    <<: *test-variables
     TOXENV: "py38-bst-fixed"
 
 # NOTE: Tests against master are only run against only one distribution in
@@ -91,7 +103,6 @@ test-master-fedora-31:
   before_script:
     - dnf install -y git-lfs
   variables:
-    <<: *test-variables
     TOXENV: "py37-bst-master"
   allow_failure: true
 
@@ -100,7 +111,6 @@ test-master-buildbox-run:
   before_script:
     - dnf install -y git-lfs
   variables:
-    <<: *test-variables
     TOXENV: "py37-bst-master"
     BST_FORCE_SANDBOX: "buildbox-run"
   allow_failure: true
@@ -122,8 +132,6 @@ format-check:
   stage: test
   script:
   - tox -e format-check
-
-
 
 #####################################################
 #               Upload stage                        #
