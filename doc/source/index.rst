@@ -34,6 +34,7 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    elements/distutils
    elements/oci
    elements/pip
+   elements/url_manifest
 
 .. toctree::
    :maxdepth: 1

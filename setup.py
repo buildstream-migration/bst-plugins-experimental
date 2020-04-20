@@ -73,6 +73,7 @@ setup(name='bst-plugins-experimental',
               'qmake = bst_plugins_experimental.elements.qmake',
               'distutils = bst_plugins_experimental.elements.distutils',
               'pip = bst_plugins_experimental.elements.pip'
+              'url_manifest = bst_plugins_experimental.elements.url_manifest'
           ],
           'buildstream.plugins.sources': [
               'bazel_source = bst_plugins_experimental.sources.bazel_source',
