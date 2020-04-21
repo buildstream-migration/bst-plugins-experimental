@@ -39,12 +39,12 @@ variables:
     # We run as a simple user to test for permission issues
     - su buildstream -c 'tox -- --integration'
 
-test-fixed-debian-9:
+test-fixed-debian-10:
   <<: *test-template
-  image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-debian:9-${DOCKER_IMAGE_VERSION}
+  image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-debian:10-${DOCKER_IMAGE_VERSION}
   variables:
     <<: *test-variables
-    TOXENV: "py35-bst-fixed"
+    TOXENV: "py37-bst-fixed"
 
 test-fixed-ubuntu-18:
   <<: *test-template
