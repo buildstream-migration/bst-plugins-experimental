@@ -208,7 +208,6 @@ creating intermediate layers that do not need to be exported.
 
 """
 
-import itertools
 import stat
 import os
 import tempfile
@@ -218,7 +217,6 @@ import gzip
 import json
 import codecs
 import shutil
-import filecmp
 from contextlib import contextmanager, ExitStack
 
 from buildstream import Element, ElementError, Scope
@@ -233,7 +231,7 @@ class blob:
         self.media_type = media_type
         self.text = text
         self.mode = mode
-        self.filename = None
+        self.path = None
         self.legacy_config = {}
         if legacy_config:
             self.legacy_config.update(legacy_config)
@@ -241,11 +239,13 @@ class blob:
 
     @contextmanager
     def create(self):
-        with tempfile.NamedTemporaryFile(
-            mode="w+b", dir=self.root, delete=False
-        ) as f:
-            filename = f.name
-            try:
+        while True:
+            # This is in a private sandbox without concurrent access.
+            tempname = os.urandom(8).hex()
+            if not self.root.exists(tempname):
+                break
+        try:
+            with self.root.open_file(tempname, mode="x+b") as f:
                 if self.text:
                     yield codecs.getwriter("utf-8")(f)
                 else:
@@ -266,62 +266,40 @@ class blob:
                     self.descriptor["digest"] = "sha256:{}".format(
                         h.hexdigest()
                     )
-                    os.makedirs(
-                        os.path.join(self.root, "blobs", "sha256"),
-                        exist_ok=True,
-                    )
-                    self.filename = os.path.join(
-                        self.root, "blobs", "sha256", h.hexdigest()
-                    )
+                    self.path = ["blobs", "sha256", h.hexdigest()]
                 else:
                     assert self.mode == "docker"
                     if self.media_type.endswith("+json"):
-                        self.filename = os.path.join(
-                            self.root, "{}.json".format(h.hexdigest())
-                        )
+                        self.path = ["{}.json".format(h.hexdigest())]
                         self.descriptor = "{}.json".format(h.hexdigest())
                     elif self.media_type.startswith(
                         "application/vnd.oci.image.layer.v1.tar"
                     ):
-                        blobdir = os.path.join(self.root, h.hexdigest())
-                        os.makedirs(blobdir)
-                        self.filename = os.path.join(blobdir, "layer.tar")
-                        with open(os.path.join(blobdir, "VERSION"), "w") as f:
+                        blobdir = self.root.descend(h.hexdigest(), create=True)
+                        self.path = [h.hexdigest(), "layer.tar"]
+                        with blobdir.open_file("VERSION", mode="w") as f:
                             f.write("1.0")
                         self.legacy_config["id"] = h.hexdigest()
                         self.legacy_id = h.hexdigest()
-                        with open(
-                            os.path.join(blobdir, "json"),
-                            "w",
-                            encoding="utf-8",
-                        ) as f:
+                        with blobdir.open_file("json", mode="w",) as f:
                             json.dump(self.legacy_config, f)
                         self.descriptor = os.path.join(
                             h.hexdigest(), "layer.tar"
                         )
                     else:
                         assert False
-                os.rename(filename, self.filename)
-            except Exception:
-                try:
-                    os.unlink(filename)
-                # FIXME: we probably want to be more precise here
-                except Exception:  # pylint: disable=broad-except
-                    pass
-                raise
-
-
-def safe_path(path):
-    norm = os.path.normpath(path)
-    if os.path.isabs(norm):
-        return os.path.relpath(norm, "/")
-    else:
-        return norm
+            subdir = self.root.descend(*self.path[:-1], create=True)
+            self.root.rename(src=[tempname], dest=self.path)
+        except Exception:
+            if self.root.exists(tempname):
+                self.root.remove(tempname)
+            raise
 
 
 class OciElement(Element):
     BST_REQUIRED_VERSION_MAJOR = 1
     BST_REQUIRED_VERSION_MINOR = 91
+    BST_VIRTUAL_DIRECTORY = True
 
     def configure(self, node):
         node.validate_keys(["mode", "gzip", "images", "annotations"])
@@ -517,13 +495,10 @@ class OciElement(Element):
         pass
 
     def _build_image(self, sandbox, image, root, output):
-        parent = os.path.join(root, "parent")
-        parent_checkout = os.path.join(root, "parent_checkout")
-
         if "layer" in image:
-            if os.path.exists(parent_checkout):
-                shutil.rmtree(parent_checkout)
-            os.makedirs(os.path.join(parent_checkout))
+            if root.exists("parent_checkout"):
+                root.remove("parent_checkout", recursive=True)
+            parent_checkout = root.descend("parent_checkout", create=True)
 
         layer_descs = []
         layer_files = []
@@ -547,8 +522,9 @@ class OciElement(Element):
                     config["config"][k] = v
 
         if "parent" in image:
-            if os.path.exists(parent):
-                shutil.rmtree(parent)
+            if root.exists("parent"):
+                root.remove("parent", recursive=True)
+            parent = root.descend("parent", create=True)
             parent_dep = self.search(Scope.BUILD, image["parent"]["element"])
             if not parent_dep:
                 raise ElementError(
@@ -560,20 +536,14 @@ class OciElement(Element):
             parent_dep.stage_dependency_artifacts(
                 sandbox, Scope.RUN, path="parent"
             )
-            if not os.path.exists(os.path.join(parent, "index.json")):
-                with open(
-                    os.path.join(parent, "manifest.json"),
-                    "r",
-                    encoding="utf-8",
-                ) as f:
+            if not parent.exists("index.json"):
+                with parent.open_file("manifest.json", mode="r",) as f:
                     parent_index = json.load(f)
                 parent_image = parent_index[image["parent"]["image"]]
                 layers = parent_image["Layers"]
 
-                with open(
-                    os.path.join(parent, safe_path(parent_image["Config"])),
-                    "r",
-                    encoding="utf-8",
+                with parent.open_file(
+                    *parent_image["Config"].split("/"), mode="r"
                 ) as f:
                     image_config = json.load(f)
                 diff_ids = image_config["rootfs"]["diff_ids"]
@@ -583,8 +553,8 @@ class OciElement(Element):
 
                 for i, layer in enumerate(layers):
                     _, diff_id = diff_ids[i].split(":", 1)
-                    with open(
-                        os.path.join(parent, safe_path(layer)), "rb"
+                    with parent.open_file(
+                        *layer.split("/"), mode="rb"
                     ) as origblob:
                         if self.gzip:
                             targz_blob = blob(
@@ -601,7 +571,7 @@ class OciElement(Element):
                                 ) as gz:
                                     shutil.copyfileobj(origblob, gz)
                             layer_descs.append(targz_blob.descriptor)
-                            layer_files.append(targz_blob.filename)
+                            layer_files.append(targz_blob.path)
                             legacy_parent = tar_blob.legacy_id
                         else:
                             legacy_config = {"os": image["os"]}
@@ -615,32 +585,22 @@ class OciElement(Element):
                             with tar_blob.create() as newfile:
                                 shutil.copyfileobj(origblob, newfile)
                             layer_descs.append(tar_blob.descriptor)
-                            layer_files.append(tar_blob.filename)
+                            layer_files.append(tar_blob.path)
                             legacy_parent = tar_blob.legacy_id
             else:
-                with open(
-                    os.path.join(parent, "index.json"), "r", encoding="utf-8"
-                ) as f:
+                with parent.open_file("index.json", mode="r") as f:
                     parent_index = json.load(f)
                 parent_image_desc = parent_index["manifests"][
                     image["parent"]["image"]
                 ]
                 algo, h = parent_image_desc["digest"].split(":", 1)
-                with open(
-                    os.path.join(
-                        parent, "blobs", safe_path(algo), safe_path(h)
-                    ),
-                    "r",
-                    encoding="utf-8",
+                with parent.open_file(
+                    "blobs", *algo.split("/"), *h.split("/"), mode="r"
                 ) as f:
                     image_manifest = json.load(f)
                 algo, h = image_manifest["config"]["digest"].split(":", 1)
-                with open(
-                    os.path.join(
-                        parent, "blobs", safe_path(algo), safe_path(h)
-                    ),
-                    "r",
-                    encoding="utf-8",
+                with parent.open_file(
+                    "blobs", *algo.split("/"), *h.split("/"), mode="r"
                 ) as f:
                     image_config = json.load(f)
                 diff_ids = image_config["rootfs"]["diff_ids"]
@@ -649,9 +609,7 @@ class OciElement(Element):
                 for i, layer in enumerate(image_manifest["layers"]):
                     _, diff_id = diff_ids[i].split(":", 1)
                     algo, h = layer["digest"].split(":", 1)
-                    origfile = os.path.join(
-                        parent, "blobs", safe_path(algo), safe_path(h)
-                    )
+                    origfile = ["blobs", *algo.split("/"), *h.split("/")]
                     with ExitStack() as e:
                         if "layer" not in image and i + 1 == len(
                             image_manifest["layers"]
@@ -679,7 +637,9 @@ class OciElement(Element):
                                 legacy_config=legacy_config,
                             )
                         outp = e.enter_context(output_blob.create())
-                        inp = e.enter_context(open(origfile, "rb"))
+                        inp = e.enter_context(
+                            parent.open_file(*origfile, mode="rb")
+                        )
                         if layer["mediaType"].endswith("+gzip"):
                             if self.gzip:
                                 shutil.copyfileobj(inp, outp)
@@ -703,7 +663,7 @@ class OciElement(Element):
                                 shutil.copyfileobj(inp, outp)
 
                     layer_descs.append(output_blob.descriptor)
-                    layer_files.append(output_blob.filename)
+                    layer_files.append(output_blob.path)
                     legacy_parent = output_blob.legacy_id
 
         if "parent" in image and "layer" in image:
@@ -756,7 +716,9 @@ class OciElement(Element):
                     with self.timed_activity(
                         "Decompressing layer {}".format(layer)
                     ):
-                        with tarfile.open(layer, mode=mode) as t:
+                        with output.open_file(
+                            layer, mode="rb"
+                        ) as f, tarfile.open(fileobj=f, mode=mode) as t:
                             members = []
                             for info in t.getmembers():
                                 if "/../" in info.name:
@@ -766,28 +728,19 @@ class OciElement(Element):
 
                                 dirname, basename = os.path.split(info.name)
                                 if basename == ".wh..wh..opq":
-                                    for entry in os.listdir(
-                                        os.path.join(parent_checkout, dirname)
-                                    ):
-                                        full_entry = os.path.join(
-                                            parent_checkout, dirname, entry
-                                        )
-                                        if os.path.islink(
-                                            full_entry
-                                        ) or not os.path.isdir(full_entry):
-                                            os.unlink(full_entry)
-                                        else:
-                                            shutil.rmtree(full_entry)
-                                elif basename.startswith(".wh."):
-                                    full_entry = os.path.join(
-                                        parent_checkout, dirname, basename[4:]
+                                    # Replace with empty directory
+                                    parent_checkout.remove(
+                                        *dirname.split("/"), recursive=True
                                     )
-                                    if os.path.islink(
-                                        full_entry
-                                    ) or not os.path.isdir(full_entry):
-                                        os.unlink(full_entry)
-                                    else:
-                                        shutil.rmtree(full_entry)
+                                    parent_checkout.descend(
+                                        *dirname.split("/"), create=True
+                                    )
+                                elif basename.startswith(".wh."):
+                                    parent_checkout.remove(
+                                        *dirname.split("/"),
+                                        basename[4:],
+                                        recursive=True,
+                                    )
                                 else:
                                     members.append(info)
 
@@ -805,37 +758,35 @@ class OciElement(Element):
                     sandbox, Scope.RUN, path="layer"
                 )
 
-            layer = os.path.join(root, "layer")
+            layer = root.descend("layer")
             with self.timed_activity("Transforming into layer"):
-                for topdir, dirs, files in os.walk(parent_checkout):
-                    for f in itertools.chain(files, dirs):
-                        rel = os.path.relpath(
-                            os.path.join(topdir, f), parent_checkout
-                        )
-                        if not os.path.lexists(
-                            os.path.join(layer, rel)
-                        ) and os.path.lexists(
-                            os.path.dirname(os.path.join(layer, rel))
-                        ):
-                            whfile = os.path.join(
-                                layer,
-                                os.path.relpath(topdir, parent_checkout),
-                                ".wh." + f,
-                            )
-                            with open(whfile, "w") as f:
+
+                def create_whiteouts(parentdir, layerdir):
+                    for f in parentdir:
+                        if not layerdir.exists(f):
+                            with layerdir.open_file(".wh." + f, mode="w"):
                                 pass
+                        elif parentdir.isdir(f) and layerdir.isdir(f):
+                            # Recurse into subdirectory
+                            create_whiteouts(
+                                parentdir.descend(f), layerdir.descend(f)
+                            )
+
+                create_whiteouts(parent_checkout, layer)
 
                 if "parent" in image:
-                    for topdir, dirs, files in os.walk(layer):
-                        for f in files:
-                            new = os.path.join(topdir, f)
-                            rel = os.path.relpath(
-                                os.path.join(topdir, f), layer
-                            )
-                            old = os.path.join(parent_checkout, rel)
-                            if os.path.lexists(old):
-                                old_st = os.lstat(old)
-                                new_st = os.lstat(new)
+                    def remove_duplicates(parentdir, layerdir):
+                        for f in list(layerdir):
+                            if not parentdir.exists(f):
+                                pass
+                            elif parentdir.isdir(f) and layerdir.isdir(f):
+                                # Recurse into subdirectory
+                                remove_duplicates(
+                                    parentdir.descend(f), layerdir.descend(f)
+                                )
+                            else:
+                                old_st = parentdir.stat(f)
+                                new_st = layerdir.stat(f)
                                 if old_st.st_mode != new_st.st_mode:
                                     continue
                                 if int(old_st.st_mtime) != int(
@@ -843,44 +794,22 @@ class OciElement(Element):
                                 ):
                                     continue
                                 if stat.S_ISLNK(old_st.st_mode):
-                                    if os.readlink(old) == os.readlink(new):
-                                        os.unlink(new)
+                                    if parentdir.readlink(
+                                        f
+                                    ) == layerdir.readlink(f):
+                                        layerdir.remove(f)
                                 else:
-                                    if filecmp.cmp(new, old):
-                                        os.unlink(new)
+                                    if parentdir.file_digest(
+                                        f
+                                    ) == layerdir.file_digest(f):
+                                        layerdir.remove(f)
+
+                    remove_duplicates(parent_checkout, layer)
 
             with tempfile.TemporaryFile(mode="w+b") as tfile:
                 with tarfile.open(fileobj=tfile, mode="w:") as t:
                     with self.timed_activity("Building layer tar"):
-                        for topdir, dirs, files in os.walk(layer):
-                            dirs.sort()
-                            for f in itertools.chain(sorted(files), dirs):
-                                path = os.path.join(topdir, f)
-                                arcname = os.path.relpath(path, layer)
-                                st = os.lstat(path)
-                                tinfo = tarfile.TarInfo(name=arcname)
-                                tinfo.uid = 0
-                                tinfo.gid = 0
-                                tinfo.mode = stat.S_IMODE(st.st_mode)
-                                tinfo.mtime = st.st_mtime
-                                if stat.S_ISDIR(st.st_mode):
-                                    tinfo.type = tarfile.DIRTYPE
-                                    t.addfile(tinfo, None)
-                                elif stat.S_ISREG(st.st_mode):
-                                    tinfo.type = tarfile.REGTYPE
-                                    tinfo.size = st.st_size
-                                    with open(path, "rb") as fd:
-                                        t.addfile(tinfo, fd)
-                                elif stat.S_ISLNK(st.st_mode):
-                                    tinfo.type = tarfile.SYMTYPE
-                                    tinfo.linkname = os.readlink(path)
-                                    t.addfile(tinfo, None)
-                                else:
-                                    raise ElementError(
-                                        "{}: Unexpected file type for: {}".format(
-                                            self, arcname
-                                        )
-                                    )
+                        layer.export_to_tar(t, "")
                 tfile.seek(0)
                 tar_hash = hashlib.sha256()
                 with self.timed_activity("Hashing layer"):
@@ -984,9 +913,8 @@ class OciElement(Element):
             return manifest_blob.descriptor, {}
 
     def assemble(self, sandbox):
-        root = sandbox.get_directory()
-        output = os.path.join(root, "output")
-        os.makedirs(output)
+        root = sandbox.get_virtual_directory()
+        output = root.descend("output", create=True)
 
         manifests = []
         legacy_repositories = {}
@@ -1005,13 +933,9 @@ class OciElement(Element):
             image_counter += 1
 
         if self.mode == "docker":
-            with open(
-                os.path.join(output, "manifest.json"), "w", encoding="utf-8"
-            ) as f:
+            with output.open_file("manifest.json", mode="w") as f:
                 json.dump(manifests, f)
-            with open(
-                os.path.join(output, "repositories"), "w", encoding="utf-8"
-            ) as f:
+            with output.open_file("repositories", mode="w") as f:
                 json.dump(legacy_repositories, f)
         else:
             index = {"schemaVersion": 2}
@@ -1019,15 +943,11 @@ class OciElement(Element):
             if self.annotations:
                 index["annotations"] = self.annotations
 
-            with open(
-                os.path.join(output, "index.json"), "w", encoding="utf-8"
-            ) as f:
+            with output.open_file("index.json", mode="w") as f:
                 json.dump(index, f)
 
             oci_layout = {"imageLayoutVersion": "1.0.0"}
-            with open(
-                os.path.join(output, "oci-layout"), "w", encoding="utf-8"
-            ) as f:
+            with output.open_file("oci-layout", mode="w") as f:
                 json.dump(oci_layout, f)
 
         return "output"
