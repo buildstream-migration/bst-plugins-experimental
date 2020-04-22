@@ -82,7 +82,6 @@ setup(name='bst-plugins-experimental',
               'quilt = bst_plugins_experimental.sources.quilt',
               'ostree = bst_plugins_experimental.sources.ostree',
               'cargo = bst_plugins_experimental.sources.cargo',
-              'tar = bst_plugins_experimental.sources.tar',
           ],
           'buildstream.tests.source_plugins': [
               'bst_plugins_experimental = bst_plugins_experimental.testutils',

@@ -53,7 +53,7 @@ import tarfile
 from contextlib import contextmanager
 import arpy
 
-from .tar import TarSource
+from buildstream.plugins.sources.tar import TarSource
 
 
 class DebSource(TarSource):
