@@ -453,7 +453,7 @@ class OciElement(Element):
                         )
 
                 for member in [
-                    "ExposedPort",
+                    "ExposedPorts",
                     "Volumes",
                     "Env",
                     "Entrypoint",
