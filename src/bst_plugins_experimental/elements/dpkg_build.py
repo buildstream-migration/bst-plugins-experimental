@@ -111,23 +111,26 @@ package if they are detected. They are written as raw text. e.g.
 
 """
 
-import filecmp
 import os
 import re
 
-from buildstream import BuildElement, utils, ElementError, Node
+from buildstream import BuildElement, ElementError, Node
 
 
 # Element implementation for the 'dpkg' kind.
 class DpkgElement(BuildElement):
+    BST_REQUIRED_VERSION_MAJOR = 1
+    BST_REQUIRED_VERSION_MINOR = 93
+    BST_VIRTUAL_DIRECTORY = True
+
     def _get_packages(self, sandbox):
+        vdir = sandbox.get_virtual_directory()
+
         controlfile = os.path.join("debian", "control")
         controlpath = os.path.join(
-            sandbox.get_directory(),
-            self.get_variable("build-root").lstrip(os.sep),
-            controlfile,
+            self.get_variable("build-root").lstrip(os.sep), controlfile,
         )
-        with open(controlpath) as f:
+        with vdir.open_file(*controlpath.split(os.sep)) as f:
             return re.findall(r"Package:\s*(.+)\n", f.read())
 
     def configure(self, node):
@@ -157,23 +160,24 @@ class DpkgElement(BuildElement):
 
         collectdir = super().assemble(sandbox)
 
+        vdir = sandbox.get_virtual_directory()
+        debian_dir = vdir.descend(
+            *self.get_variable("build-root").split(os.sep), "debian"
+        )
+
         bad_overlaps = set()
         new_split_rules = Node.from_dict({})
         new_dpkg_data = Node.from_dict({})
         new_package_scripts = Node.from_dict({})
         have_package_scripts = False
         for package in packages:
-            package_path = os.path.join(
-                sandbox.get_directory(),
-                self.get_variable("build-root").lstrip(os.sep),
-                "debian",
-                package,
-            )
+
+            package_dir = debian_dir.descend(package)
 
             # Exclude DEBIAN files because they're pulled in as public metadata
             contents = [
                 "/" + x
-                for x in utils.list_relative_paths(package_path)
+                for x in package_dir.list_relative_paths()
                 if x != "." and not x.startswith("DEBIAN")
             ]
 
@@ -186,33 +190,32 @@ class DpkgElement(BuildElement):
             for content_file in contents:
                 for split_package, split_contents in new_split_rules.items():
                     for split_file in split_contents.as_str_list():
-                        content_file_path = os.path.join(
-                            package_path, content_file.lstrip(os.sep)
-                        )
-                        split_file_path = os.path.join(
-                            os.path.dirname(package_path),
-                            split_package,
-                            split_file.lstrip(os.sep),
-                        )
+                        split_package_dir = debian_dir.descend(split_package)
                         if (
                             content_file == split_file
-                            and os.path.isfile(content_file_path)
-                            and not filecmp.cmp(
-                                content_file_path, split_file_path
+                            and package_dir.isfile(*content_file.split(os.sep))
+                            and split_package_dir.isfile(
+                                *split_file.split(os.sep)
                             )
                         ):
-                            bad_overlaps.add(content_file)
+                            content_file_digest = package_dir.file_digest(
+                                *content_file.split(os.sep)
+                            )
+                            split_file_digest = package_dir.file_digest(
+                                *split_file.split(os.sep)
+                            )
+                            if content_file_digest != split_file_digest:
+                                bad_overlaps.add(content_file)
 
             # Store /DEBIAN metadata for each package.
             # DEBIAN/control goes into bst.dpkg-data.<package>.control
-            controlpath = os.path.join(package_path, "DEBIAN", "control")
-            if not os.path.exists(controlpath):
+            if not package_dir.exists("DEBIAN", "control"):
                 raise ElementError(
                     "{}: package {} doesn't have a DEBIAN/control in {}!".format(
-                        self.name, package, package_path
+                        self.name, package, str(package_dir)
                     )
                 )
-            with open(controlpath, "r") as f:
+            with package_dir.open_file("DEBIAN", "control", mode="r") as f:
                 controldata = f.read()
 
             # Setup the package data
@@ -222,12 +225,11 @@ class DpkgElement(BuildElement):
             package_scripts = Node.from_dict({})
             scriptfiles = ["preinst", "postinst", "prerm", "postrm"]
             for s in scriptfiles:
-                path = os.path.join(package_path, "DEBIAN", s)
-                if os.path.exists(path):
+                if package_dir.exists("DEBIAN", s):
                     have_package_scripts = True
                     if package not in new_package_scripts:
                         new_package_scripts[package] = package_scripts
-                    with open(path, "r") as f:
+                    with package_dir.open_file("DEBIAN", s, mode="r") as f:
                         data = f.read()
                     package_scripts[s] = data
 
