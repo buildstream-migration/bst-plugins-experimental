@@ -37,7 +37,7 @@ variables:
 
     # Run the tests form the source distribution.
     # We run as a simple user to test for permission issues
-    - su buildstream -c 'tox -- --integration'
+    - su buildstream -c 'tox -- --integration -n 2'
 
 test-fixed-debian-9:
   <<: *test-template
