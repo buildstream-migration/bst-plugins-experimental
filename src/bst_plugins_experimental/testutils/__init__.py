@@ -1,6 +1,6 @@
 from buildstream.testing import register_repo_kind
 
-from .repo import Git, OSTree, Tar
+from .repo import Git, OSTree
 
 
 # TODO: can we get this from somewhere? pkg_resources?
