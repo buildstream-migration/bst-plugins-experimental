@@ -40,6 +40,7 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    :caption: Contained Sources
 
    sources/bazel_source
+   sources/bzr
    sources/cargo
    sources/deb
    sources/ostree
