@@ -20,7 +20,7 @@ variables:
   # Version of the docker images we should use for all the images.
   # This is taken from buildstream/buildstream-docker-images and is updated
   # periodically.
-  DOCKER_IMAGE_VERSION: master-106676842
+  DOCKER_IMAGE_VERSION: master-138527946
 
 #####################################################
 #                    Test stage                     #
@@ -39,12 +39,12 @@ variables:
     # We run as a simple user to test for permission issues
     - su buildstream -c 'tox -- --integration'
 
-test-fixed-debian-9:
+test-fixed-debian-10:
   <<: *test-template
-  image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-debian:9-${DOCKER_IMAGE_VERSION}
+  image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-debian:10-${DOCKER_IMAGE_VERSION}
   variables:
     <<: *test-variables
-    TOXENV: "py35-bst-fixed"
+    TOXENV: "py37-bst-fixed"
 
 test-fixed-ubuntu-18:
   <<: *test-template
@@ -74,6 +74,14 @@ test-master-fedora-31:
   variables:
     <<: *test-variables
     TOXENV: "py37-bst-master"
+  allow_failure: true
+
+test-master-buildbox-run:
+  <<: *test-template
+  variables:
+    <<: *test-variables
+    TOXENV: "py37-bst-master"
+    BST_FORCE_SANDBOX: "buildbox-run"
   allow_failure: true
 
 docs:

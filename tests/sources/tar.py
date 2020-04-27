@@ -43,7 +43,7 @@ def _assemble_tar_lz(workingdir, srcdir, dstfile):
 def generate_project(project_dir, tmpdir):
     project_file = os.path.join(project_dir, "project.conf")
     _yaml.roundtrip_dump(
-        {"name": "foo", "aliases": {"tmpdir": "file:///" + str(tmpdir)}},
+        {"name": "foo", "min-version": "2.0", "aliases": {"tmpdir": "file:///" + str(tmpdir)}},
         project_file,
     )
 
@@ -51,7 +51,7 @@ def generate_project(project_dir, tmpdir):
 def generate_project_file_server(base_url, project_dir):
     project_file = os.path.join(project_dir, "project.conf")
     _yaml.roundtrip_dump(
-        {"name": "foo", "aliases": {"tmpdir": base_url}}, project_file
+        {"name": "foo", "min-version": "2.0", "aliases": {"tmpdir": base_url}}, project_file
     )
 
 
@@ -522,7 +522,12 @@ def test_out_of_basedir_hardlinks(cli, tmpdir, datafiles):
     old_dir = os.getcwd()
     os.chdir(str(tmpdir))
     with tarfile.open(src_tar, "w:gz") as tar:
-        tar.add("contents", filter=ensure_link)
+        # Don't recursively add `contents` as the order is not guaranteed.
+        # We need to add `elsewhere` before `to_extract` as the latter
+        # references the former in `linkname`.
+        tar.add("contents", recursive=False)
+        tar.add("contents/elsewhere")
+        tar.add("contents/to_extract", filter=ensure_link)
     os.chdir(old_dir)
 
     # Make sure our tarfile is actually created with the desired
