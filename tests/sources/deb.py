@@ -21,6 +21,7 @@ def generate_project(project_dir, tmpdir):
     _yaml.roundtrip_dump(
         {
             "name": "foo",
+            "min-version": "2.0",
             "aliases": {"tmpdir": "file:///" + str(tmpdir)},
             "plugins": [
                 {

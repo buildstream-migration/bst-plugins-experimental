@@ -43,7 +43,7 @@ def _assemble_tar_lz(workingdir, srcdir, dstfile):
 def generate_project(project_dir, tmpdir):
     project_file = os.path.join(project_dir, "project.conf")
     _yaml.roundtrip_dump(
-        {"name": "foo", "aliases": {"tmpdir": "file:///" + str(tmpdir)}},
+        {"name": "foo", "min-version": "2.0", "aliases": {"tmpdir": "file:///" + str(tmpdir)}},
         project_file,
     )
 
@@ -51,7 +51,7 @@ def generate_project(project_dir, tmpdir):
 def generate_project_file_server(base_url, project_dir):
     project_file = os.path.join(project_dir, "project.conf")
     _yaml.roundtrip_dump(
-        {"name": "foo", "aliases": {"tmpdir": base_url}}, project_file
+        {"name": "foo", "min-version": "2.0", "aliases": {"tmpdir": base_url}}, project_file
     )
 
 

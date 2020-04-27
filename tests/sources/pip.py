@@ -17,6 +17,7 @@ def generate_project(project_dir):
     _yaml.roundtrip_dump(
         {
             "name": "foo",
+            "min-version": "2.0",
             "plugins": [
                 {
                     "origin": "pip",
