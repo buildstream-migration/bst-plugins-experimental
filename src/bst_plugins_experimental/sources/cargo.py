@@ -331,11 +331,7 @@ class Crate(SourceFetcher):
 
 
 class CargoSource(Source):
-
-    # We require at least BuildStream 1.3 for the ability to
-    # view previously staged sources at track and fetch time.
-    BST_REQUIRED_VERSION_MAJOR = 1
-    BST_REQUIRED_VERSION_MINOR = 91
+    BST_MIN_VERSION = "2.0"
 
     # We need the Cargo.lock file to construct our ref at track time
     BST_REQUIRES_PREVIOUS_SOURCES_TRACK = True

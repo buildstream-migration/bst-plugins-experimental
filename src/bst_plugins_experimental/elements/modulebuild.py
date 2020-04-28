@@ -37,6 +37,8 @@ from buildstream import BuildElement, SandboxFlags
 
 # Element implementation for the 'modulebuild' kind.
 class ModuleBuildElement(BuildElement):
+    BST_MIN_VERSION = "2.0"
+
     # Supports virtual directories (required for remote execution)
     BST_VIRTUAL_DIRECTORY = True
 

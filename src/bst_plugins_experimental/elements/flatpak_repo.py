@@ -31,9 +31,8 @@ from buildstream import ScriptElement, Scope, ElementError
 
 
 class FlatpakRepoElement(ScriptElement):
+    BST_MIN_VERSION = "2.0"
     BST_ARTIFACT_VERSION = 1
-    BST_REQUIRED_VERSION_MAJOR = 1
-    BST_REQUIRED_VERSION_MINOR = 91
 
     def configure(self, node):
         node.validate_keys(

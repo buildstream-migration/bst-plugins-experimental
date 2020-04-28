@@ -91,6 +91,7 @@ from buildstream import Source, SourceError, utils
 
 class BazelSource(Source):
     # pylint: disable=attribute-defined-outside-init
+    BST_MIN_VERSION = "2.0"
 
     BST_REQUIRES_PREVIOUS_SOURCES_FETCH = True
 

@@ -33,8 +33,7 @@ from buildstream import ScriptElement, ElementError
 # Element implementation for the 'FastbootBootImage' kind.
 # Based on the implementation for generating x86 images
 class FastbootBootImageElement(ScriptElement):
-    BST_REQUIRED_VERSION_MAJOR = 1
-    BST_REQUIRED_VERSION_MINOR = 91
+    BST_MIN_VERSION = "2.0"
 
     def configure(self, node):
         command_steps = ["create_dtb", "create_img", "install_img"]

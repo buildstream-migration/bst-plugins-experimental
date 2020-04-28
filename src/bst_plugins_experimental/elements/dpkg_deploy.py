@@ -143,8 +143,7 @@ def md5sum_file(vdir, path):
 
 # Element implementation for the 'dpkg_deploy' kind.
 class DpkgDeployElement(ScriptElement):
-    BST_REQUIRED_VERSION_MAJOR = 1
-    BST_REQUIRED_VERSION_MINOR = 93
+    BST_MIN_VERSION = "2.0"
     BST_VIRTUAL_DIRECTORY = True
 
     def configure(self, node):

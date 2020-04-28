@@ -119,8 +119,7 @@ from buildstream import BuildElement, ElementError, Node
 
 # Element implementation for the 'dpkg' kind.
 class DpkgElement(BuildElement):
-    BST_REQUIRED_VERSION_MAJOR = 1
-    BST_REQUIRED_VERSION_MINOR = 93
+    BST_MIN_VERSION = "2.0"
     BST_VIRTUAL_DIRECTORY = True
 
     def _get_packages(self, sandbox):

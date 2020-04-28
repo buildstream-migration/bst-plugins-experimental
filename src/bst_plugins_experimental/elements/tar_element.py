@@ -44,8 +44,7 @@ from buildstream import Element, Scope, ElementError
 
 class TarElement(Element):
 
-    BST_REQUIRED_VERSION_MAJOR = 1
-    BST_REQUIRED_VERSION_MINOR = 91
+    BST_MIN_VERSION = "2.0"
 
     # Supports virtual directories (required for remote execution)
     BST_VIRTUAL_DIRECTORY = True

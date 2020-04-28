@@ -94,9 +94,7 @@ class CollectManifestElement(Element):
            version-match: '(\\d+)_(\\d+)_(\\d+[a-z]?)'
     """
 
-    BST_FORMAT_VERSION = 2
-    BST_REQUIRED_VERSION_MAJOR = 1
-    BST_REQUIRED_VERSION_MINOR = 91
+    BST_MIN_VERSION = "2.0"
     BST_VIRTUAL_DIRECTORY = True
 
     def configure(self, node):
