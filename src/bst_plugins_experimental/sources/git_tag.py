@@ -560,7 +560,8 @@ class GitTagMirror(SourceFetcher):
 
     def init_workspace(self, directory):
         fullpath = os.path.join(directory, self.path)
-        url = self.source.translate_url(self.url)
+        url = self.source.translate_url(self.url,
+                                        primary=self.primary)
 
         self.source.call(
             [
