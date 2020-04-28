@@ -130,12 +130,12 @@ raw text, e.g.
 import hashlib
 import os
 import re
-from buildstream import ScriptElement, Scope, utils, ElementError
+from buildstream import ScriptElement, Scope, ElementError
 
 
-def md5sum_file(path):
+def md5sum_file(vdir, path):
     hash_md5 = hashlib.md5()
-    with open(path, "rb") as f:
+    with vdir.open_file(*path.split(os.sep), mode="rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
@@ -144,7 +144,8 @@ def md5sum_file(path):
 # Element implementation for the 'dpkg_deploy' kind.
 class DpkgDeployElement(ScriptElement):
     BST_REQUIRED_VERSION_MAJOR = 1
-    BST_REQUIRED_VERSION_MINOR = 91
+    BST_REQUIRED_VERSION_MINOR = 93
+    BST_VIRTUAL_DIRECTORY = True
 
     def configure(self, node):
         node.validate_keys(["build-commands", "base", "input"])
@@ -219,23 +220,19 @@ class DpkgDeployElement(ScriptElement):
             )
 
             package_files = input_elm.compute_manifest(include=[package])
-            src = os.path.join(
-                sandbox.get_directory(),
-                self.get_variable("build-root").lstrip(os.sep),
-            )
-            dst = os.path.join(src, package)
-            os.makedirs(dst, exist_ok=True)
+            vdir = sandbox.get_virtual_directory()
+            src = vdir.descend(*self.get_variable("build-root").split(os.sep))
+            dst = src.descend(package, create=True)
 
             # link only the files for this package into it's respective package directory
             def package_filter(filename, package_files=package_files):
                 return filename in package_files
 
-            utils.link_files(src, dst, filter_callback=package_filter)
+            dst.import_files(src, filter_callback=package_filter)
 
             # Create this dir. If it already exists,
             # something unexpected has happened.
-            debiandir = os.path.join(dst, "DEBIAN")
-            os.makedirs(debiandir)
+            debiandir = dst.descend("DEBIAN", create=True)
 
             # Recreate the DEBIAN files.
             # control is extracted verbatim, and is mandatory.
@@ -248,7 +245,6 @@ class DpkgDeployElement(ScriptElement):
                         package
                     ),
                 )
-            controlpath = os.path.join(debiandir, "control")
             controltext = package_data.get_str("control")
             # Slightly ugly way of renaming the package
             controltext = re.sub(
@@ -256,17 +252,15 @@ class DpkgDeployElement(ScriptElement):
                 "Package: {}".format(package_name),
                 controltext,
             )
-            with open(controlpath, "w") as f:
+            with debiandir.open_file("control", mode="w") as f:
                 f.write(controltext + "\n")
 
             # Generate a DEBIAN/md5sums file from the artifact
             md5sums = {}
-            for split in package_files:
-                filepath = os.path.join(src, split.lstrip(os.sep))
-                if os.path.isfile(filepath):
-                    md5sums[split] = md5sum_file(filepath)
-            md5sumspath = os.path.join(debiandir, "md5sums")
-            with open(md5sumspath, "w") as f:
+            for filepath in package_files:
+                if src.isfile(*filepath.split(os.sep)):
+                    md5sums[filepath] = md5sum_file(src, filepath)
+            with debiandir.open_file("md5sums", mode="w") as f:
                 for path, md5sum in md5sums.items():
                     f.write("{}  {}\n".format(md5sum, path))
 
@@ -276,10 +270,9 @@ class DpkgDeployElement(ScriptElement):
                 for script in ["postinst", "preinst", "postrm", "prerm"]:
                     script_text = package_scripts.get_str(script, "")
                     if script_text:
-                        filepath = os.path.join(debiandir, script)
-                        with open(filepath, "w") as f:
+                        with debiandir.open_file(script, mode="w") as f:
                             f.write(script_text)
-                        os.chmod(filepath, 0o755)
+                            os.fchmod(f.fileno(), 0o755)
 
     def _packages_list(self):
         input_elm = self.search(Scope.BUILD, self.__input)
