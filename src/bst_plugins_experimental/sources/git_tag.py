@@ -98,6 +98,9 @@ git-tag - extension of BuildStream git plugin to track latest tag
    # If not set, this will default to 'True'
    checkout-submodules: True
 
+   # Optionally specify whether or not to clone Git LFS objects
+   use-lfs: False
+
    # If your repository has submodules, explicitly specifying the
    # url from which they are to be fetched allows you to easily
    # rebuild the same sources from a different location. This is
@@ -117,6 +120,12 @@ git-tag - extension of BuildStream git plugin to track latest tag
    # Fetch a full clone instead of a shallow clone.
    full-clone: False
 
+**Configurable Warnings:**
+
+This plugin provides the following :ref:`configurable warnings <configurable_warnings>`:
+
+- ``git:unused-lfs`` - There are files with Git LFS attributes but 'use-lfs' is not explicitly set.
+
 """
 
 import os
@@ -130,7 +139,10 @@ from buildstream import Source, SourceError, SourceFetcher
 from buildstream import utils
 
 GIT_MODULES = ".gitmodules"
+GIT_ATTRIBUTES = '.gitattributes'
 
+# Warnings
+WARN_UNUSED_GITLFS = "unused-lfs"
 
 # Because of handling of submodules, we maintain a GitMirror
 # for the primary git source and also for each submodule it
@@ -421,6 +433,22 @@ class GitTagMirror(SourceFetcher):
         rc = self.source.call(
             [self.source.host_git, "cat-file", "-t", self.ref], cwd=mirror
         )
+        if not rc == 0:
+            return False
+
+        ## This tries to test if git-lfs is used in this repo and if it is then mandates that you have set
+        ## whether or not to use git-lfs with the use-lfs option.
+        showrc, attrs = self.source.check_output(
+                [self.source.host_git, 'show', "{}:{}".format(self.ref, GIT_ATTRIBUTES)],
+                cwd=mirror)
+        if showrc == 0 and ('filter=lfs' in attrs or 'diff=lfs' in attrs or 'merge=lfs' in attrs) and (self.source.use_lfs is None):
+            self.source.warn(
+                    "{}: Git LFS not configured but LFS objects exist"
+                    .format(self.source),
+                    detail="a filter, diff or merge is set to use lfs in {}"
+                    .format(GIT_ATTRIBUTES),
+                    warning_token=WARN_UNUSED_GITLFS
+            )
         return rc == 0
 
     def assert_ref(self):
@@ -515,9 +543,18 @@ class GitTagMirror(SourceFetcher):
             fail_temporarily=True,
         )
 
+        if self.source.use_lfs:
+            self.set_origin_url(directory)
+
+        ## This turns git-lfs off if it is installed but we dont want to use it.
+        my_env = os.environ.copy()
+        if not self.source.use_lfs:
+            my_env['GIT_LFS_SKIP_SMUDGE'] = 'TRUE'
+
         self.source.call(
             [self.source.host_git, "checkout", "--force", self.ref],
             fail="Failed to checkout git ref {}".format(self.ref),
+            env=my_env,
             cwd=fullpath,
         )
 
@@ -545,9 +582,14 @@ class GitTagMirror(SourceFetcher):
             cwd=fullpath,
         )
 
+        ## This turns git-lfs off if it is installed but we dont want to use it.
+        my_env = os.environ.copy()
+        if not self.source.use_lfs:
+            my_env['GIT_LFS_SKIP_SMUDGE'] = 'TRUE'
         self.source.call(
             [self.source.host_git, "checkout", "--force", self.ref],
             fail="Failed to checkout git ref {}".format(self.ref),
+            env=my_env,
             cwd=fullpath,
         )
 
@@ -636,6 +678,19 @@ class GitTagMirror(SourceFetcher):
 
             return None
 
+    # Git-lfs can not retrieve objects from a file based directory, it needs something like github or gitlab
+    # to serve them. This function can be used when gitlfs is requested to set the checkout repo to point to
+    # the original url rather than the mirror when it is about to do the full checkout.
+    # This happens after the --no-checkout clone so that as little is pulled from the remote as posible.
+    def set_origin_url(self, directory):
+        fullpath = os.path.join(directory, self.path)
+        _, origin_url = self.source.check_output([self.source.host_git, 'config', '--get', 'remote.origin.url'],
+                         fail='Failed to get origin url "{}"'.format(self.mirror),
+                         cwd=self.mirror)
+        self.source.call([self.source.host_git, 'config', 'remote.origin.url', origin_url],
+                         fail="Failed to set origin url {}".format(origin_url),
+                         cwd=fullpath)
+
 
 class GitTagSource(Source):
     # pylint: disable=attribute-defined-outside-init
@@ -656,6 +711,7 @@ class GitTagSource(Source):
             "match",
             "exclude",
             "full-clone",
+            "use-lfs",
         ]
         node.validate_keys(config_keys + Source.COMMON_CONFIG_KEYS)
 
@@ -672,6 +728,10 @@ class GitTagSource(Source):
         self.match = node.get_str_list("match", [])
         # FIXME: check if get_sequence would not be better
         self.exclude = node.get_str_list("exclude", [])
+        if 'use-lfs' in node.keys():
+            self.use_lfs = node.get_bool('use-lfs', False)
+        else:
+            self.use_lfs = None
 
         # At this point we now know if the source has a ref and/or a track.
         # If it is missing both then we will be unable to track or build.
@@ -707,6 +767,9 @@ class GitTagSource(Source):
     def preflight(self):
         # Check if git is installed, get the binary at the same time
         self.host_git = utils.get_host_tool("git")
+        if self.use_lfs:
+            self.call([self.host_git, 'lfs', '--version'],
+                              fail="Git lfs not installed")
 
     def get_unique_key(self):
         # Here we want to encode the local name of the repository and
@@ -730,6 +793,9 @@ class GitTagSource(Source):
                     "submodule_checkout_overrides": self.submodule_checkout_overrides
                 }
             )
+
+        if self.use_lfs:
+            key.append("use-lfs")
 
         return key
 
