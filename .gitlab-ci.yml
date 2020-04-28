@@ -8,14 +8,6 @@ stages:
   - test
   - upload
 
-before_script:
-  # Diagnostics
-  - mount
-  - df -h
-
-  - useradd -Um buildstream
-  - chown -R buildstream:buildstream .
-
 variables:
   # Version of the docker images we should use for all the images.
   # This is taken from buildstream/buildstream-docker-images and is updated
@@ -31,8 +23,13 @@ variables:
   variables: &test-variables
     PYTEST_ADDOPTS: "--color=yes"
   script:
-    - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
+    # Diagnostics
+    - mount
+    - df -h
 
+    # Common setup
+    - useradd -Um buildstream
+    - export INTEGRATION_CACHE="$(pwd)/cache/integration-cache"
     - chown -R buildstream:buildstream .
 
     # Run the tests form the source distribution.
@@ -42,6 +39,9 @@ variables:
 test-fixed-debian-10:
   <<: *test-template
   image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-debian:10-${DOCKER_IMAGE_VERSION}
+  before_script:
+    - apt update -y
+    - apt install -y git-lfs
   variables:
     <<: *test-variables
     TOXENV: "py37-bst-fixed"
@@ -49,12 +49,26 @@ test-fixed-debian-10:
 test-fixed-ubuntu-18:
   <<: *test-template
   image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-ubuntu:18.04-${DOCKER_IMAGE_VERSION}
+  before_script:
+    - apt update -y
+    - apt install -y git-lfs
+    - |
+      cat > /etc/gitconfig << EOF
+      [filter "lfs"]
+        clean = git-lfs clean -- %f
+        smudge = git-lfs smudge -- %f
+        process = git-lfs filter-process
+        required = true
+      EOF
+
   variables:
     <<: *test-variables
     TOXENV: "py36-bst-fixed"
 
 test-fixed-fedora-31:
   <<: *test-template
+  before_script:
+    - dnf install -y git-lfs
   variables:
     <<: *test-variables
     TOXENV: "py37-bst-fixed"
@@ -62,6 +76,9 @@ test-fixed-fedora-31:
 test-fixed-python-38-debian:
   <<: *test-template
   image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-python:3.8-buster-${DOCKER_IMAGE_VERSION}
+  before_script:
+    - apt update -y
+    - apt install -y git-lfs
   variables:
     <<: *test-variables
     TOXENV: "py38-bst-fixed"
@@ -71,6 +88,8 @@ test-fixed-python-38-debian:
 test-master-fedora-31:
   image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-${DOCKER_IMAGE_VERSION}
   <<: *test-template
+  before_script:
+    - dnf install -y git-lfs
   variables:
     <<: *test-variables
     TOXENV: "py37-bst-master"
@@ -78,6 +97,8 @@ test-master-fedora-31:
 
 test-master-buildbox-run:
   <<: *test-template
+  before_script:
+    - dnf install -y git-lfs
   variables:
     <<: *test-variables
     TOXENV: "py37-bst-master"
