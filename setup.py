@@ -39,7 +39,7 @@ with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
 
 
 setup(name='bst-plugins-experimental',
-      version="1.93.1",
+      version="1.93.2",
       description="A collection of experimental BuildStream plugins.",
       long_description=long_description,
       long_description_content_type='text/x-rst; charset=UTF-8',
