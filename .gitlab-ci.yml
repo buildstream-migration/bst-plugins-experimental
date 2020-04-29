@@ -12,7 +12,7 @@ variables:
   # Version of the docker images we should use for all the images.
   # This is taken from buildstream/buildstream-docker-images and is updated
   # periodically.
-  DOCKER_IMAGE_VERSION: master-138527946
+  DOCKER_IMAGE_VERSION: master-140747994
 
 #####################################################
 #                    Test stage                     #

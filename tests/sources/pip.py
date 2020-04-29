@@ -22,9 +22,7 @@ def generate_project(project_dir):
                 {
                     "origin": "pip",
                     "package-name": "bst-plugins-experimental",
-                    "sources": {
-                        "pip:": 0,
-                    }
+                    "sources": ["pip"],
                 }
             ]
         },
