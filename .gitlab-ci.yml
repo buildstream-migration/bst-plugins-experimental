@@ -6,6 +6,7 @@ include:
 image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-${DOCKER_IMAGE_VERSION}
 
 cache:
+  key: "$CI_JOB_NAME-"
   paths:
     - cache/
 
