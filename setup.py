@@ -54,6 +54,7 @@ setup(name='bst-plugins-experimental',
       entry_points={
           'buildstream.plugins.elements': [
               'bazel_build = bst_plugins_experimental.elements.bazel_build',
+              'bazelize = bst_plugins_experimental.elements.bazelize',
               'cmake = bst_plugins_experimental.elements.cmake',
               'dpkg_build = bst_plugins_experimental.elements.dpkg_build',
               'dpkg_deploy = bst_plugins_experimental.elements.dpkg_deploy',
