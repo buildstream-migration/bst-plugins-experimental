@@ -1,4 +1,8 @@
 config:
+  # output directory for the buildfile
   buildfile-dir: "%{prefix}"
+  # list of options to add to the C++ compilation command
   copts: []
+  # list of defines to add to the compile line
+  linkopts: []
   bazel-rule: "BST.BAZEL_NONE_RULE"
