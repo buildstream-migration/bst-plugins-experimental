@@ -1,6 +1,6 @@
-.PHONY: all install clean
-libs = lib1.so lib2.a lib3.so
-hdrs = hdr1.h hdr2.h hdr3.h
+.PHONY: all install
+libs = lib1.so lib2.a lib3.so.1234.4321 lib4.pic.a lib5.a lib6.pic.lo lib7.lo
+hdrs = hdr1.h hdr2.hh hdr3.hpp hdr4.hxx hdr5.inc hdr6.inl hdr7.H
 all: $(libs)
 
 $(libs): $(hdrs)
@@ -18,6 +18,3 @@ install-lib: $(libs)
 install-hdr: $(hdrs)
 	install -d ${DESTDIR}/${PREFIX}/testincludes1
 	install -m 755 $? ${DESTDIR}/${PREFIX}/testincludes1
-
-clean:
-	rm *.so *.a *.h

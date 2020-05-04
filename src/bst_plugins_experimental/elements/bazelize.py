@@ -61,9 +61,12 @@ if TYPE_CHECKING:
     from buildstream import Sandbox  # pylint: disable=import-error
 
 # header regex
-BAZELIZE_HDR_RE = re.compile(r"^.*\.h$")
+HDR_EXT = r"h(x{2}|p{2})?|h{2}|H|in(c|l)"
+BAZELIZE_HDR_RE = re.compile(r"^.*\.(" + HDR_EXT + r")$")
+
 # source regex
-BAZELIZE_SOURCE_RE = re.compile(r"^.*\.(c(pp)?|so|a)$")
+SRC_EXT = r"c(x{2}|p{2})|c{2}|c\+{2}|C|S|(pic\.)?(a|l?o)|so(\.\d+)*"
+BAZELIZE_SOURCE_RE = re.compile(r"^.*\.(" + SRC_EXT + r")$")
 
 
 class BazelRuleEntry:  # pylint: disable=too-few-public-methods
