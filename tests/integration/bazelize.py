@@ -25,7 +25,7 @@ def render_entry(entry):
     msg += [
         '    name = "{}",'.format(entry["name"]) + os.linesep
     ]  #     name = "name",
-    for item in ["srcs", "hdrs", "deps", "copts"]:
+    for item in ["srcs", "hdrs", "deps", "copts", "linkopts"]:
         if item in entry:
             msg += [
                 "    {} = {},".format(item, entry[item]) + os.linesep
@@ -111,12 +111,14 @@ def test_gen_buildrules(cli, datafiles):
     bin1_srcs = ["app"]
     bin1_deps = [prj_prefix + "makelib2", prj_prefix + "makelib1"]
     bin1_opts = ["-I/lib/inc", "-I/include/someinc"]
+    bin1_lopts = ["-lboost_thread", "-lboost_system"]
     bin1 = {
         "rule": "cc_binary",
         "name": prj_prefix + "bazelize",
         "srcs": sorted(bin1_srcs),
         "deps": sorted(bin1_deps),
         "copts": sorted(bin1_opts),
+        "linkopts": sorted(bin1_lopts),
     }
 
     # nb. current rules are sorted by name field in the plugin

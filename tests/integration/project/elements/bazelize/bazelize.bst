@@ -7,6 +7,9 @@ sources:
   path: files/bazelize_src/app
 config:
   bazel-rule: "cc_binary"
+  linkopts:
+  - "-lboost_system"
+  - "-lboost_thread"
   copts:
   - "-I/include/someinc"
   - "-I/lib/inc"

@@ -109,12 +109,14 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
         self._hdrs: List[str] = []
         self._deps: List[str] = []
         self._copts: List[str] = []
+        self._linkopts: List[str] = []
         self._scope = Scope.RUN
 
         if element.get_kind() == "bazelize":
             self._scope = Scope.BUILD
             self.bazel_rule = element.bazel_rule
             self._copts = element.copts
+            self._linkopts = element.linkopts
 
         # empty rules have no semantic meaning for the BUILD
         if self.bazel_rule == BazelRuleEntry.NONE_RULE:
@@ -180,6 +182,8 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
             msg += "    deps = {},".format(self._deps) + os.linesep
         if self._copts:
             msg += "    copts = {},".format(self._copts) + os.linesep
+        if self._linkopts:
+            msg += "    linkopts = {},".format(self._linkopts) + os.linesep
         msg += ")" + os.linesep
         return msg
 
@@ -205,7 +209,9 @@ class BazelizeElement(Element):
 
     def configure(self, node: MappingNode) -> None:
         # configure the path for the BUILD file and some options
-        node.validate_keys(["buildfile-dir", "copts", "bazel-rule"])
+        node.validate_keys(
+            ["buildfile-dir", "copts", "linkopts", "bazel-rule"]
+        )
 
         self.build_file_dir = self.node_subst_vars(  # pylint: disable=attribute-defined-outside-init
             node.get_scalar("buildfile-dir")
@@ -214,8 +220,14 @@ class BazelizeElement(Element):
         self.copts = self.node_subst_sequence_vars(  # pylint: disable=attribute-defined-outside-init
             node.get_sequence("copts")
         )
-        # sort the options to gaurantee a unique key
+        # sort the options to gaurantee a deterministic key
         self.copts.sort()
+
+        self.linkopts = self.node_subst_sequence_vars(  # pylint: disable=attribute-defined-outside-init
+            node.get_sequence("linkopts")
+        )
+        # sort the options to gaurantee a deterministic key
+        self.linkopts.sort()
 
         # get the rule for this element
         self.bazel_rule = self.node_subst_vars(  # pylint: disable=attribute-defined-outside-init
@@ -226,6 +238,7 @@ class BazelizeElement(Element):
         return {
             "buildfile-dir": self.build_file_dir,
             "copts": self.copts,
+            "linkopts": self.linkopts,
             "bazel-rule": self.bazel_rule,
         }
 
