@@ -6,12 +6,18 @@ import pytest
 
 from buildstream import _yaml
 
-from buildstream.testing import cli_integration as cli  # pylint: disable=unused-import
+from buildstream.testing import (  # pylint: disable=unused-import
+    cli_integration as cli,
+)
 from buildstream.testing.integration import assert_contains
-from buildstream.testing.integration import integration_cache  # pylint: disable=unused-import
+from buildstream.testing.integration import (  # pylint: disable=unused-import
+    integration_cache,
+)
 from buildstream.testing._utils.site import HAVE_SANDBOX
 
-from tests.testutils.python_repo import setup_pypi_repo  # pylint: disable=unused-import
+from tests.testutils.python_repo import (  # pylint: disable=unused-import
+    setup_pypi_repo,
+)
 
 
 pytestmark = pytest.mark.integration
@@ -29,8 +35,18 @@ def test_pip_source_import_packages(cli, datafiles, setup_pypi_repo):
 
     # check that exotically named packages are imported correctly
     myreqs_packages = "hellolib"
-    dependencies = ["app2", "app.3", "app-4", "app_5", "app.no.6", "app-no-7", "app_no_8"]
-    mock_packages = {myreqs_packages: {package: {} for package in dependencies}}
+    dependencies = [
+        "app2",
+        "app.3",
+        "app-4",
+        "app_5",
+        "app.no.6",
+        "app-no-7",
+        "app_no_8",
+    ]
+    mock_packages = {
+        myreqs_packages: {package: {} for package in dependencies}
+    }
 
     # create mock pypi repository
     pypi_repo = os.path.join(project, "files", "pypi-repo")
@@ -41,10 +57,17 @@ def test_pip_source_import_packages(cli, datafiles, setup_pypi_repo):
         "kind": "import",
         "sources": [
             {"kind": "local", "path": "files/pip-source"},
-            {"kind": "pip", "url": "file://{}".format(os.path.realpath(pypi_repo)), "packages": [myreqs_packages]},
+            {
+                "kind": "pip",
+                "url": "file://{}".format(os.path.realpath(pypi_repo)),
+                "packages": [myreqs_packages],
+            },
         ],
     }
-    os.makedirs(os.path.dirname(os.path.join(element_path, element_name)), exist_ok=True)
+    os.makedirs(
+        os.path.dirname(os.path.join(element_path, element_name)),
+        exist_ok=True,
+    )
     _yaml.roundtrip_dump(element, os.path.join(element_path, element_name))
 
     result = cli.run(project=project, args=["source", "track", element_name])
@@ -53,7 +76,10 @@ def test_pip_source_import_packages(cli, datafiles, setup_pypi_repo):
     result = cli.run(project=project, args=["build", element_name])
     assert result.exit_code == 0
 
-    result = cli.run(project=project, args=["artifact", "checkout", element_name, "--directory", checkout])
+    result = cli.run(
+        project=project,
+        args=["artifact", "checkout", element_name, "--directory", checkout],
+    )
     assert result.exit_code == 0
 
     assert_contains(
@@ -81,8 +107,18 @@ def test_pip_source_import_requirements_files(cli, datafiles, setup_pypi_repo):
 
     # check that exotically named packages are imported correctly
     myreqs_packages = "hellolib"
-    dependencies = ["app2", "app.3", "app-4", "app_5", "app.no.6", "app-no-7", "app_no_8"]
-    mock_packages = {myreqs_packages: {package: {} for package in dependencies}}
+    dependencies = [
+        "app2",
+        "app.3",
+        "app-4",
+        "app_5",
+        "app.no.6",
+        "app-no-7",
+        "app_no_8",
+    ]
+    mock_packages = {
+        myreqs_packages: {package: {} for package in dependencies}
+    }
 
     # create mock pypi repository
     pypi_repo = os.path.join(project, "files", "pypi-repo")
@@ -100,7 +136,10 @@ def test_pip_source_import_requirements_files(cli, datafiles, setup_pypi_repo):
             },
         ],
     }
-    os.makedirs(os.path.dirname(os.path.join(element_path, element_name)), exist_ok=True)
+    os.makedirs(
+        os.path.dirname(os.path.join(element_path, element_name)),
+        exist_ok=True,
+    )
     _yaml.roundtrip_dump(element, os.path.join(element_path, element_name))
 
     result = cli.run(project=project, args=["source", "track", element_name])
@@ -109,7 +148,10 @@ def test_pip_source_import_requirements_files(cli, datafiles, setup_pypi_repo):
     result = cli.run(project=project, args=["build", element_name])
     assert result.exit_code == 0
 
-    result = cli.run(project=project, args=["artifact", "checkout", element_name, "--directory", checkout])
+    result = cli.run(
+        project=project,
+        args=["artifact", "checkout", element_name, "--directory", checkout],
+    )
     assert result.exit_code == 0
 
     assert_contains(
@@ -129,7 +171,9 @@ def test_pip_source_import_requirements_files(cli, datafiles, setup_pypi_repo):
 
 
 @pytest.mark.datafiles(DATA_DIR)
-@pytest.mark.skipif(not HAVE_SANDBOX, reason="Only available with a functioning sandbox")
+@pytest.mark.skipif(
+    not HAVE_SANDBOX, reason="Only available with a functioning sandbox"
+)
 def test_pip_source_build(cli, datafiles, setup_pypi_repo):
     project = str(datafiles)
     element_path = os.path.join(project, "elements")
@@ -137,8 +181,18 @@ def test_pip_source_build(cli, datafiles, setup_pypi_repo):
 
     # check that exotically named packages are imported correctly
     myreqs_packages = "hellolib"
-    dependencies = ["app2", "app.3", "app-4", "app_5", "app.no.6", "app-no-7", "app_no_8"]
-    mock_packages = {myreqs_packages: {package: {} for package in dependencies}}
+    dependencies = [
+        "app2",
+        "app.3",
+        "app-4",
+        "app_5",
+        "app.no.6",
+        "app-no-7",
+        "app_no_8",
+    ]
+    mock_packages = {
+        myreqs_packages: {package: {} for package in dependencies}
+    }
 
     # create mock pypi repository
     pypi_repo = os.path.join(project, "files", "pypi-repo")
@@ -164,7 +218,10 @@ def test_pip_source_build(cli, datafiles, setup_pypi_repo):
             ]
         },
     }
-    os.makedirs(os.path.dirname(os.path.join(element_path, element_name)), exist_ok=True)
+    os.makedirs(
+        os.path.dirname(os.path.join(element_path, element_name)),
+        exist_ok=True,
+    )
     _yaml.roundtrip_dump(element, os.path.join(element_path, element_name))
 
     result = cli.run(project=project, args=["source", "track", element_name])
@@ -173,6 +230,8 @@ def test_pip_source_build(cli, datafiles, setup_pypi_repo):
     result = cli.run(project=project, args=["build", element_name])
     assert result.exit_code == 0
 
-    result = cli.run(project=project, args=["shell", element_name, "/usr/bin/app1.py"])
+    result = cli.run(
+        project=project, args=["shell", element_name, "/usr/bin/app1.py"]
+    )
     assert result.exit_code == 0
     assert result.output == "Hello App1! This is hellolib\n"

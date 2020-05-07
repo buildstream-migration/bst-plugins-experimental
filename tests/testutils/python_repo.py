@@ -76,7 +76,14 @@ def generate_pip_package(tmpdir, pypi, name, version="0.1", dependencies=None):
     setup_file = os.path.join(tmpdir, "setup.py")
     pkgdirname = re.sub("[^0-9a-zA-Z]+", "", name)
     with open(setup_file, "w") as f:
-        f.write(SETUP_TEMPLATE.format(name=name, version=version, pkgdirname=pkgdirname, pkgdeps=dependencies))
+        f.write(
+            SETUP_TEMPLATE.format(
+                name=name,
+                version=version,
+                pkgdirname=pkgdirname,
+                pkgdeps=dependencies,
+            )
+        )
     os.chmod(setup_file, 0o755)
 
     package = os.path.join(tmpdir, pkgdirname)
@@ -88,7 +95,9 @@ def generate_pip_package(tmpdir, pypi, name, version="0.1", dependencies=None):
     os.chmod(main_file, 0o644)
 
     # Run sdist with a fresh process
-    subprocess.run([sys.executable, "setup.py", "sdist"], cwd=tmpdir, check=True)
+    subprocess.run(
+        [sys.executable, "setup.py", "sdist"], cwd=tmpdir, check=True
+    )
 
     # create directory for this package in pypi resulting in a directory
     # tree resembling the following structure:
@@ -123,7 +132,12 @@ def setup_pypi_repo(tmpdir):
     def add_packages(packages, pypi_repo):
         for package, dependencies in packages.items():
             pkgdir = create_pkgdir(package)
-            generate_pip_package(pkgdir, pypi_repo, package, dependencies=list(dependencies.keys()))
+            generate_pip_package(
+                pkgdir,
+                pypi_repo,
+                package,
+                dependencies=list(dependencies.keys()),
+            )
             for dependency, dependency_dependencies in dependencies.items():
                 add_packages({dependency: dependency_dependencies}, pypi_repo)
 

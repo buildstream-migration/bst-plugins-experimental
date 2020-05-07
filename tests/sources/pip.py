@@ -24,7 +24,7 @@ def generate_project(project_dir):
                     "package-name": "bst-plugins-experimental",
                     "sources": ["pip"],
                 }
-            ]
+            ],
         },
         project_file,
     )
@@ -65,9 +65,21 @@ def test_no_packages(cli, datafiles):
         ("hyphenated-package-2.6.0.tar.gz", "hyphenated-package", "2.6.0"),
         ("underscore_pkg-3.1.0.tar.gz", "underscore_pkg", "3.1.0"),
         ("numbers2and5-1.0.1.tar.gz", "numbers2and5", "1.0.1"),
-        ("multiple.dots.package-5.6.7.tar.gz", "multiple.dots.package", "5.6.7"),
-        ("multiple-hyphens-package-1.2.3.tar.gz", "multiple-hyphens-package", "1.2.3"),
-        ("multiple_underscore_pkg-3.4.5.tar.gz", "multiple_underscore_pkg", "3.4.5"),
+        (
+            "multiple.dots.package-5.6.7.tar.gz",
+            "multiple.dots.package",
+            "5.6.7",
+        ),
+        (
+            "multiple-hyphens-package-1.2.3.tar.gz",
+            "multiple-hyphens-package",
+            "1.2.3",
+        ),
+        (
+            "multiple_underscore_pkg-3.4.5.tar.gz",
+            "multiple_underscore_pkg",
+            "3.4.5",
+        ),
         ("shortversion-1.0.tar.gz", "shortversion", "1.0"),
         ("longversion-1.2.3.4.tar.gz", "longversion", "1.2.3.4"),
     ],

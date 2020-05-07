@@ -106,7 +106,9 @@ class FlatpakImageElement(Element):
         for section in self.metadata.sections():
             if section.startswith("Extension "):
                 extensiondir = self.metadata.get(section, "directory")
-                installdir.descend("files", *extensiondir.split(os.path.sep), create=True)
+                installdir.descend(
+                    "files", *extensiondir.split(os.path.sep), create=True
+                )
 
         with self.timed_activity("Creating flatpak image", silent_nested=True):
             self.stage_dependency_artifacts(

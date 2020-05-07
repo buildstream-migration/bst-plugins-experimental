@@ -113,9 +113,13 @@ class TarElement(Element):
                 "xz": ".tar.xz",
                 "bzip2": ".tar.bz2",
             }
-            with outputdir.open_file(self.filename + extension_map[self.compression], mode="wb") as outputfile:
+            with outputdir.open_file(
+                self.filename + extension_map[self.compression], mode="wb"
+            ) as outputfile:
                 mode = "w:" + compress_map[self.compression]
-                with tarfile.TarFile.open(fileobj=outputfile, mode=mode) as tar:
+                with tarfile.TarFile.open(
+                    fileobj=outputfile, mode=mode
+                ) as tar:
                     inputdir.export_to_tar(tar, "")
 
         return "/output"

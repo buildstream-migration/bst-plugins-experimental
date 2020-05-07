@@ -199,7 +199,9 @@ class CollectManifestElement(Element):
             basedir = sandbox.get_virtual_directory()
             dirname = os.path.dirname(self.path)
             filename = os.path.basename(self.path)
-            vdir = basedir.descend(*dirname.lstrip(os.path.sep).split(os.path.sep), create=True)
+            vdir = basedir.descend(
+                *dirname.lstrip(os.path.sep).split(os.path.sep), create=True
+            )
             if vdir.exists(filename):
                 if filename[-1].isdigit():
                     version = int(filename[-1]) + 1

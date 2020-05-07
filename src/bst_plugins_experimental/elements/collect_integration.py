@@ -87,7 +87,9 @@ class ExtractIntegrationElement(Element):
         basedir = sandbox.get_virtual_directory()
         script_dirname = os.path.dirname(self.script_path)
         script_filename = os.path.basename(self.script_path)
-        script_vdir = basedir.descend(*script_dirname.lstrip(os.path.sep).split(os.path.sep), create=True)
+        script_vdir = basedir.descend(
+            *script_dirname.lstrip(os.path.sep).split(os.path.sep), create=True
+        )
 
         ignore_set = set()
         for ignore in self.ignore:
