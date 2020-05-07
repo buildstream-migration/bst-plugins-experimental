@@ -122,7 +122,8 @@ git-tag - extension of BuildStream git plugin to track latest tag
 
 **Configurable Warnings:**
 
-This plugin provides the following :ref:`configurable warnings <configurable_warnings>`:
+This plugin provides the following `configurable warnings
+<https://docs.buildstream.build/master/format_project.html#configurable-warnings>`:
 
 - ``git:unused-lfs`` - There are files with Git LFS attributes but 'use-lfs' is not explicitly set.
 

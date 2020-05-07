@@ -15,6 +15,7 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    :caption: Contained Elements
 
    elements/bazel_build
+   elements/bazelize
    elements/cmake
    elements/dpkg_build
    elements/dpkg_deploy

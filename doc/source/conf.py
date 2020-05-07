@@ -158,7 +158,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['.static']
+html_static_path = []
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -343,18 +343,3 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 autodoc_member_order = 'bysource'
-
-##############################
-# External links definitions #
-##############################
-
-# FIXME: this currently tracks master. Once BuildStream 2.0 is released,
-#        we should be changing this to the official docs page
-BASE_BUILDSTREAM_DOCS_URL = "https://buildstream.gitlab.io/buildstream"
-
-extlinks = {
-    "ext_core_source_builtins": (
-        "{}/buildstream.source.html#built-in-functionality".format(BASE_BUILDSTREAM_DOCS_URL),
-        None,
-    ),
-}

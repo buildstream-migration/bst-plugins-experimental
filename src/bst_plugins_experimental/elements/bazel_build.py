@@ -41,7 +41,7 @@ target you wish to build, e.g. `//foo:bar`.
 
 Here is the default configuration for the `bazel` element
 
-.. literalinclude:: ../../../src/bst-plugins-experimental/elements/bazel.yaml
+.. literalinclude:: ../../../src/bst_plugins_experimental/elements/bazel_build.yaml
      :language: yaml
 """
 

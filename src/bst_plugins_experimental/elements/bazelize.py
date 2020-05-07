@@ -23,21 +23,21 @@ It creates BUILD files calling bazel
 
 As an example considering an element `makelib.bst` producing an artifact
 containing:
-    * usr/lib/lib.so
-    * usr/include/hdr.h
+* usr/lib/lib.so
+* usr/include/hdr.h
 
 An element of this kind ('bazelize.bst') declaring a
 `build-depends: makelib.bst` will produce a BUILD file containing:
 
-```
-load("@rules_cc//cc:defs.bzl", "cc_library")
+.. code::
 
-cc_library(
-    name = "makelib",
-    srcs = ['usr/lib/lib.so'],
-    hdrs = ['usr/include/hdr.h']
-)
-```
+    load("@rules_cc//cc:defs.bzl", "cc_library")
+
+    cc_library(
+        name = "makelib",
+        srcs = ['usr/lib/lib.so'],
+        hdrs = ['usr/include/hdr.h']
+    )
 """
 import re
 import os
