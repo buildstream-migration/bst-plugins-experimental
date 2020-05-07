@@ -2,7 +2,16 @@
 Next Version
 ================
 
-o Add bazelize element plugin
+===============================
+bst-plugins-experimental 1.93.3
+===============================
+
+o BREAKING CHANGE: Adapt plugins to BuildStream 1.93.3.
+
+  Due to backwards incompatible nature of the API changes in BuildStream, this
+  release also drops support for BuildStream <= 1.93.3.
+
+o Add bazelize element plugin.
 
 ===============================
 bst-plugins-experimental 1.93.1
