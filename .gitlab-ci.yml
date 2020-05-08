@@ -96,6 +96,14 @@ test-fixed-python-38-debian:
   variables:
     TOXENV: "py38-bst-fixed"
 
+test-fixed-nodeps:
+  <<: *test-template
+  image: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-debian:10-${DOCKER_IMAGE_VERSION}
+  before_script:
+    - apt-get purge -y quilt ostree
+  variables:
+    TOXENV: "py37-bst-fixed"
+
 # NOTE: Tests against master are only run against only one distribution in
 # order to conserve CI resources.
 test-master-fedora-31:
