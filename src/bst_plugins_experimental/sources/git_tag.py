@@ -140,7 +140,7 @@ from buildstream import Source, SourceError, SourceFetcher
 from buildstream import utils
 
 GIT_MODULES = ".gitmodules"
-GIT_ATTRIBUTES = '.gitattributes'
+GIT_ATTRIBUTES = ".gitattributes"
 
 # Warnings
 WARN_UNUSED_GITLFS = "unused-lfs"
@@ -440,15 +440,30 @@ class GitTagMirror(SourceFetcher):
         ## This tries to test if git-lfs is used in this repo and if it is then mandates that you have set
         ## whether or not to use git-lfs with the use-lfs option.
         showrc, attrs = self.source.check_output(
-                [self.source.host_git, 'show', "{}:{}".format(self.ref, GIT_ATTRIBUTES)],
-                cwd=mirror)
-        if showrc == 0 and ('filter=lfs' in attrs or 'diff=lfs' in attrs or 'merge=lfs' in attrs) and (self.source.use_lfs is None):
+            [
+                self.source.host_git,
+                "show",
+                "{}:{}".format(self.ref, GIT_ATTRIBUTES),
+            ],
+            cwd=mirror,
+        )
+        if (
+            showrc == 0
+            and (
+                "filter=lfs" in attrs
+                or "diff=lfs" in attrs
+                or "merge=lfs" in attrs
+            )
+            and (self.source.use_lfs is None)
+        ):
             self.source.warn(
-                    "{}: Git LFS not configured but LFS objects exist"
-                    .format(self.source),
-                    detail="a filter, diff or merge is set to use lfs in {}"
-                    .format(GIT_ATTRIBUTES),
-                    warning_token=WARN_UNUSED_GITLFS
+                "{}: Git LFS not configured but LFS objects exist".format(
+                    self.source
+                ),
+                detail="a filter, diff or merge is set to use lfs in {}".format(
+                    GIT_ATTRIBUTES
+                ),
+                warning_token=WARN_UNUSED_GITLFS,
             )
         return rc == 0
 
@@ -550,7 +565,7 @@ class GitTagMirror(SourceFetcher):
         ## This turns git-lfs off if it is installed but we dont want to use it.
         my_env = os.environ.copy()
         if not self.source.use_lfs:
-            my_env['GIT_LFS_SKIP_SMUDGE'] = 'TRUE'
+            my_env["GIT_LFS_SKIP_SMUDGE"] = "TRUE"
 
         self.source.call(
             [self.source.host_git, "checkout", "--force", self.ref],
@@ -561,8 +576,7 @@ class GitTagMirror(SourceFetcher):
 
     def init_workspace(self, directory):
         fullpath = os.path.join(directory, self.path)
-        url = self.source.translate_url(self.url,
-                                        primary=self.primary)
+        url = self.source.translate_url(self.url, primary=self.primary)
 
         self.source.call(
             [
@@ -587,7 +601,7 @@ class GitTagMirror(SourceFetcher):
         ## This turns git-lfs off if it is installed but we dont want to use it.
         my_env = os.environ.copy()
         if not self.source.use_lfs:
-            my_env['GIT_LFS_SKIP_SMUDGE'] = 'TRUE'
+            my_env["GIT_LFS_SKIP_SMUDGE"] = "TRUE"
         self.source.call(
             [self.source.host_git, "checkout", "--force", self.ref],
             fail="Failed to checkout git ref {}".format(self.ref),
@@ -686,12 +700,16 @@ class GitTagMirror(SourceFetcher):
     # This happens after the --no-checkout clone so that as little is pulled from the remote as posible.
     def set_origin_url(self, directory):
         fullpath = os.path.join(directory, self.path)
-        _, origin_url = self.source.check_output([self.source.host_git, 'config', '--get', 'remote.origin.url'],
-                         fail='Failed to get origin url "{}"'.format(self.mirror),
-                         cwd=self.mirror)
-        self.source.call([self.source.host_git, 'config', 'remote.origin.url', origin_url],
-                         fail="Failed to set origin url {}".format(origin_url),
-                         cwd=fullpath)
+        _, origin_url = self.source.check_output(
+            [self.source.host_git, "config", "--get", "remote.origin.url"],
+            fail='Failed to get origin url "{}"'.format(self.mirror),
+            cwd=self.mirror,
+        )
+        self.source.call(
+            [self.source.host_git, "config", "remote.origin.url", origin_url],
+            fail="Failed to set origin url {}".format(origin_url),
+            cwd=fullpath,
+        )
 
 
 class GitTagSource(Source):
@@ -730,8 +748,8 @@ class GitTagSource(Source):
         self.match = node.get_str_list("match", [])
         # FIXME: check if get_sequence would not be better
         self.exclude = node.get_str_list("exclude", [])
-        if 'use-lfs' in node.keys():
-            self.use_lfs = node.get_bool('use-lfs', False)
+        if "use-lfs" in node.keys():
+            self.use_lfs = node.get_bool("use-lfs", False)
         else:
             self.use_lfs = None
 
@@ -770,8 +788,10 @@ class GitTagSource(Source):
         # Check if git is installed, get the binary at the same time
         self.host_git = utils.get_host_tool("git")
         if self.use_lfs:
-            self.call([self.host_git, 'lfs', '--version'],
-                              fail="Git lfs not installed")
+            self.call(
+                [self.host_git, "lfs", "--version"],
+                fail="Git lfs not installed",
+            )
 
     def get_unique_key(self):
         # Here we want to encode the local name of the repository and

@@ -442,8 +442,7 @@ class CargoSource(Source):
 
         # Stage our vendor config
         vendor_config = _default_vendor_config_template.format(
-            vendorurl=self.translate_url(self.url),
-            vendordir=self.vendor_dir
+            vendorurl=self.translate_url(self.url), vendordir=self.vendor_dir
         )
         conf_dir = os.path.join(directory, ".cargo")
         conf_file = os.path.join(conf_dir, "config")

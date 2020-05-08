@@ -98,7 +98,10 @@ _PYTHON_VERSIONS = [
 # https://docs.python.org/3/distutils/sourcedist.html.
 # Names of source distribution archives must be of the form
 # '%{package-name}-%{version}.%{extension}'.
-_SDIST_RE = re.compile(r"^([\w.-]+?)-((?:[\d.]+){2,})\.(?:tar|tar.bz2|tar.gz|tar.xz|tar.Z|zip)$", re.IGNORECASE)
+_SDIST_RE = re.compile(
+    r"^([\w.-]+?)-((?:[\d.]+){2,})\.(?:tar|tar.bz2|tar.gz|tar.xz|tar.Z|zip)$",
+    re.IGNORECASE,
+)
 
 
 class PipSource(Source):
@@ -111,7 +114,10 @@ class PipSource(Source):
     BST_REQUIRES_PREVIOUS_SOURCES_TRACK = True
 
     def configure(self, node):
-        node.validate_keys(["url", "packages", "ref", "requirements-files"] + Source.COMMON_CONFIG_KEYS)
+        node.validate_keys(
+            ["url", "packages", "ref", "requirements-files"]
+            + Source.COMMON_CONFIG_KEYS
+        )
         self.ref = node.get_str("ref", None)
         self.original_url = node.get_str("url", _PYPI_INDEX_URL)
         self.index_url = self.translate_url(self.original_url)
@@ -119,7 +125,11 @@ class PipSource(Source):
         self.requirements_files = node.get_str_list("requirements-files", [])
 
         if not (self.packages or self.requirements_files):
-            raise SourceError("{}: Either 'packages' or 'requirements-files' must be specified".format(self))
+            raise SourceError(
+                "{}: Either 'packages' or 'requirements-files' must be specified".format(
+                    self
+                )
+            )
 
     def preflight(self):
         # Try to find a pip version that spports download command
@@ -127,7 +137,9 @@ class PipSource(Source):
         for python in reversed(_PYTHON_VERSIONS):
             try:
                 host_python = utils.get_host_tool(python)
-                rc = self.call([host_python, "-m", "pip", "download", "--help"])
+                rc = self.call(
+                    [host_python, "-m", "pip", "download", "--help"]
+                )
                 if rc == 0:
                     self.host_pip = [host_python, "-m", "pip"]
                     break
@@ -135,7 +147,9 @@ class PipSource(Source):
                 pass
 
         if self.host_pip is None:
-            raise SourceError("{}: Unable to find a suitable pip command".format(self))
+            raise SourceError(
+                "{}: Unable to find a suitable pip command".format(self)
+            )
 
     def get_unique_key(self):
         return [self.original_url, self.ref]
@@ -216,8 +230,12 @@ class PipSource(Source):
                 ) from e
 
     def stage(self, directory):
-        with self.timed_activity("Staging Python packages", silent_nested=True):
-            utils.copy_files(self._mirror, os.path.join(directory, _OUTPUT_DIRNAME))
+        with self.timed_activity(
+            "Staging Python packages", silent_nested=True
+        ):
+            utils.copy_files(
+                self._mirror, os.path.join(directory, _OUTPUT_DIRNAME)
+            )
 
     # Directory where this source should stage its files
     #

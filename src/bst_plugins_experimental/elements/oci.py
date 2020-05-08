@@ -774,6 +774,7 @@ class OciElement(Element):
                 create_whiteouts(parent_checkout, layer)
 
                 if "parent" in image:
+
                     def remove_duplicates(parentdir, layerdir):
                         for f in list(layerdir):
                             if not parentdir.exists(f):
