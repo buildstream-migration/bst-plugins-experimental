@@ -23,6 +23,7 @@
 #
 
 import os
+import shutil
 
 import pytest
 
@@ -36,12 +37,14 @@ DATA_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), "git_tag",
 )
 
+HAVE_GIT_LFS = shutil.which("git-lfs") is not None
+
 
 ## This test needs internet access which is not the best
 ## Something like https://github.com/git-lfs/lfs-test-server
 ## should allow for off line test but seems to need a very new
 ## version of git-lfs
-@pytest.mark.skipif(HAVE_GIT is False, reason="git is not available")
+@pytest.mark.skipif(not HAVE_GIT_LFS, reason="git-lfs is not available")
 @pytest.mark.datafiles(os.path.join(DATA_DIR, "lfs"))
 def test_gitlfs(cli, tmpdir, datafiles):
     project = os.path.join(datafiles.dirname, datafiles.basename)

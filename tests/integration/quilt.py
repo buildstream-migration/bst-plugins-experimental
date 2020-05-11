@@ -2,6 +2,7 @@
 # pylint: disable=redefined-outer-name
 
 import os
+import shutil
 import pytest
 
 from buildstream.testing.runcli import (  # pylint: disable=unused-import
@@ -18,10 +19,15 @@ pytestmark = pytest.mark.integration
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "project")
 
+HAVE_QUILT = shutil.which("quilt")
+
 
 @pytest.mark.datafiles(DATA_DIR)
 @pytest.mark.skipif(
     not HAVE_SANDBOX, reason="Only available with a functioning sandbox"
+)
+@pytest.mark.skipif(
+    not HAVE_QUILT, reason="Only available if `quilt` is installed"
 )
 def test_quilt_build(cli, datafiles):
     project = str(datafiles)
