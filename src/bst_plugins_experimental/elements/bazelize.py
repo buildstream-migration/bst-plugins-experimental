@@ -111,10 +111,9 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
         self._deps: List[str] = []
         self._copts: List[str] = []
         self._linkopts: List[str] = []
-        self._scope = Scope.RUN
+        self._scope = Scope.ALL
 
         if element.get_kind() == "bazelize":
-            self._scope = Scope.BUILD
             self.bazel_rule = element.bazel_rule
             self._copts = element.copts
             self._linkopts = element.linkopts
@@ -187,8 +186,6 @@ class BazelizeElement(Element):
     """Buildstream element plugin kind formatting calls to cc_library rules"""
 
     BST_MIN_VERSION = "2.0"
-    # explicitly forbid run-time dependencies
-    BST_FORBID_RDEPENDS = True
     BST_VIRTUAL_DIRECTORY = True
 
     def preflight(self) -> None:
@@ -250,7 +247,7 @@ class BazelizeElement(Element):
         """
         targets_set: Set[BazelRuleEntry] = set()
 
-        for dep in self.dependencies(Scope.BUILD, recurse=False):
+        for dep in self.dependencies(Scope.ALL, recurse=False):
             target = BazelizeElement._gather_target(
                 dep, dep.compute_manifest()
             )
