@@ -31,6 +31,7 @@ An element of this kind ('bazelize.bst') declaring a
 
 .. code::
 
+    package(default_visibility = ["//visibility:public"])
     load("@rules_cc//cc:defs.bzl", "cc_library")
 
     cc_library(
@@ -281,6 +282,13 @@ class BazelizeElement(Element):
         return load_directive, targets
 
     def assemble(self, sandbox: "Sandbox") -> str:
+        # format the visibility
+        visibility = (
+            'package(default_visibility = ["//visibility:{}"])'.format(
+                "public"
+            )
+            + os.linesep
+        )
         # gather the sorted list of targets and the load directive
         load_directive, targets = self._gather_targets()
 
@@ -294,6 +302,8 @@ class BazelizeElement(Element):
         )
 
         with vdir.open_file(build_file_name, mode="w") as f:
+            # write the visibility
+            f.write(visibility)
             # write the load directives
             f.write(load_directive)
             for target in targets:

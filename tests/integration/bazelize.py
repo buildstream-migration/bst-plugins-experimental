@@ -123,9 +123,14 @@ def test_gen_buildrules(cli, datafiles):
 
     # nb. current rules are sorted by name field in the plugin
     expected = [
-        'load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")'
-        + os.linesep
+        'package(default_visibility = ["//visibility:public"])' + os.linesep
     ]
+    expected.extend(
+        [
+            'load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")'
+            + os.linesep
+        ]
+    )
     expected += render_entry(bin1)
     expected += render_entry(gen_cc_lib(1))
     expected += render_entry(gen_cc_lib(2))
