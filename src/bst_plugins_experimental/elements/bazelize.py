@@ -123,13 +123,6 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
         if self.bazel_rule == BazelRuleEntry.NONE_RULE:
             return
 
-        # sources and headers from manifest and element.sources
-        _srcs = set()
-        for source in element.sources():
-            _srcs.add(os.path.basename(source.path))
-        self._srcs = list(_srcs)
-        del _srcs
-
         # get target names of deps from element dependencies
         _deps = set()
         for dep in element.dependencies(self._scope, recurse=False):
@@ -137,12 +130,13 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
         self._deps = sorted(list(_deps))
         del _deps
 
+        # sources and headers from manifest
         if manifest:
             self._match_manifest_items(manifest)
+            # sort headers and sources
+            self._srcs.sort()
+            self._hdrs.sort()
 
-        # sort headers and sources
-        self._srcs.sort()
-        self._hdrs.sort()
         return
 
     def _match_manifest_items(
