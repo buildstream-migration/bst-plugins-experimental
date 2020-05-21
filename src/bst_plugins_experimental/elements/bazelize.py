@@ -285,7 +285,7 @@ class BazelizeElement(Element):
         load_directive, targets = self._gather_targets()
 
         # attempt to write the BUILD file from assembled rule entries
-        build_file_name = "BUILD." + self.normal_name
+        build_file_name = "BUILD"
 
         basedir = sandbox.get_virtual_directory()
         vdir = basedir.descend(

@@ -44,7 +44,7 @@ def test_gen_buildrules(cli, datafiles):
     checkout = os.path.join(project, "checkout")
     prj_prefix = "bazelize-"
     element_name = "bazelize/empty.bst"
-    build_file = "BUILD.bazelize-empty"  # default build file name
+    build_file = "BUILD"  # default build file name
 
     # try to build
     result = cli.run(project=project, args=["build", element_name],)
