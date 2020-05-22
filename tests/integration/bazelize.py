@@ -26,7 +26,7 @@ def render_entry(entry):
         '    name = "{}",'.format(entry["name"]) + os.linesep
     ]  #     name = "name",
     for item in ["srcs", "hdrs", "deps", "copts", "linkopts"]:
-        if item in entry:
+        if item in entry and entry[item]:
             msg += [
                 "    {} = {},".format(item, entry[item]) + os.linesep
             ]  #     item = [values],
@@ -44,7 +44,7 @@ def test_gen_buildrules(cli, datafiles):
     checkout = os.path.join(project, "checkout")
     prj_prefix = "bazelize-"
     element_name = "bazelize/empty.bst"
-    build_file = "BUILD.bazelize-empty"  # default build file name
+    build_file = "BUILD"  # default build file name
 
     # try to build
     result = cli.run(project=project, args=["build", element_name],)
@@ -101,21 +101,19 @@ def test_gen_buildrules(cli, datafiles):
         return {
             "rule": "cc_library",
             "name": prj_prefix + libname,
-            "srcs": sorted([libname] + get_srcs(num)),
+            "srcs": sorted(get_srcs(num)),
             "hdrs": sorted(get_hdrs(num)),
         }
 
     # format expected binary data
     # FIXME: bin1_srcs are [glob(app/*)] or ["app/afile.cpp", "app/bfile.c"]
     # see #6
-    bin1_srcs = ["app"]
     bin1_deps = [prj_prefix + "makelib2", prj_prefix + "makelib1"]
     bin1_opts = ["-I/lib/inc", "-I/include/someinc"]
     bin1_lopts = ["-lboost_thread", "-lboost_system"]
     bin1 = {
         "rule": "cc_binary",
         "name": prj_prefix + "bazelize",
-        "srcs": sorted(bin1_srcs),
         "deps": sorted(bin1_deps),
         "copts": sorted(bin1_opts),
         "linkopts": sorted(bin1_lopts),
@@ -123,9 +121,14 @@ def test_gen_buildrules(cli, datafiles):
 
     # nb. current rules are sorted by name field in the plugin
     expected = [
-        'load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")'
-        + os.linesep
+        'package(default_visibility = ["//visibility:public"])' + os.linesep
     ]
+    expected.extend(
+        [
+            'load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")'
+            + os.linesep
+        ]
+    )
     expected += render_entry(bin1)
     expected += render_entry(gen_cc_lib(1))
     expected += render_entry(gen_cc_lib(2))

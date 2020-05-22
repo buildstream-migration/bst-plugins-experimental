@@ -31,6 +31,7 @@ An element of this kind ('bazelize.bst') declaring a
 
 .. code::
 
+    package(default_visibility = ["//visibility:public"])
     load("@rules_cc//cc:defs.bzl", "cc_library")
 
     cc_library(
@@ -122,13 +123,6 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
         if self.bazel_rule == BazelRuleEntry.NONE_RULE:
             return
 
-        # sources and headers from manifest and element.sources
-        _srcs = set()
-        for source in element.sources():
-            _srcs.add(os.path.basename(source.path))
-        self._srcs = list(_srcs)
-        del _srcs
-
         # get target names of deps from element dependencies
         _deps = set()
         for dep in element.dependencies(self._scope, recurse=False):
@@ -136,12 +130,13 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
         self._deps = sorted(list(_deps))
         del _deps
 
+        # sources and headers from manifest
         if manifest:
             self._match_manifest_items(manifest)
+            # sort headers and sources
+            self._srcs.sort()
+            self._hdrs.sort()
 
-        # sort headers and sources
-        self._srcs.sort()
-        self._hdrs.sort()
         return
 
     def _match_manifest_items(
@@ -281,11 +276,18 @@ class BazelizeElement(Element):
         return load_directive, targets
 
     def assemble(self, sandbox: "Sandbox") -> str:
+        # format the visibility
+        visibility = (
+            'package(default_visibility = ["//visibility:{}"])'.format(
+                "public"
+            )
+            + os.linesep
+        )
         # gather the sorted list of targets and the load directive
         load_directive, targets = self._gather_targets()
 
         # attempt to write the BUILD file from assembled rule entries
-        build_file_name = "BUILD." + self.normal_name
+        build_file_name = "BUILD"
 
         basedir = sandbox.get_virtual_directory()
         vdir = basedir.descend(
@@ -294,6 +296,8 @@ class BazelizeElement(Element):
         )
 
         with vdir.open_file(build_file_name, mode="w") as f:
+            # write the visibility
+            f.write(visibility)
             # write the load directives
             f.write(load_directive)
             for target in targets:
