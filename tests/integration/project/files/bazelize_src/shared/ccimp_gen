@@ -1,0 +1,21 @@
+.PHONY: all install
+hdrext = X.h X.hh X.hpp X.hxx X.inc X.inl X.H X.nonesuch
+libs = $(subst X,${base},$(libext))
+hdrs = $(subst X,${base},$(hdrext))
+all: $(libs)
+
+$(libs): $(hdrs)
+	touch $@
+
+$(hdrs):
+	touch $@
+
+install: install-lib install-hdr
+
+install-lib: $(libs)
+	install -d ${DESTDIR}/${PREFIX}/testlibs/${base}
+	install -m 755 $? ${DESTDIR}/${PREFIX}/testlibs/${base}
+
+install-hdr: $(hdrs)
+	install -d ${DESTDIR}/${PREFIX}/testincs/${base}
+	install -m 755 $? ${DESTDIR}/${PREFIX}/testincs/${base}
