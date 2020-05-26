@@ -5,7 +5,9 @@ build-depends:
 
 sources:
 - kind: local
-  path: files/bazelize_src/makelib2
+  path: files/bazelize_src/shared
+- kind: local
+  path: files/bazelize_src/cclib1
 
 config:
   build-commands:
