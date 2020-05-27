@@ -1,8 +1,8 @@
 kind: bazelize
 build-depends:
-- filename: bazelize/makelib1.bst
+- filename: bazelize/cclib1.bst
 runtime-depends:
-- filename: bazelize/makelib2.bst
+- filename: bazelize/cclib2.bst
 sources:
 - kind: local
   path: files/bazelize_src/app

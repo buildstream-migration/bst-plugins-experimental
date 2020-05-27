@@ -66,7 +66,7 @@ HDR_EXT = r"h(x{2}|p{2})?|h{2}|H|in(c|l)"
 BAZELIZE_HDR_RE = re.compile(r"^.*\.(" + HDR_EXT + r")$")
 
 # source regex
-SRC_EXT = r"c(x{2}|p{2})|c{2}|c\+{2}|C|S|(pic\.)?(a|l?o)|so(\.\d+)*"
+SRC_EXT = r"c(x{2}|p{2})|c{2}|c\+{2}|c|C|S|(pic\.)?(a|l?o)|so(\.\d+)*"
 BAZELIZE_SOURCE_RE = re.compile(r"^.*\.(" + SRC_EXT + r")$")
 
 

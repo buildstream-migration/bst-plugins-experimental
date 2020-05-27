@@ -1,0 +1,44 @@
+.PHONY: all install clean
+srcext = X.c X.cc X.cpp X.cxx X.c++ X.C \
+	   X.S \
+	   X.o \
+	   X.pic.o \
+	   X.nonesuch
+libext = X.so X.a X.so.1234.4321 X.pic.a X.pic.lo X.lo X.nonesuch
+hdrext = X.h X.hh X.hpp X.hxx X.inc X.inl X.H X.nonesuch
+
+libs = $(subst X,${base},$(libext))
+hdrs = $(subst X,${base},$(hdrext))
+srcs = $(subst X,${base},$(srcext))
+
+targets := $(subst X,*,$(libext))
+targets := $(targets) $(subst X,*,$(hdrext))
+targets := $(targets) $(subst X,*,$(srcext))
+
+all: $(libs)
+
+$(libs): $(hdrs) $(srcs)
+	touch $@
+
+$(hdrs):
+	touch $@
+
+$(srcs):
+	touch $@
+
+install: install-lib install-hdr install-src
+
+install-lib: $(libs)
+	install -d ${DESTDIR}/${PREFIX}/testlibs/${base}
+	install -m 755 $? ${DESTDIR}/${PREFIX}/testlibs/${base}
+
+install-hdr: $(hdrs)
+	install -d ${DESTDIR}/${PREFIX}/testincs/${base}
+	install -m 755 $? ${DESTDIR}/${PREFIX}/testincs/${base}
+
+install-src: $(srcs)
+	install -d ${DESTDIR}/${PREFIX}/testsrcs/${base}
+	install -m 755 $? ${DESTDIR}/${PREFIX}/testsrcs/${base}
+
+clean:
+	rm $(targets)

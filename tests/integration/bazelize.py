@@ -62,54 +62,75 @@ def test_gen_buildrules(cli, datafiles):
 
     # format test content to check against the content of the build file
     # format expected library data
-    lib_prefix = [
-        "usr" + os.path.sep + dirname for dirname in ["testlibs1", "testlibs2"]
-    ]
-    hdr_prefix = [
-        "usr" + os.path.sep + dirname
-        for dirname in ["testincludes1", "testincludes2"]
-    ]
+    prefix = "usr" + os.path.sep
+    lib_prefix = prefix + "testlibs"
+    hdr_prefix = prefix + "testincs"
+    src_prefix = prefix + "testsrcs"
 
-    def get_srcs(lib_num):
+    def get_libs(libname):
         libs = [
-            "lib1.so",
-            "lib2.a",
-            "lib3.so.1234.4321",
-            "lib4.pic.a",
-            "lib5.a",
-            "lib6.pic.lo",
-            "lib7.lo",
+            libname + lib
+            for lib in [
+                ".so",
+                ".a",
+                ".so.1234.4321",
+                ".pic.a",
+                ".pic.lo",
+                ".lo",
+            ]
         ]
         random.shuffle(libs)
-        return [lib_prefix[lib_num - 1] + os.path.sep + lib for lib in libs]
+        return [
+            lib_prefix + os.path.sep + libname + os.path.sep + lib
+            for lib in libs
+        ]
 
-    def get_hdrs(lib_num):
+    def get_srcs(libname):
+        libs = [
+            libname + lib
+            for lib in [
+                ".c",
+                ".cc",
+                ".cpp",
+                ".cxx",
+                ".c++",
+                ".C",
+                ".S",
+                ".o",
+                ".pic.o",
+            ]
+        ]
+        random.shuffle(libs)
+        return [
+            src_prefix + os.path.sep + libname + os.path.sep + lib
+            for lib in libs
+        ]
+
+    def get_hdrs(libname):
         hdrs = [
-            "hdr1.h",
-            "hdr2.hh",
-            "hdr3.hpp",
-            "hdr4.hxx",
-            "hdr5.inc",
-            "hdr6.inl",
-            "hdr7.H",
+            libname + hdr
+            for hdr in [".h", ".hh", ".hpp", ".hxx", ".inc", ".inl", ".H",]
         ]
         random.shuffle(hdrs)
-        return [hdr_prefix[lib_num - 1] + os.path.sep + hdr for hdr in hdrs]
+        return [
+            hdr_prefix + os.path.sep + libname + os.path.sep + hdr
+            for hdr in hdrs
+        ]
 
     def gen_cc_lib(num):
-        libname = "makelib" + str(num)
+        libname = "cclib" + str(num)
         return {
             "rule": "cc_library",
             "name": prj_prefix + libname,
-            "srcs": sorted(get_srcs(num)),
-            "hdrs": sorted(get_hdrs(num)),
+            "srcs": sorted(get_libs(libname) + get_srcs(libname)),
+            "hdrs": sorted(get_hdrs(libname)),
             "deps": ["base"],
         }
 
     # format expected binary data
     # FIXME: bin1_srcs are [glob(app/*)] or ["app/afile.cpp", "app/bfile.c"]
     # see #6
-    bin1_deps = [prj_prefix + "makelib2", prj_prefix + "makelib1"]
+    bin1_deps = [prj_prefix + "cclib2", prj_prefix + "cclib1"]
     bin1_opts = ["-I/lib/inc", "-I/include/someinc"]
     bin1_lopts = ["-lboost_thread", "-lboost_system"]
     bin1 = {
