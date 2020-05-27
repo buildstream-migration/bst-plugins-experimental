@@ -6,6 +6,7 @@ sources:
 - kind: local
   path: files/bazelize_src/app
 config:
+  buildfile-dir: "/"
   bazel-rule: "cc_binary"
   linkopts:
   - "-lboost_system"
