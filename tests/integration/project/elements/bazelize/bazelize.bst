@@ -1,6 +1,7 @@
 kind: bazelize
 build-depends:
 - filename: bazelize/makelib1.bst
+runtime-depends:
 - filename: bazelize/makelib2.bst
 sources:
 - kind: local

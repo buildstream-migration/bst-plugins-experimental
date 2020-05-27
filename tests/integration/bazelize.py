@@ -103,6 +103,7 @@ def test_gen_buildrules(cli, datafiles):
             "name": prj_prefix + libname,
             "srcs": sorted(get_srcs(num)),
             "hdrs": sorted(get_hdrs(num)),
+            "deps": ["base"],
         }
 
     # format expected binary data
