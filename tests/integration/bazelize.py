@@ -133,7 +133,6 @@ def test_gen_buildrules(cli, datafiles):
             "name": prj_prefix + libname,
             "srcs": sorted(get_libs(libname) + get_srcs(libname)),
             "hdrs": sorted(get_hdrs(libname)),
-            "deps": ["base"],
         }
 
     # format expected binary data
@@ -174,7 +173,6 @@ def test_gen_buildrules(cli, datafiles):
 @pytest.mark.skipif(
     not HAVE_SANDBOX, reason="Only available with a functioning sandbox"
 )
-@pytest.mark.xfail(reason="Invalid targets from bst elements", strict=True)
 # pylint: disable=too-many-locals
 def test_gen_ccimports(cli, datafiles):
     project = str(datafiles)

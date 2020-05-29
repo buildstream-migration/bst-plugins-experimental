@@ -355,11 +355,15 @@ class BazelizeElement(Element):
         )
         del targets_set
 
-        rule_types = set()
+        # remove unbound dependencies and modify rules to be cc_imports if
+        # necessary
+        bound = {target.name for target in targets}
         for target in targets:
-            rule_types.add(target.bazel_rule)
+            target.deps = sorted(list(set(target.deps).intersection(bound)))
+            target.make_cc_import()
 
         # get the load directive
+        rule_types = {target.bazel_rule for target in targets}
         load_directive = BazelRuleEntry.get_directive(rule_types)
 
         return load_directive, targets
