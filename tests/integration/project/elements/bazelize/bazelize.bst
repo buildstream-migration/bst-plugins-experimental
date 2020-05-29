@@ -1,7 +1,6 @@
 kind: bazelize
-build-depends:
+depends:
 - filename: bazelize/cclib1.bst
-runtime-depends:
 - filename: bazelize/cclib2.bst
 sources:
 - kind: local
