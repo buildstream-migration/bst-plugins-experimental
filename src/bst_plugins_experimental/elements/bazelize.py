@@ -69,6 +69,14 @@ BAZELIZE_HDR_RE = re.compile(r"^.*\.(" + HDR_EXT + r")$")
 SRC_EXT = r"c(x{2}|p{2})|c{2}|c\+{2}|c|C|S|(pic\.)?(a|l?o)|so(\.\d+)*"
 BAZELIZE_SOURCE_RE = re.compile(r"^.*\.(" + SRC_EXT + r")$")
 
+# library regex
+INTERFACE_EXT = r"ifso|tbd"
+BAZELIZE_INTERFACE_RE = re.compile(r"^.*\.(" + INTERFACE_EXT + r")$")
+SHARED_EXT = r"so|dll|dylib"
+BAZELIZE_SHARED_RE = re.compile(r"^.*\.(" + SHARED_EXT + r")$")
+STATIC_EXT = r"(pic\.)?a|lib"
+BAZELIZE_STATIC_RE = re.compile(r"^.*\.(" + STATIC_EXT + r")$")
+
 
 class BazelRuleEntry:  # pylint: disable=too-few-public-methods
     """Simple class to hold information about cc_* bazel rule targets and
@@ -78,10 +86,14 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
     HDR_RE = BAZELIZE_HDR_RE
     # source regex
     SOURCE_RE = BAZELIZE_SOURCE_RE
+    INTERFACE_RE = BAZELIZE_INTERFACE_RE
+    SHARED_RE = BAZELIZE_SHARED_RE
+    STATIC_RE = BAZELIZE_STATIC_RE
     # the empty metarule
     NONE_RULE = "BST.BAZEL_NONE_RULE"
     # default rule
     DEFAULT_RULE = "cc_library"
+    IMPORT_RULE = "cc_import"
 
     @staticmethod
     def get_directive(rules: Set[str]) -> str:
@@ -107,8 +119,11 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
         self.name = element.normal_name
         self.bazel_rule: str = BazelRuleEntry.DEFAULT_RULE
         self._srcs: List[str] = []
+        self._interface_lib: List[str] = []
+        self._shared_lib: List[str] = []
+        self._static_lib: List[str] = []
         self._hdrs: List[str] = []
-        self._deps: List[str] = []
+        self.deps: List[str] = []
         self._copts: List[str] = []
         self._linkopts: List[str] = []
         self._scope = Scope.ALL
@@ -126,7 +141,7 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
         _deps = set()
         for dep in element.dependencies(self._scope, recurse=False):
             _deps.add(dep.normal_name)
-        self._deps = sorted(list(_deps))
+        self.deps = sorted(list(_deps))
         del _deps
 
         # sources and headers from manifest
@@ -136,6 +151,39 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
             self._srcs.sort()
             self._hdrs.sort()
 
+        self.make_cc_import()
+
+        return
+
+    def make_cc_import(self) -> None:
+        """Modifies the bazel rule to be a cc_import from cc_library if matching
+        the criteria."""
+        # don't modify rules that are not cc_library
+        if self.bazel_rule != "cc_library":
+            return
+
+        # to be a valid cc_import:
+        # 1. there must be 0 or 1 of interface, shared, and static library values
+        critical_lengths = [
+            (len(ls) <= 1)
+            for ls in [self._interface_lib, self._shared_lib, self._static_lib]
+        ]
+        # 2. there must not be sources which do not overlap with shared or static values
+        critical_lengths.append(
+            len(
+                set(self._srcs)
+                - (set(self._shared_lib).union(set(self._static_lib)))
+            )
+            == 0
+        )
+        # 3. there must not be any copts,linkopts, or deps
+        critical_lengths.extend(
+            [(len(ls) == 0) for ls in [self._copts, self._linkopts, self.deps]]
+        )
+
+        if all(critical_lengths):
+            self.bazel_rule = BazelRuleEntry.IMPORT_RULE
+
         return
 
     def _match_manifest_items(
@@ -143,16 +191,35 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
     ) -> None:
         srcs = set()
         hdrs = set()
+        interfaces = set()
+        shareds = set()
+        statics = set()
+
         for item in manifest:
-            _maybe = re.match(BazelRuleEntry.SOURCE_RE, item)
-            if _maybe:
-                # the item looks like a source
+            if re.match(BazelRuleEntry.SOURCE_RE, item):
+                # looks like a source
                 srcs.add(item)
-            else:
-                _maybe = re.match(BazelRuleEntry.HDR_RE, item)
-                if _maybe:
-                    # the item looks like a header
-                    hdrs.add(item)
+                # regex overlap between SRC_RE and SHARED_RE/STATIC_RE
+                if re.match(BazelRuleEntry.SHARED_RE, item):
+                    shareds.add(item)
+                elif re.match(BazelRuleEntry.STATIC_RE, item):
+                    statics.add(item)
+            elif re.match(BazelRuleEntry.HDR_RE, item):
+                # looks like a header
+                hdrs.add(item)
+            elif re.match(BazelRuleEntry.INTERFACE_RE, item):
+                # looks like an interface library
+                interfaces.add(item)
+            elif re.match(BazelRuleEntry.SHARED_RE, item):
+                # looks like a shared library
+                shareds.add(item)
+            elif re.match(BazelRuleEntry.STATIC_RE, item):
+                # looks like a static library
+                statics.add(item)
+
+        self._interface_lib += list(interfaces)
+        self._shared_lib += list(shareds)
+        self._static_lib += list(statics)
         self._srcs += list(srcs)
         self._hdrs += list(hdrs)
 
@@ -161,6 +228,14 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
         # avoid representing the empty targets
         if self.bazel_rule == BazelRuleEntry.NONE_RULE:
             return str()
+
+        # workaround the regex overlap for library extensions
+        if self.bazel_rule == BazelRuleEntry.IMPORT_RULE:
+            self._srcs = []
+        else:
+            self._interface_lib = []
+            self._shared_lib = []
+            self._static_lib = []
 
         msg = (
             "{}(".format(self.bazel_rule)
@@ -172,8 +247,23 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
             msg += "    srcs = {},".format(self._srcs) + os.linesep
         if self._hdrs:
             msg += "    hdrs = {},".format(self._hdrs) + os.linesep
-        if self._deps:
-            msg += "    deps = {},".format(self._deps) + os.linesep
+        if self._interface_lib:
+            msg += (
+                "    interface_library = {},".format(self._interface_lib[0])
+                + os.linesep
+            )
+        if self._shared_lib:
+            msg += (
+                "    shared_library = {},".format(self._shared_lib[0])
+                + os.linesep
+            )
+        if self._static_lib:
+            msg += (
+                "    static_library = {},".format(self._static_lib[0])
+                + os.linesep
+            )
+        if self.deps:
+            msg += "    deps = {},".format(self.deps) + os.linesep
         if self._copts:
             msg += "    copts = {},".format(self._copts) + os.linesep
         if self._linkopts:
@@ -265,9 +355,15 @@ class BazelizeElement(Element):
         )
         del targets_set
 
-        rule_types = set()
+        # remove unbound dependencies and modify rules to be cc_imports if
+        # necessary
+        bound = {target.name for target in targets}
         for target in targets:
-            rule_types.add(target.bazel_rule)
+            target.deps = sorted(list(set(target.deps).intersection(bound)))
+            target.make_cc_import()
+
+        # get the load directive
+        rule_types = {target.bazel_rule for target in targets}
         load_directive = BazelRuleEntry.get_directive(rule_types)
 
         return load_directive, targets
