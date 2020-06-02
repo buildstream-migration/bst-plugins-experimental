@@ -249,17 +249,17 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
             msg += "    hdrs = {},".format(self._hdrs) + os.linesep
         if self._interface_lib:
             msg += (
-                "    interface_library = {},".format(self._interface_lib[0])
+                '    interface_library = "{}",'.format(self._interface_lib[0])
                 + os.linesep
             )
         if self._shared_lib:
             msg += (
-                "    shared_library = {},".format(self._shared_lib[0])
+                '    shared_library = "{}",'.format(self._shared_lib[0])
                 + os.linesep
             )
         if self._static_lib:
             msg += (
-                "    static_library = {},".format(self._static_lib[0])
+                '    static_library = "{}",'.format(self._static_lib[0])
                 + os.linesep
             )
         if self.deps:

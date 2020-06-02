@@ -67,14 +67,20 @@ def render_entry(entry):
         "deps",
         "copts",
         "linkopts",
+    ]:
+        if item in entry and entry[item]:
+            msg += [
+                "    {} = {},".format(item, entry[item]) + os.linesep
+            ]  #     item = [values],
+    for item in [
         "interface_library",
         "shared_library",
         "static_library",
     ]:
         if item in entry and entry[item]:
             msg += [
-                "    {} = {},".format(item, entry[item]) + os.linesep
-            ]  #     item = [values],
+                '    {} = "{}",'.format(item, entry[item]) + os.linesep
+            ]  #     item = "value",
     msg += [")" + os.linesep]  # )
     return msg
 
