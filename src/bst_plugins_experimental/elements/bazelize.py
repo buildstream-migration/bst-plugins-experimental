@@ -223,6 +223,15 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
         self._srcs += list(srcs)
         self._hdrs += list(hdrs)
 
+    def __eq__(self, other):
+        # Target names cannot overlap so targets with the same names
+        # should be considered to be equivalent.
+        return other and self.name == other.name
+
+    def __hash__(self):
+        # This is defined by the implementation of __eq__()
+        return hash(self.name)
+
     def __str__(self) -> str:
         """Implementation for representing the entry"""
         # avoid representing the empty targets
