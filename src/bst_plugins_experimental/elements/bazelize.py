@@ -16,7 +16,7 @@
 #
 #  Authors:
 #        Darius Makovsky <darius.makovsky@codethink.co.uk>
-"""Bazelise kind Buildstream element plugin
+"""Bazelize kind Buildstream element plugin
 
 It creates BUILD files calling bazel
 [cc_* rules](https://docs.bazel.build/versions/master/be/c-cpp.html).
