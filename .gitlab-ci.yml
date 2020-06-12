@@ -17,6 +17,9 @@ stages:
 variables:
   # SAST related variables
   SAST_DISABLE_DIND: "true"
+  # only run a subset of default analyzers from:
+  # https://docs.gitlab.com/ee/user/application_security/sast/analyzers.html
+  SAST_DEFAULT_ANALYZERS: "bandit, secrets"
   SAST_GOSEC_LEVEL: 2
   CI_PROJECT_REPOSITORY_LANGUAGES: "python"
 
