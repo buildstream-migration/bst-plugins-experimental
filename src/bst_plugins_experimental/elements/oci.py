@@ -167,7 +167,7 @@ Docker specific:
   Memory: 2048
   MemorySwap: 4096
   CpuShares: 2
-  Heathcheck:
+  Healthcheck:
     Test: ["CMD", "/bin/test", "param"]
     Interval: 50000000000
     Timeout: 10000000000
