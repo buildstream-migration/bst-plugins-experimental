@@ -455,16 +455,16 @@ class OciElement(Element):
                     healthcheck.validate_keys(
                         ["Test", "Interval", "Timeout", "Retries"]
                     )
-                    config["Healthcheck"] = {}
+                    config_value["Healthcheck"] = {}
                     if "Test" in healthcheck:
-                        config["Healthcheck"][
+                        config_value["Healthcheck"][
                             "Test"
                         ] = self.node_subst_sequence_vars(
                             healthcheck.get_sequence("Test")
                         )
                     for member in ["Interval", "Timeout", "Retries"]:
                         if member in healthcheck:
-                            config["Healthcheck"][member] = int(
+                            config_value["Healthcheck"][member] = int(
                                 self.node_subst_sequence_vars(
                                     healthcheck.get_scalar(member)
                                 )
