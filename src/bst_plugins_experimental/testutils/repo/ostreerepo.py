@@ -13,22 +13,13 @@ try:
 except ProgramNotFoundError:
     HAVE_OSTREE_CLI = False
 
-try:
-    from bst_plugins_experimental.sources import (  # pylint: disable=unused-import
-        _ostree,
-    )
-
-    HAVE_OSTREE = True
-except (ImportError, ValueError):
-    HAVE_OSTREE = False
-
 
 class OSTree(Repo):
     def __init__(self, directory, subdir):
-        if not HAVE_OSTREE_CLI or not HAVE_OSTREE:
+        if not HAVE_OSTREE_CLI:
             pytest.skip("ostree cli is not available")
 
-        super(OSTree, self).__init__(directory, subdir)
+        super().__init__(directory, subdir)
         self.ostree = OSTREE_CLI
 
     def create(self, directory, *, gpg_sign=None, gpg_homedir=None):
@@ -37,7 +28,7 @@ class OSTree(Repo):
         )
 
         commit_args = [
-            "ostree",
+            self.ostree,
             "commit",
             "--repo",
             self.repo,
