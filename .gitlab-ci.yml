@@ -119,15 +119,6 @@ test-master-fedora-31:
     TOXENV: "py37-bst-master"
   allow_failure: true
 
-test-master-bwrap:
-  <<: *test-template
-  before_script:
-    - dnf install -y git-lfs
-  variables:
-    TOXENV: "py37-bst-master"
-    BST_FORCE_SANDBOX: "bwrap"
-  allow_failure: true
-
 docs:
   stage: test
   script:
