@@ -50,15 +50,15 @@ class FlatpakImageElement(Element):
         self.exclude = node.get_str_list("exclude")
         self.metadata = configparser.ConfigParser()
         self.metadata.optionxform = str
-        metadata_dict = {}
+        self.metadata_dict = {}
         metadata_node = node.get_mapping("metadata")
         for section, pairs in metadata_node.items():
             section_dict = {}
             for key, value in pairs.items():
                 section_dict[key] = self.node_subst_vars(value)
-            metadata_dict[section] = section_dict
+            self.metadata_dict[section] = section_dict
 
-        self.metadata.read_dict(metadata_dict)
+        self.metadata.read_dict(self.metadata_dict)
 
     def preflight(self):
         runtime_deps = list(self.dependencies(Scope.RUN, recurse=False))
@@ -80,7 +80,7 @@ class FlatpakImageElement(Element):
         key["directory"] = self.directory
         key["include"] = sorted(self.include)
         key["exclude"] = sorted(self.exclude)
-        key["metadata"] = self.metadata
+        key["metadata"] = self.metadata_dict
         key["version"] = 2  # Used to force rebuilds after editing the plugin
         return key
 
