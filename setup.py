@@ -94,7 +94,6 @@ setup(
         ],
     },
     extras_require={
-        "ostree": ["PyGObject"],
         "cargo": ["pytoml"],
         "bazel": ["requests"],
         "deb": ["arpy"],
