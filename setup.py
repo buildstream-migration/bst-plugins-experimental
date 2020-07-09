@@ -43,7 +43,7 @@ with open(
 
 setup(
     name="bst-plugins-experimental",
-    version="1.93.3",
+    version="1.93.4",
     description="A collection of experimental BuildStream plugins.",
     long_description=long_description,
     long_description_content_type="text/x-rst; charset=UTF-8",
