@@ -3,6 +3,13 @@ Next Version
 ================
 
 ===============================
+bst-plugins-experimental 1.93.4
+===============================
+
+o OSTree plugin now doesn't need PyGobject anymore. The 'extras'
+  target 'ostree' has been dropped. You can safely remove it.
+
+===============================
 bst-plugins-experimental 1.93.3
 ===============================
 
