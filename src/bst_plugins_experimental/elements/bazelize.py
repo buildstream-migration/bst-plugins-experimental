@@ -342,7 +342,7 @@ class BazelizeElement(Element):
     def _gather_targets(self) -> Tuple[str, List[BazelRuleEntry]]:
         """Gather the required rules for the defined targets
 
-           This returns a list of rule entry objects and a load directive str.
+        This returns a list of rule entry objects and a load directive str.
         """
         targets_set: Set[BazelRuleEntry] = set()
 

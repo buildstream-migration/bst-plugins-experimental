@@ -28,7 +28,10 @@ from buildstream.exceptions import ErrorDomain
 from buildstream.testing import cli  # pylint: disable=unused-import
 from buildstream.testing import create_repo
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ostree",)
+DATA_DIR = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    "ostree",
+)
 
 
 @pytest.mark.datafiles(os.path.join(DATA_DIR, "template"))

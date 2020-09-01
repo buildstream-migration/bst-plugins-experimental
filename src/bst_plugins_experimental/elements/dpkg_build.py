@@ -127,7 +127,8 @@ class DpkgElement(BuildElement):
 
         controlfile = os.path.join("debian", "control")
         controlpath = os.path.join(
-            self.get_variable("build-root").lstrip(os.sep), controlfile,
+            self.get_variable("build-root").lstrip(os.sep),
+            controlfile,
         )
         with vdir.open_file(*controlpath.split(os.sep)) as f:
             return re.findall(r"Package:\s*(.+)\n", f.read())

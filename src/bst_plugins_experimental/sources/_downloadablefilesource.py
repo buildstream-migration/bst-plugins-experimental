@@ -267,7 +267,7 @@ class DownloadableFileSource(Source):
                 netrc_pw_mgr = _NetrcPasswordManager(netrc_config)
                 http_auth = urllib.request.HTTPBasicAuthHandler(netrc_pw_mgr)
                 ftp_handler = _NetrcFTPOpener(netrc_config)
-                DownloadableFileSource.__urlopener = urllib.request.build_opener(
-                    http_auth, ftp_handler
+                DownloadableFileSource.__urlopener = (
+                    urllib.request.build_opener(http_auth, ftp_handler)
                 )
         return DownloadableFileSource.__urlopener

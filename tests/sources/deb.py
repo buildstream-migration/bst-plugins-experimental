@@ -11,7 +11,10 @@ from buildstream.exceptions import ErrorDomain
 from buildstream.testing import cli  # pylint: disable=unused-import
 from . import list_dir_contents
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "deb",)
+DATA_DIR = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    "deb",
+)
 
 deb_name = "a_deb.deb"
 

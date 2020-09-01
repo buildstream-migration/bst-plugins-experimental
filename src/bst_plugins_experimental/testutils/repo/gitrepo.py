@@ -120,5 +120,8 @@ class Git(Repo):
 
     def rev_parse(self, rev):
         return self._run_git(
-            "rev-parse", rev, stdout=subprocess.PIPE, universal_newlines=True,
+            "rev-parse",
+            rev,
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
         ).stdout.strip()

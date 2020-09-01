@@ -873,7 +873,7 @@ class GitTagSource(Source):
                     )
                     for branch in branches
                 ]
-            )  # pylint: disable=bad-continuation
+            )
 
             # Find latest candidate ref from all branches
             # Update self.mirror.ref, node.ref

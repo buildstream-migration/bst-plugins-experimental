@@ -281,7 +281,10 @@ class blob:
                             f.write("1.0")
                         self.legacy_config["id"] = h.hexdigest()
                         self.legacy_id = h.hexdigest()
-                        with blobdir.open_file("json", mode="w",) as f:
+                        with blobdir.open_file(
+                            "json",
+                            mode="w",
+                        ) as f:
                             json.dump(self.legacy_config, f)
                         self.descriptor = os.path.join(
                             h.hexdigest(), "layer.tar"
@@ -536,7 +539,10 @@ class OciElement(Element):
                 sandbox, Scope.RUN, path="parent"
             )
             if not parent.exists("index.json"):
-                with parent.open_file("manifest.json", mode="r",) as f:
+                with parent.open_file(
+                    "manifest.json",
+                    mode="r",
+                ) as f:
                     parent_index = json.load(f)
                 parent_image = parent_index[image["parent"]["image"]]
                 layers = parent_image["Layers"]
