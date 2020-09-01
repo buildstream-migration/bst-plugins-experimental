@@ -117,7 +117,7 @@ class FlatpakRepoElement(ScriptElement):
                 ],
             )
 
-        super(FlatpakRepoElement, self).stage(sandbox)
+        super().stage(sandbox)
 
     def get_unique_key(self):
         return {
