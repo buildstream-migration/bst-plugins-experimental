@@ -250,7 +250,7 @@ class BazelSource(Source):
         )
 
     def _ensure_repo_file(self, repo_file, workspace):
-        """ Ensures that the repository resolved file exists.
+        """Ensures that the repository resolved file exists.
 
         Returns whether the host bazel was used or not, for ref-checking purposes.
         """
@@ -302,8 +302,7 @@ class BazelSource(Source):
             return True
 
     def _handle_single_source(self, source, directory):
-        """ Parses and downloads a single external dependency
-        """
+        """Parses and downloads a single external dependency"""
         if "original_attributes" not in source.keys():
             self.warn(
                 "{}: Bazel dependency has no 'original_attributes'".format(
@@ -375,10 +374,10 @@ class BazelSource(Source):
 
 
 def _import_repo_file(filename):
-    """ Imports the repository resolved file as a python module, returns
-        the loaded list of sources. As s{ky,tar}lark is valid python for
-        assignment, list and dict, this should work entirely reliably with
-        a repository resolved file
+    """Imports the repository resolved file as a python module, returns
+    the loaded list of sources. As s{ky,tar}lark is valid python for
+    assignment, list and dict, this should work entirely reliably with
+    a repository resolved file
     """
     spec = importlib.util.spec_from_loader(
         "tmp_module", SourceFileLoader("tmp_module", filename)

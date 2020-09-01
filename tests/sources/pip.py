@@ -9,7 +9,10 @@ from buildstream.exceptions import ErrorDomain
 from buildstream.testing import cli  # pylint: disable=unused-import
 from bst_plugins_experimental.sources.pip import _match_package_name
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "pip",)
+DATA_DIR = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    "pip",
+)
 
 
 def generate_project(project_dir):

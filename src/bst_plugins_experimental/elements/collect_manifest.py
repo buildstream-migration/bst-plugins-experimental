@@ -134,7 +134,12 @@ class CollectManifestElement(Element):
         if "version" not in cpe:
             matcher = VersionMatcher(version_match)
             version = matcher.get_version(sources)
-            self.info("{} version {}".format(dep, version,))
+            self.info(
+                "{} version {}".format(
+                    dep,
+                    version,
+                )
+            )
 
             if version is None:
                 if version_match is None:

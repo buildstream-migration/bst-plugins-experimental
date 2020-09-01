@@ -116,7 +116,10 @@ def test_gen_buildrules(cli, datafiles):
     build_file = "BUILD"  # default build file name
 
     # try to build
-    result = cli.run(project=project, args=["build", element_name],)
+    result = cli.run(
+        project=project,
+        args=["build", element_name],
+    )
     result.assert_success()
 
     # try to checkout
@@ -188,7 +191,10 @@ def test_gen_ccimports(cli, datafiles):
     build_file = "BUILD"  # default build file name
 
     # try to build
-    result = cli.run(project=project, args=["build", element_name],)
+    result = cli.run(
+        project=project,
+        args=["build", element_name],
+    )
     result.assert_success()
 
     # try to checkout

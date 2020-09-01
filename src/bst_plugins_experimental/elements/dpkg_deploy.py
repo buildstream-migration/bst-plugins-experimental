@@ -214,9 +214,11 @@ class DpkgDeployElement(ScriptElement):
             #        that we are relying on Element.compute_manifest(), can
             #        we then remove this manual handling of split-rules ?
             #
-            package_splits = split_rules.get_str_list(  # pylint: disable=unused-variable
-                package
-            )
+            # package_splits = (
+            #    split_rules.get_str_list(
+            #        package
+            #    )
+            # )
 
             package_files = input_elm.compute_manifest(include=[package])
             vdir = sandbox.get_virtual_directory()
