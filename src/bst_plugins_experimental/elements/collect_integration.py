@@ -32,12 +32,13 @@ Used to generate freedesktop-post.sh
 """
 import os
 import stat
-from buildstream import Element, ElementError, Scope
+from buildstream import Element, ElementError
 
 
 class ExtractIntegrationElement(Element):
     BST_MIN_VERSION = "2.0"
     BST_VIRTUAL_DIRECTORY = True
+    BST_FORBID_RDEPENDS = True
 
     def configure(self, node):
         node.validate_keys(["script-path", "ignore"])
@@ -46,14 +47,6 @@ class ExtractIntegrationElement(Element):
         self.ignore = node.get_str_list("ignore", [])
 
     def preflight(self):
-        runtime_deps = list(self.dependencies(Scope.RUN, recurse=False))
-        if runtime_deps:
-            raise ElementError(
-                "{}: Only build type dependencies supported by collect-integration elements".format(
-                    self
-                )
-            )
-
         sources = list(self.sources())
         if sources:
             raise ElementError(
@@ -63,7 +56,7 @@ class ExtractIntegrationElement(Element):
             )
 
         for ignore in self.ignore:
-            if self.search(Scope.BUILD, ignore) is None:
+            if self.search(ignore) is None:
                 raise ElementError(
                     "{}: element {} is not in dependencies".format(
                         self, ignore
@@ -91,16 +84,12 @@ class ExtractIntegrationElement(Element):
             *script_dirname.lstrip(os.path.sep).split(os.path.sep), create=True
         )
 
-        ignore_set = set()
-        for ignore in self.ignore:
-            ignore_set.add(self.search(Scope.BUILD, ignore))
-
         with script_vdir.open_file(script_filename, mode="w") as f:
             os.chmod(f.name, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
             f.write("#!/bin/sh\n")
             f.write("set -e\n\n")
-            for dependency in self.dependencies(Scope.BUILD):
-                if dependency in ignore_set:
+            for dependency in self.dependencies():
+                if dependency.name in self.ignore:
                     continue
                 bstdata = dependency.get_public_data("bst")
                 if bstdata is not None:
