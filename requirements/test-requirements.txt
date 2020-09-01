@@ -1,10 +1,9 @@
-pytest-datafiles
 pytest-env
 # Provide option to run tests in parallel, less reliable
 pytest-xdist
-# FIXME: Relax the version constraint once
-# https://gitlab.com/BuildStream/buildstream/-/issues/1377 is fixed upstream.
-pytest >= 3.1.0, < 6.0.0
+pytest >= 6.0.1
+pytest-datafiles >= 2.0
 pylint
 pycodestyle
 pyftpdlib
+
