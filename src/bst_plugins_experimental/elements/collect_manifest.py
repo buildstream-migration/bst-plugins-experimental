@@ -27,7 +27,7 @@ import re
 import json
 from collections import OrderedDict
 from collections.abc import Mapping
-from buildstream import Element, Scope, Node, ElementError
+from buildstream import Element, Node, ElementError
 
 
 class CollectManifestElement(Element):
@@ -168,7 +168,7 @@ class CollectManifestElement(Element):
         if dep in visited:
             return
         visited.add(dep)
-        for subdep in dep.dependencies(Scope.RUN, recurse=False):
+        for subdep in dep.dependencies(recurse=False):
             yield from self.get_dependencies(subdep, visited)
         yield dep
 
@@ -180,7 +180,7 @@ class CollectManifestElement(Element):
         manifest["modules"] = []
 
         visited = set()
-        for top_dep in self.dependencies(Scope.BUILD, recurse=False):
+        for top_dep in self.dependencies(recurse=False):
             for dep in self.get_dependencies(top_dep, visited):
                 import_manifest = dep.get_public_data("cpe-manifest")
 
