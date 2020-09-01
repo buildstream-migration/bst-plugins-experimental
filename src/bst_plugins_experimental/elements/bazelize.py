@@ -53,8 +53,8 @@ from typing import (
 )
 from buildstream import (  # pylint: disable=import-error
     Element,
-    Scope,
     MappingNode,
+    Node,
 )
 
 if TYPE_CHECKING:
@@ -126,12 +126,12 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
         self.deps: List[str] = []
         self._copts: List[str] = []
         self._linkopts: List[str] = []
-        self._scope = Scope.ALL
 
-        if element.get_kind() == "bazelize":
-            self.bazel_rule = element.bazel_rule
-            self._copts = element.copts
-            self._linkopts = element.linkopts
+        bazelize_data = element.get_public_data("bazelize-data")
+        if bazelize_data is not None:
+            self.bazel_rule = bazelize_data.get_str("bazel-rule")
+            self._copts = bazelize_data.get_str_list("copts")
+            self._linkopts = bazelize_data.get_str_list("linkopts")
 
         # empty rules have no semantic meaning for the BUILD
         if self.bazel_rule == BazelRuleEntry.NONE_RULE:
@@ -139,7 +139,7 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
 
         # get target names of deps from element dependencies
         _deps = set()
-        for dep in element.dependencies(self._scope, recurse=False):
+        for dep in element.dependencies(recurse=False):
             _deps.add(dep.normal_name)
         self.deps = sorted(list(_deps))
         del _deps
@@ -284,6 +284,8 @@ class BazelRuleEntry:  # pylint: disable=too-few-public-methods
 class BazelizeElement(Element):
     """Buildstream element plugin kind formatting calls to cc_library rules"""
 
+    # pylint: disable=attribute-defined-outside-init
+
     BST_MIN_VERSION = "2.0"
     BST_VIRTUAL_DIRECTORY = True
 
@@ -299,31 +301,19 @@ class BazelizeElement(Element):
         pass
 
     def configure(self, node: MappingNode) -> None:
-        # configure the path for the BUILD file and some options
         node.validate_keys(
             ["buildfile-dir", "copts", "linkopts", "bazel-rule"]
         )
 
-        self.build_file_dir = self.node_subst_vars(  # pylint: disable=attribute-defined-outside-init
-            node.get_scalar("buildfile-dir")
-        )
+        # configure the path for the BUILD file and some options
+        self.build_file_dir = node.get_str("buildfile-dir")
+        self.copts = node.get_str_list("copts")
+        self.linkopts = node.get_str_list("linkopts")
+        self.bazel_rule = node.get_str("bazel-rule")
 
-        self.copts = self.node_subst_sequence_vars(  # pylint: disable=attribute-defined-outside-init
-            node.get_sequence("copts")
-        )
         # sort the options to gaurantee a deterministic key
         self.copts.sort()
-
-        self.linkopts = self.node_subst_sequence_vars(  # pylint: disable=attribute-defined-outside-init
-            node.get_sequence("linkopts")
-        )
-        # sort the options to gaurantee a deterministic key
         self.linkopts.sort()
-
-        # get the rule for this element
-        self.bazel_rule = self.node_subst_vars(  # pylint: disable=attribute-defined-outside-init
-            node.get_scalar("bazel-rule")
-        )
 
     def get_unique_key(self) -> "SourceRef":
         return {
@@ -346,7 +336,7 @@ class BazelizeElement(Element):
         """
         targets_set: Set[BazelRuleEntry] = set()
 
-        for dep in self.dependencies(Scope.ALL, recurse=False):
+        for dep in self.dependencies(recurse=False):
             target = BazelizeElement._gather_target(
                 dep, dep.compute_manifest()
             )
@@ -404,6 +394,17 @@ class BazelizeElement(Element):
             f.write(load_directive)
             for target in targets:
                 f.write(str(target))
+
+        # Propagate the bazelize configuration data through public
+        # data since we need to read it from reverse dependency
+        # bazelize elements.
+        #
+        bazelize_data = Node.from_dict({})
+        bazelize_data["copts"] = self.copts
+        bazelize_data["linkopts"] = self.linkopts
+        bazelize_data["bazel-rule"] = self.bazel_rule
+        self.set_public_data("bazelize-data", bazelize_data)
+
         return os.path.sep
 
 
