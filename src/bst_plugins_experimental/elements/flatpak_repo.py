@@ -27,7 +27,7 @@ The flatpak_repo default configuration:
      :language: yaml
 """
 
-from buildstream import ScriptElement, Scope, ElementError
+from buildstream import ScriptElement, ElementError
 
 
 class FlatpakRepoElement(ScriptElement):
@@ -84,9 +84,7 @@ class FlatpakRepoElement(ScriptElement):
                     "export {}".format(elt.name), [export_command(elt)]
                 )
             elif elt.get_kind() == "stack":
-                self._layout_flatpaks(
-                    elt.dependencies(Scope.RUN, recurse=False)
-                )
+                self._layout_flatpaks(elt.dependencies(recurse=False))
             else:
                 raise ElementError(
                     "Dependency {} is not of kind flatpak_image".format(
@@ -95,11 +93,9 @@ class FlatpakRepoElement(ScriptElement):
                 )
 
     def stage(self, sandbox):
-        env = [self.search(Scope.BUILD, elt) for elt in self._env]
+        env = [self.search(elt) for elt in self._env]
         flatpaks = [
-            elt
-            for elt in self.dependencies(Scope.BUILD, recurse=False)
-            if elt not in env
+            elt for elt in self.dependencies(recurse=False) if elt not in env
         ]
 
         for elt in env:
