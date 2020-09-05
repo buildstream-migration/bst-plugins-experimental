@@ -130,7 +130,7 @@ raw text, e.g.
 import hashlib
 import os
 import re
-from buildstream import ScriptElement, Scope, ElementError
+from buildstream import ScriptElement, ElementError
 
 
 def md5sum_file(vdir, path):
@@ -179,7 +179,7 @@ class DpkgDeployElement(ScriptElement):
         super().stage(sandbox)
         # For each package, create a subdir in build-root and copy the files to there
         # then reconstitute the /DEBIAN files.
-        input_elm = self.search(Scope.BUILD, self.__input)
+        input_elm = self.search(self.__input)
         if not input_elm:
             raise ElementError(
                 "{}: Failed to find input element {} in build-depends".format(
@@ -276,10 +276,10 @@ class DpkgDeployElement(ScriptElement):
                             os.fchmod(f.fileno(), 0o755)
 
     def _packages_list(self):
-        input_elm = self.search(Scope.BUILD, self.__input)
+        input_elm = self.search(self.__input)
         if not input_elm:
             detail = "Available elements are {}".format(
-                "\n".join([x.name for x in self.dependencies(Scope.BUILD)])
+                "\n".join([x.name for x in self.dependencies()])
             )
             raise ElementError(
                 "{} Failed to find element {}".format(self.name, self.__input),

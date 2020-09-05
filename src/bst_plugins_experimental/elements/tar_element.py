@@ -39,7 +39,7 @@ The tarball_element default configuration:
 
 import tarfile
 
-from buildstream import Element, Scope, ElementError
+from buildstream import Element, ElementError
 
 
 class TarElement(Element):
@@ -94,9 +94,7 @@ class TarElement(Element):
 
         # Stage deps in the sandbox root
         with self.timed_activity("Staging dependencies", silent_nested=True):
-            self.stage_dependency_artifacts(
-                sandbox, Scope.BUILD, path="/input"
-            )
+            self.stage_dependency_artifacts(sandbox, path="/input")
 
         with self.timed_activity("Creating tarball", silent_nested=True):
 

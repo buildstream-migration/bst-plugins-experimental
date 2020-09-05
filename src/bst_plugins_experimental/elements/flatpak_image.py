@@ -34,7 +34,7 @@ provided by the 'metadata' field in a format useful to generate flatpaks.
 import configparser
 import os
 
-from buildstream import Element, ElementError, Scope
+from buildstream import Element, ElementError
 
 
 class FlatpakImageElement(Element):
@@ -61,7 +61,7 @@ class FlatpakImageElement(Element):
         self.metadata.read_dict(self.metadata_dict)
 
     def preflight(self):
-        runtime_deps = list(self.dependencies(Scope.RUN, recurse=False))
+        runtime_deps = list(self.dependencies(recurse=False))
         if runtime_deps:
             raise ElementError(
                 "{}: Only build type dependencies supported by flatpak_image elements".format(
@@ -113,7 +113,6 @@ class FlatpakImageElement(Element):
         with self.timed_activity("Creating flatpak image", silent_nested=True):
             self.stage_dependency_artifacts(
                 sandbox,
-                Scope.BUILD,
                 path=stagedir,
                 include=self.include,
                 exclude=self.exclude,

@@ -219,7 +219,7 @@ import codecs
 import shutil
 from contextlib import contextmanager, ExitStack
 
-from buildstream import Element, ElementError, Scope
+from buildstream import Element, ElementError
 
 
 class blob:
@@ -527,7 +527,7 @@ class OciElement(Element):
             if root.exists("parent"):
                 root.remove("parent", recursive=True)
             parent = root.descend("parent", create=True)
-            parent_dep = self.search(Scope.BUILD, image["parent"]["element"])
+            parent_dep = self.search(image["parent"]["element"])
             if not parent_dep:
                 raise ElementError(
                     "{}: Element not in dependencies: {}".format(
@@ -535,9 +535,7 @@ class OciElement(Element):
                     )
                 )
 
-            parent_dep.stage_dependency_artifacts(
-                sandbox, Scope.RUN, path="parent"
-            )
+            parent_dep.stage_dependency_artifacts(sandbox, path="parent")
             if not parent.exists("index.json"):
                 with parent.open_file(
                     "manifest.json",
@@ -680,7 +678,7 @@ class OciElement(Element):
                 layers = []
                 parent_image = image["parent"]["image"]
                 for layer in parent_dep.images[parent_image]["layer"]:
-                    layer_dep = parent_dep.search(Scope.BUILD, layer)
+                    layer_dep = parent_dep.search(layer)
                     if not layer_dep:
                         raise ElementError(
                             "{}: Element not in dependencies: {}".format(
@@ -692,7 +690,7 @@ class OciElement(Element):
                     # element's dependencies, then we cannnot safely assume
                     # it is cached. Parent could be cached while its
                     # dependencies either removed or not pulled.
-                    if layer_dep != self.search(Scope.BUILD, layer):
+                    if layer_dep != self.search(layer):
                         self.warn(
                             "In order to optimize building of {}, you should add {} as build dependency".format(
                                 self.name, layer
@@ -708,7 +706,7 @@ class OciElement(Element):
                     ):
                         for layer_dep in layers:
                             layer_dep.stage_dependency_artifacts(
-                                sandbox, Scope.RUN, path="parent_checkout"
+                                sandbox, path="parent_checkout"
                             )
                         unpacked = True
 
@@ -758,10 +756,8 @@ class OciElement(Element):
 
         if "layer" in image:
             for name in image["layer"]:
-                dep = self.search(Scope.BUILD, name)
-                dep.stage_dependency_artifacts(
-                    sandbox, Scope.RUN, path="layer"
-                )
+                dep = self.search(name)
+                dep.stage_dependency_artifacts(sandbox, path="layer")
 
             layer = root.descend("layer")
             with self.timed_activity("Transforming into layer"):
