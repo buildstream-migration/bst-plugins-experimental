@@ -33,31 +33,28 @@ from buildstream import ScriptElement, ElementError
 class FlatpakRepoElement(ScriptElement):
     BST_MIN_VERSION = "2.0"
     BST_ARTIFACT_VERSION = 1
+    BST_FORBID_RDEPENDS = True
 
     def configure(self, node):
-        node.validate_keys(
-            ["environment", "copy-refs", "repo-mode", "arch", "branch"]
-        )
-
-        self._env = node.get_str_list("environment")
+        node.validate_keys(["copy-refs", "repo-mode", "arch", "branch"])
 
         self._copy_refs = []
         for subnode in node.get_sequence("copy-refs"):
             subnode.validate_keys(["src", "dest"])
             self._copy_refs.append(
                 (
-                    self.node_subst_vars(subnode.get_scalar("src")),
-                    self.node_subst_vars(subnode.get_scalar("dest")),
+                    subnode.get_scalar("src"),
+                    subnode.get_scalar("dest"),
                 )
             )
 
-        self._arch = self.node_subst_vars(node.get_scalar("arch"))
-        self._branch = self.node_subst_vars(node.get_scalar("branch"))
+        self._arch = node.get_scalar("arch")
+        self._branch = node.get_scalar("branch")
 
         self.set_work_dir()
         self.set_root_read_only(True)
 
-        self._repo_mode = self.node_subst_vars(node.get_scalar("repo-mode"))
+        self._repo_mode = node.get_scalar("repo-mode")
         self.set_install_root("/buildstream/repo")
         self.add_commands(
             "init repository",
@@ -68,41 +65,43 @@ class FlatpakRepoElement(ScriptElement):
             ],
         )
 
-    def _layout_flatpaks(self, elements):
-        def staging_dir(elt):
-            return "/buildstream/input/{}".format(elt.name)
+    def configure_dependencies(self, dependencies):
 
-        def export_command(elt):
-            return "flatpak build-export --files=files --arch={} /buildstream/repo {} {}".format(
-                self._arch, staging_dir(elt), self._branch
+        self._flatpaks = []
+
+        for dep in dependencies:
+            flatpak_image_dep = False
+            flatpak_stack_dep = False
+
+            if dep.config:
+                dep.config.validate_keys(["flatpak-image", "flatpak-stack"])
+                flatpak_image_dep = dep.config.get_bool("flatpak-image", False)
+                flatpak_stack_dep = dep.config.get_bool("flatpak-stack", False)
+
+                if flatpak_image_dep and flatpak_stack_dep:
+                    raise ElementError(
+                        "{}: Dependency specified as both a flatpak image and a stack".format(
+                            dep.config.get_provenance()
+                        )
+                    )
+
+            if flatpak_image_dep:
+                self._layout_flatpak(dep.element, dep.path)
+            elif flatpak_stack_dep:
+                for flatpak_image in dep.element.dependencies(recurse=False):
+                    self._layout_flatpak(
+                        flatpak_image, dep.path, is_stack=True
+                    )
+            else:
+                self.layout_add(dep.element, dep.path, "/")
+
+        if not self._flatpaks:
+            raise ElementError(
+                "{}: No flatpak images specified for this repo".format(self)
             )
 
-        for elt in elements:
-            if elt.get_kind() == "flatpak_image":
-                self.layout_add(elt.name, staging_dir(elt))
-                self.add_commands(
-                    "export {}".format(elt.name), [export_command(elt)]
-                )
-            elif elt.get_kind() == "stack":
-                self._layout_flatpaks(elt.dependencies(recurse=False))
-            else:
-                raise ElementError(
-                    "Dependency {} is not of kind flatpak_image".format(
-                        elt.name
-                    )
-                )
-
-    def stage(self, sandbox):
-        env = [self.search(elt) for elt in self._env]
-        flatpaks = [
-            elt for elt in self.dependencies(recurse=False) if elt not in env
-        ]
-
-        for elt in env:
-            self.layout_add(elt.name, "/")
-
-        self._layout_flatpaks(flatpaks)
-
+        # Add these commands after laying out the flaptaks, which also adds commands.
+        #
         for src, dest in self._copy_refs:
             self.add_commands(
                 "copy ref {} -> {}".format(src, dest),
@@ -113,16 +112,25 @@ class FlatpakRepoElement(ScriptElement):
                 ],
             )
 
-        super().stage(sandbox)
+    def _layout_flatpak(self, element, path, is_stack=False):
 
-    def get_unique_key(self):
-        return {
-            "environment": self._env,
-            "copy-refs": self._copy_refs,
-            "repo-mode": self._repo_mode,
-            "arch": self._arch,
-            "branch": self._branch,
-        }
+        # If it is a stack, make a more descriptive identifier for
+        # the commands and layout.
+        #
+        if is_stack:
+            path = "{} ({})".format(path, element.name)
+
+        def staging_dir(elt):
+            return "/buildstream/input/{}".format(elt.normal_name)
+
+        def export_command(elt):
+            return "flatpak build-export --files=files --arch={} /buildstream/repo {} {}".format(
+                self._arch, staging_dir(elt), self._branch
+            )
+
+        self._flatpaks.append(element)
+        self.layout_add(element, path, staging_dir(element))
+        self.add_commands("export {}".format(path), [export_command(element)])
 
 
 # Plugin entry point
