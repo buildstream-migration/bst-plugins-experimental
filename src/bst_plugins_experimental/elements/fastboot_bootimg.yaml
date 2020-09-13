@@ -1,5 +1,22 @@
 #fastboot boot image default configuration
 
+# When specifying dependencies, one needs to specify
+# which dependencies are a part of the 'input' for
+# the image, other dependencies are assumed to be tooling
+# required to build the image and will be staged in "/"
+#
+# E.g.:
+#
+# build-depends:
+# - base.bst
+# - filename: input1.bst
+#   config:
+#     input: True
+# - filename: input2.bst
+#   config:
+#     input: True
+#
+
 variables:
   base: 0x80000000
   dtb_page-size: 2048
