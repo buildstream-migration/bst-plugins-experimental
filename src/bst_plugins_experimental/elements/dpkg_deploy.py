@@ -24,6 +24,7 @@ A `ScriptElement
 <https://docs.buildstream.build/master/buildstream.scriptelement.html#module-buildstream.scriptelement>`_
 implementation for creating debian packages
 
+
 Default Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -147,12 +148,8 @@ class DpkgDeployElement(ScriptElement):
     BST_VIRTUAL_DIRECTORY = True
 
     def configure(self, node):
-        node.validate_keys(["build-commands", "base", "input"])
+        node.validate_keys(["build-commands"])
 
-        self.__input = self.node_subst_vars(node.get_scalar("input"))
-        self.layout_add(self.node_subst_vars(node.get_scalar("base")), "/")
-        self.layout_add(None, "/buildstream")
-        self.layout_add(self.__input, self.get_variable("build-root"))
         self.unedited_cmds = {}
         if "build-commands" not in node:
             raise ElementError(
@@ -160,14 +157,40 @@ class DpkgDeployElement(ScriptElement):
                     self
                 )
             )
-        cmds = self.node_subst_sequence_vars(
-            node.get_sequence("build-commands")
+        self.unedited_cmds["build-commands"] = node.get_str_list(
+            "build-commands"
         )
-        self.unedited_cmds["build-commands"] = cmds
-
         self.set_work_dir()
         self.set_install_root()
         self.set_root_read_only(True)
+
+    def configure_dependencies(self, dependencies):
+
+        self.__input = None
+
+        for dep in dependencies:
+
+            # Determine the location to stage each element, default is "/"
+            input_element = False
+            if dep.config:
+                dep.config.validate_keys(["input"])
+                input_element = dep.config.get_bool("input", False)
+
+            # Add each element to the layout
+            if input_element:
+                self.layout_add(
+                    dep.element, dep.path, self.get_variable("build-root")
+                )
+
+                # Hold on to the input element
+                self.__input = dep.element
+            else:
+                self.layout_add(dep.element, dep.path, "/")
+
+        if self.__input is None:
+            raise ElementError(
+                "{}: No dependency specified as the input element".format(self)
+            )
 
     def get_unique_key(self):
         key = super().get_unique_key()
@@ -175,30 +198,27 @@ class DpkgDeployElement(ScriptElement):
         key["unedited-commands"] = self.unedited_cmds
         return key
 
+    def configure_sandbox(self, sandbox):
+        super().configure_sandbox(sandbox)
+
+        # We do some work in this directory, and need it to be read-write
+        sandbox.mark_directory("/buildstream", artifact=False)
+
     def stage(self, sandbox):
         super().stage(sandbox)
-        # For each package, create a subdir in build-root and copy the files to there
-        # then reconstitute the /DEBIAN files.
-        input_elm = self.search(self.__input)
-        if not input_elm:
-            raise ElementError(
-                "{}: Failed to find input element {} in build-depends".format(
-                    self.name, self.__input
-                )
-            )
 
-        bstdata = input_elm.get_public_data("bst")
+        bstdata = self.__input.get_public_data("bst")
         if "dpkg-data" not in bstdata:
             raise ElementError(
                 "{}: input element {} does not have any bst.dpkg-data public data".format(
-                    self.name, self.__input
+                    self.name, self.__input.name
                 )
             )
 
         dpkg_data = bstdata.get_mapping("dpkg-data")
         for package, package_data in dpkg_data.items():
             package_name = package_data.get_str(
-                "name", "{}-{}".format(input_elm.normal_name, package)
+                "name", "{}-{}".format(self.__input.normal_name, package)
             )
             split_rules = bstdata.get_mapping("split-rules", {})
 
@@ -220,7 +240,7 @@ class DpkgDeployElement(ScriptElement):
             #    )
             # )
 
-            package_files = input_elm.compute_manifest(include=[package])
+            package_files = self.__input.compute_manifest(include=[package])
             vdir = sandbox.get_virtual_directory()
             src = vdir.descend(*self.get_variable("build-root").split(os.sep))
             dst = src.descend(package, create=True)
@@ -276,21 +296,12 @@ class DpkgDeployElement(ScriptElement):
                             os.fchmod(f.fileno(), 0o755)
 
     def _packages_list(self):
-        input_elm = self.search(self.__input)
-        if not input_elm:
-            detail = "Available elements are {}".format(
-                "\n".join([x.name for x in self.dependencies()])
-            )
-            raise ElementError(
-                "{} Failed to find element {}".format(self.name, self.__input),
-                detail=detail,
-            )
 
-        bstdata = input_elm.get_public_data("bst")
+        bstdata = self.__input.get_public_data("bst")
         if "dpkg-data" not in bstdata:
             raise ElementError(
                 "{}: Can't get package list for {}, no bst.dpkg-data".format(
-                    self.name, self.__input
+                    self, self.__input.name
                 )
             )
 
