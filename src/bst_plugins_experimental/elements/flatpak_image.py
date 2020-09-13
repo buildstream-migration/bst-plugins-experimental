@@ -78,7 +78,14 @@ class FlatpakImageElement(Element):
         pass
 
     def stage(self, sandbox):
-        pass
+        stagedir = os.path.join(os.sep, "buildstream", "allfiles")
+        with self.timed_activity("Staging dependencies", silent_nested=True):
+            self.stage_dependency_artifacts(
+                sandbox,
+                path=stagedir,
+                include=self.include,
+                exclude=self.exclude,
+            )
 
     def assemble(self, sandbox):
         self.stage_sources(sandbox, "input")
@@ -88,7 +95,6 @@ class FlatpakImageElement(Element):
         reldirectory = os.path.relpath(self.directory, "/")
         installdir = basedir.descend("buildstream", "install", create=True)
         filesdir = installdir.descend("files", create=True)
-        stagedir = os.path.join(os.sep, "buildstream", "allfiles")
 
         if self.metadata.has_section("Application"):
             installdir.descend("export", create=True)
@@ -100,20 +106,13 @@ class FlatpakImageElement(Element):
                     "files", *extensiondir.split(os.path.sep), create=True
                 )
 
-        with self.timed_activity("Creating flatpak image", silent_nested=True):
-            self.stage_dependency_artifacts(
-                sandbox,
-                path=stagedir,
-                include=self.include,
-                exclude=self.exclude,
-            )
-            if allfiles.exists(*reldirectory.split(os.path.sep)):
-                subdir = allfiles.descend(*reldirectory.split(os.path.sep))
-                filesdir.import_files(subdir)
-            if allfiles.exists("etc"):
-                etcdir = allfiles.descend("etc")
-                filesetcdir = filesdir.descend("etc", create=True)
-                filesetcdir.import_files(etcdir)
+        if allfiles.exists(*reldirectory.split(os.path.sep)):
+            subdir = allfiles.descend(*reldirectory.split(os.path.sep))
+            filesdir.import_files(subdir)
+        if allfiles.exists("etc"):
+            etcdir = allfiles.descend("etc")
+            filesetcdir = filesdir.descend("etc", create=True)
+            filesetcdir.import_files(etcdir)
 
         with installdir.open_file("metadata", mode="w") as m:
             self.metadata.write(m)
