@@ -37,8 +37,7 @@ class FastbootExt4ImageElement(ScriptElement):
 
     def configure(self, node):
         command_steps = ["create_dev_proc_shadow", "create_img", "install_img"]
-
-        node.validate_keys(command_steps + ["base", "input"])
+        node.validate_keys(command_steps)
 
         for step in command_steps:
             if step not in node:
@@ -47,19 +46,40 @@ class FastbootExt4ImageElement(ScriptElement):
                         self, step
                     )
                 )
-            cmds = self.node_subst_sequence_vars(node.get_sequence(step))
+            cmds = node.get_str_list(step)
             self.add_commands(step, cmds)
-
-        self.layout_add(self.node_subst_vars(node.get_scalar("base")), "/")
-        self.layout_add(None, "/buildstream")
-        self.layout_add(
-            self.node_subst_vars(node.get_scalar("input")),
-            self.get_variable("build-root"),
-        )
 
         self.set_work_dir()
         self.set_install_root()
         self.set_root_read_only(True)
+
+    def configure_dependencies(self, dependencies):
+        have_input = False
+        for dep in dependencies:
+            input_dep = False
+            # Separate base dependencies from input dependencies
+            if dep.config:
+                dep.config.validate_keys(["input"])
+                input_dep = dep.config.get_bool("input", False)
+
+            if input_dep:
+                have_input = True
+                self.layout_add(
+                    dep.element, dep.path, self.get_variable("build-root")
+                )
+            else:
+                self.layout_add(dep.element, dep.path, "/")
+
+        if not have_input:
+            raise ElementError(
+                "{}: No 'input' dependency specified".format(self)
+            )
+
+    def configure_sandbox(self, sandbox):
+        super().configure_sandbox(sandbox)
+
+        # We do some work in this directory, and need it to be read-write
+        sandbox.mark_directory("/buildstream", artifact=False)
 
 
 # Plugin entry point
