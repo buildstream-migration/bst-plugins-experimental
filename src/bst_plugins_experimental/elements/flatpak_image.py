@@ -34,7 +34,7 @@ provided by the 'metadata' field in a format useful to generate flatpaks.
 import configparser
 import os
 
-from buildstream import Element, ElementError
+from buildstream import Element
 
 
 class FlatpakImageElement(Element):
@@ -42,6 +42,8 @@ class FlatpakImageElement(Element):
     BST_MIN_VERSION = "2.0"
     BST_STRICT_REBUILD = True
     BST_VIRTUAL_DIRECTORY = True
+    BST_FORBID_RDEPENDS = True
+    BST_FORBID_SOURCES = True
 
     def configure(self, node):
         node.validate_keys(["directory", "include", "exclude", "metadata"])
@@ -61,19 +63,7 @@ class FlatpakImageElement(Element):
         self.metadata.read_dict(self.metadata_dict)
 
     def preflight(self):
-        runtime_deps = list(self.dependencies(recurse=False))
-        if runtime_deps:
-            raise ElementError(
-                "{}: Only build type dependencies supported by flatpak_image elements".format(
-                    self
-                )
-            )
-
-        sources = list(self.sources())
-        if sources:
-            raise ElementError(
-                "{}: flatpak_image elements may not have sources".format(self)
-            )
+        pass
 
     def get_unique_key(self):
         key = {}
