@@ -158,7 +158,7 @@ OCI specific:
 ::
 
   Labels: {"a": "b"}
-  StopSignals: "SIGKILL"
+  StopSignal: "SIGKILL"
 
 Docker specific:
 
@@ -167,7 +167,7 @@ Docker specific:
   Memory: 2048
   MemorySwap: 4096
   CpuShares: 2
-  Heathcheck:
+  Healthcheck:
     Test: ["CMD", "/bin/test", "param"]
     Interval: 50000000000
     Timeout: 10000000000
@@ -412,7 +412,7 @@ class OciElement(Element):
                     "CpuShares",
                     "Healthcheck",
                 ]
-                oci_config = ["Labels", "StopSignals"]
+                oci_config = ["Labels", "StopSignal"]
 
                 config.validate_keys(
                     common_config
@@ -455,16 +455,16 @@ class OciElement(Element):
                     healthcheck.validate_keys(
                         ["Test", "Interval", "Timeout", "Retries"]
                     )
-                    config["Healthcheck"] = {}
+                    config_value["Healthcheck"] = {}
                     if "Test" in healthcheck:
-                        config["Healthcheck"][
+                        config_value["Healthcheck"][
                             "Test"
                         ] = self.node_subst_sequence_vars(
                             healthcheck.get_sequence("Test")
                         )
                     for member in ["Interval", "Timeout", "Retries"]:
                         if member in healthcheck:
-                            config["Healthcheck"][member] = int(
+                            config_value["Healthcheck"][member] = int(
                                 self.node_subst_sequence_vars(
                                     healthcheck.get_scalar(member)
                                 )
