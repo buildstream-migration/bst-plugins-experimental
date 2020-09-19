@@ -85,16 +85,14 @@ class TarElement(Element):
         pass
 
     def stage(self, sandbox):
-        pass
+        # Stage deps in the sandbox at "/input"
+        with self.timed_activity("Staging dependencies", silent_nested=True):
+            self.stage_dependency_artifacts(sandbox, path="/input")
 
     def assemble(self, sandbox):
         basedir = sandbox.get_virtual_directory()
         inputdir = basedir.descend("input", create=True)
         outputdir = basedir.descend("output", create=True)
-
-        # Stage deps in the sandbox root
-        with self.timed_activity("Staging dependencies", silent_nested=True):
-            self.stage_dependency_artifacts(sandbox, path="/input")
 
         with self.timed_activity("Creating tarball", silent_nested=True):
 

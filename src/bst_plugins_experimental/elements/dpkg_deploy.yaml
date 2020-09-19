@@ -1,8 +1,23 @@
 #dpkg_deploy default configuration
 
+# When specifying dependencies, one needs to specify one of the
+# dependencies as the 'input' element.
+#
+# The 'input' should be a debian package structure which should have
+# the 'dpkg-data' public data describing how they can be packaged.
+#
+# E.g.:
+#
+# build-depends:
+# - filename: base-tooling.bst
+# - filename: input.bst
+#   config:
+#     input: True
+#
+
 variables:
   # packages' default value will be automatically replaced with
-  # defaultscalculated from the input's split-rules. Replace this
+  # defaults calculated from the input's split-rules. Replace this
   # with a space-separated list of packages to have more control
   # over what gets generated.
   #
@@ -14,14 +29,6 @@ variables:
             done
 
 config:
-  # The element that should be staged into "/". It must contain
-  # all the tools required to generate the image
-  # base: image-tools.bst
-
-  # The element that should be staged into %{build-root}. It is
-  # expected to be the system that you're planning to turn into
-  # an image.
-  # input: foo-system.bst
 
   build-commands:
   - |

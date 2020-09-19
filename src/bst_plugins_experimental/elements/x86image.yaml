@@ -1,5 +1,22 @@
 #x86 image default configuration
 
+# When specifying dependencies, one needs to specify
+# which dependencies are a part of the 'input' for
+# the image, other dependencies are assumed to be tooling
+# required to build the image and will be staged in "/"
+#
+# E.g.:
+#
+# build-depends:
+# - base.bst
+# - filename: input1.bst
+#   config:
+#     input: True
+# - filename: input2.bst
+#   config:
+#     input: True
+#
+
 variables:
   # Size of the disk to create
   #
@@ -15,13 +32,6 @@ variables:
   kernel-args: root=/dev/sda2 rootfstype=ext4 rootdelay=20 init=/sbin/init
 
 config:
-  # The element that should be staged into "/". It must contain
-  # all the tools required to generate the image
-  # base: image-tools.bst
-
-  # The element that should be staged into %{build-root}. It is expected
-  # to be the system that you're planning to turn into an image.
-  # input: foo-system.bst
 
   filesystem-tree-setup-commands:
   - |
