@@ -47,4 +47,5 @@ bst-plugins-experimental package and enabled it in your `project configuration f
    sources/pip
    sources/quilt
    sources/git_tag
+   sources/git_module
    sources/tar

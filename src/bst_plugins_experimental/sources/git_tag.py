@@ -712,33 +712,142 @@ class GitTagMirror(SourceFetcher):
         )
 
 
-class GitTagSource(Source):
+class AbstractGitTagSource(Source):
     # pylint: disable=attribute-defined-outside-init
 
     BST_MIN_VERSION = "2.0"
 
     def configure(self, node):
-        ref = node.get_str("ref", None)
+        self.mirror = None
 
         config_keys = [
             "url",
-            "track",
-            "track-tags",
-            "track-extra",
             "ref",
-            "submodules",
-            "checkout-submodules",
-            "match",
-            "exclude",
             "full-clone",
             "use-lfs",
         ]
-        node.validate_keys(config_keys + Source.COMMON_CONFIG_KEYS)
+        config_keys.extend(self.get_extra_config_keys())
+        config_keys.extend(Source.COMMON_CONFIG_KEYS)
+        node.validate_keys(config_keys)
 
         self.original_url = node.get_str("url")
         self.full_clone = node.get_bool("full-clone", False)
+
+        if "use-lfs" in node.keys():
+            self.use_lfs = node.get_bool("use-lfs", False)
+        else:
+            self.use_lfs = None
+
+        self.extra_configure(node)
+
+        self.mark_download_url(self.original_url)
+
+    def extra_configure(self, node):
+        pass
+
+    def get_extra_config_keys(self):
+        return []
+
+    def preflight(self):
+        # Check if git is installed, get the binary at the same time
+        self.host_git = utils.get_host_tool("git")
+        if self.use_lfs:
+            self.call(
+                [self.host_git, "lfs", "--version"],
+                fail="Git lfs not installed",
+            )
+
+    def get_unique_key(self):
+        # Here we want to encode the local name of the repository and
+        # the ref, if the user changes the alias to fetch the same sources
+        # from another location, it should not effect the cache key.
+        key = [self.original_url, self.mirror.ref]
+
+        key.extend(self.get_extra_unique_key())
+
+        if self.use_lfs:
+            key.append("use-lfs")
+
+        return key
+
+    def get_extra_unique_key(self):
+        return []
+
+    def is_cached(self):
+        return self.have_all_refs()
+
+    def load_ref(self, node):
+        ref = node.get_str("ref", None)
+        self.mirror.set_ref(ref)
+
+    def get_ref(self):
+        return self.mirror.ref
+
+    def set_ref(self, ref, node):
+        self.mirror.set_ref(ref)
+        node["ref"] = ref
+
+    def init_workspace(self, directory):
+        # XXX: may wish to refactor this as some code dupe with stage()
+        self.mirror.ensure_trackable()
+
+        with self.timed_activity(
+            'Setting up workspace "{}"'.format(directory), silent_nested=True
+        ):
+            self.mirror.init_workspace(directory)
+            self.extra_init_workspace(directory)
+
+    def extra_init_workspace(self, directory):
+        pass
+
+    def stage(self, directory):
+        # Stage the main repo in the specified directory
+        #
+        with self.timed_activity(
+            "Staging {}".format(self.mirror.url), silent_nested=True
+        ):
+            self.mirror.stage(directory)
+            self.extra_stage(directory)
+
+    def extra_stage(self, directory):
+        pass
+
+    ###########################################################
+    #                     Local Functions                     #
+    ###########################################################
+    def have_all_refs(self):
+        if not self.mirror.has_ref():
+            return False
+
+        return self.have_all_extra_refs()
+
+    def have_all_extra_refs(self):
+        return True
+
+
+class GitTagSource(AbstractGitTagSource):
+    # pylint: disable=attribute-defined-outside-init
+
+    def get_extra_config_keys(self):
+        return [
+            "track",
+            "track-extra",
+            "track-tags",
+            "match",
+            "exclude",
+            "checkout-submodules",
+        ]
+
+    def extra_configure(self, node):
+        ref = node.get_str("ref", None)
+
         self.mirror = GitTagMirror(
-            self, "", self.original_url, ref, primary=True
+            self,
+            "",
+            self.original_url,
+            ref,
+            primary=True,
+            full_clone=self.full_clone,
         )
         self.tracking = node.get_str("track", None)
         # FIXME: check if get_sequence would not be better
@@ -748,10 +857,6 @@ class GitTagSource(Source):
         self.match = node.get_str_list("match", [])
         # FIXME: check if get_sequence would not be better
         self.exclude = node.get_str_list("exclude", [])
-        if "use-lfs" in node.keys():
-            self.use_lfs = node.get_bool("use-lfs", False)
-        else:
-            self.use_lfs = None
 
         # At this point we now know if the source has a ref and/or a track.
         # If it is missing both then we will be unable to track or build.
@@ -782,22 +887,8 @@ class GitTagSource(Source):
                 checkout = submodule.get_bool("checkout")
                 self.submodule_checkout_overrides[path] = checkout
 
-        self.mark_download_url(self.original_url)
-
-    def preflight(self):
-        # Check if git is installed, get the binary at the same time
-        self.host_git = utils.get_host_tool("git")
-        if self.use_lfs:
-            self.call(
-                [self.host_git, "lfs", "--version"],
-                fail="Git lfs not installed",
-            )
-
-    def get_unique_key(self):
-        # Here we want to encode the local name of the repository and
-        # the ref, if the user changes the alias to fetch the same sources
-        # from another location, it should not effect the cache key.
-        key = [self.original_url, self.mirror.ref]
+    def get_extra_unique_key(self):
+        key = []
 
         # Only modify the cache key with checkout_submodules if it's something
         # other than the default behaviour.
@@ -816,24 +907,26 @@ class GitTagSource(Source):
                 }
             )
 
-        if self.use_lfs:
-            key.append("use-lfs")
-
         return key
 
-    def is_cached(self):
-        return self.have_all_refs()
+    def extra_init_workspace(self, directory):
+        self.refresh_submodules()
 
-    def load_ref(self, node):
-        ref = node.get_str("ref", None)
-        self.mirror.set_ref(ref)
+        for mirror in self.submodules:
+            mirror.init_workspace(directory)
 
-    def get_ref(self):
-        return self.mirror.ref
+    def extra_stage(self, directory):
+        # Need to refresh submodule list here again, because
+        # it's possible that we did not load in the main process
+        # with submodules present (source needed fetching) and
+        # we may not know about the submodule yet come time to build.
+        #
+        self.refresh_submodules()
 
-    def set_ref(self, ref, node):
-        self.mirror.set_ref(ref)
-        node["ref"] = ref
+        # Stage the main repo in the specified directory
+        #
+        for mirror in self.submodules:
+            mirror.stage(directory)
 
     def track(self):
 
@@ -881,60 +974,6 @@ class GitTagSource(Source):
 
         return ret
 
-    def init_workspace(self, directory):
-        # XXX: may wish to refactor this as some code dupe with stage()
-        self.mirror.ensure_trackable()
-        self.refresh_submodules()
-
-        with self.timed_activity(
-            'Setting up workspace "{}"'.format(directory), silent_nested=True
-        ):
-            self.mirror.init_workspace(directory)
-            for mirror in self.submodules:
-                mirror.init_workspace(directory)
-
-    def stage(self, directory):
-
-        # Need to refresh submodule list here again, because
-        # it's possible that we did not load in the main process
-        # with submodules present (source needed fetching) and
-        # we may not know about the submodule yet come time to build.
-        #
-        self.refresh_submodules()
-
-        # Stage the main repo in the specified directory
-        #
-        with self.timed_activity(
-            "Staging {}".format(self.mirror.url), silent_nested=True
-        ):
-            self.mirror.stage(directory)
-            for mirror in self.submodules:
-                mirror.stage(directory)
-
-    def get_source_fetchers(self):
-        yield self.mirror
-        self.refresh_submodules()
-        for submodule in self.submodules:
-            yield submodule
-
-    ###########################################################
-    #                     Local Functions                     #
-    ###########################################################
-    def have_all_refs(self):
-        if not self.mirror.has_ref():
-            return False
-
-        self.refresh_submodules()
-        for mirror in self.submodules:
-            if not os.path.exists(mirror.mirror) and not os.path.exists(
-                mirror.fetch_mirror
-            ):
-                return False
-            if not mirror.has_ref():
-                return False
-
-        return True
-
     # Refreshes the GitTagMirror objects for submodules
     #
     # Assumes that we have our mirror and we have the ref which we point to
@@ -974,6 +1013,24 @@ class GitTagSource(Source):
         except KeyError:
             checkout = self.checkout_submodules
         return not checkout
+
+    def get_source_fetchers(self):
+        yield self.mirror
+        self.refresh_submodules()
+        for submodule in self.submodules:
+            yield submodule
+
+    def have_all_extra_refs(self):
+        self.refresh_submodules()
+        for mirror in self.submodules:
+            if not os.path.exists(mirror.mirror) and not os.path.exists(
+                mirror.fetch_mirror
+            ):
+                return False
+            if not mirror.has_ref():
+                return False
+
+        return True
 
 
 # Plugin entry point
