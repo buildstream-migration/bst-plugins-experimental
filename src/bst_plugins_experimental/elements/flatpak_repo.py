@@ -43,18 +43,18 @@ class FlatpakRepoElement(ScriptElement):
             subnode.validate_keys(["src", "dest"])
             self._copy_refs.append(
                 (
-                    subnode.get_scalar("src"),
-                    subnode.get_scalar("dest"),
+                    subnode.get_str("src"),
+                    subnode.get_str("dest"),
                 )
             )
 
-        self._arch = node.get_scalar("arch")
-        self._branch = node.get_scalar("branch")
+        self._arch = node.get_str("arch")
+        self._branch = node.get_str("branch")
 
         self.set_work_dir()
         self.set_root_read_only(True)
 
-        self._repo_mode = node.get_scalar("repo-mode")
+        self._repo_mode = node.get_str("repo-mode")
         self.set_install_root("/buildstream/repo")
         self.add_commands(
             "init repository",
