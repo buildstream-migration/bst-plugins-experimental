@@ -1,0 +1,60 @@
+name: Merge actions
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build:
+    name: Build documentation
+    runs-on: ubuntu-20.04
+    container: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-master-140747994
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+    - name: Run tox inside a container
+      run: tox -e docs
+    - name: Create docs tarball
+      run: tar -C doc/build/html -zcf docs.tgz .
+    - name: Upload release assets
+      run: |
+        tag_name="${GITHUB_REF##*/}"
+        hub release create -a "docs.tgz" -m "$tag_name" "$tag_name"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish:
+    name: Publish documentation to pages
+    needs: build
+    runs-on: ubuntu-20.04
+    steps:
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: docs
+        path: docs
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: gh-pages
+        path: pages
+
+    - name: Update repo
+      run: |
+
+        # Copy the docs asset over and overwrite the orphan gh-pages branch, ensure
+        # that we disable GitHub's jekyll by creating the .nojekyll file, otherwise
+        # it will interfere with the rendering of the site.
+        #
+        cp -a docs/* pages/
+        touch pages/.nojekyll
+
+        cd pages/
+        git add .
+        git config --local user.email "merge-ci@ponyland"
+        git config --local user.name  "Github Actions Nightly Job"
+        git commit -m "Update repo for docs build $GITHUB_RUN_NUMBER"
+        git push "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git" gh-pages
