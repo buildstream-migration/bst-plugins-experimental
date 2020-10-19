@@ -1,0 +1,104 @@
+name: PR Checks
+
+# We don't run these jobs on pull requests because:
+# 1. it is often useful to run tests on one's branch without creating a pull
+#    request, and
+# 2. running on both pushes and pull requests results in the classic problem of
+#    having double jobs.
+on: push
+
+# Left to-do:
+# - publishing docs to gh-pages/plugins docs sites
+# - automatically upload to PyPI when a release is tagged
+# - persistent cache
+# - SAST, Code Quality, License Scanning
+
+env:
+  CI_IMAGE: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-master-140747994
+  PYTEST_ARGS: --color=yes --integration
+jobs:
+  tests:
+    runs-on: ubuntu-20.04
+    continue-on-error: ${{ matrix.allow-failure || false }}
+
+    env:
+      CI_IMAGE_PREFIX: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite
+      CI_IMAGE_SUFFIX: master-140747994
+      PYTEST_ADDOPTS: "--color=yes"
+
+    strategy:
+      fail-fast: false
+      matrix:
+
+        include:
+          - test-name: fixed-debian-10
+            image-name: debian:10
+            toxenv: py37-bst-fixed
+            dependencies: apt update -y && apt install -y git-lfs
+          - test-name: fixed-ubuntu-18
+            image-name: ubuntu:18.04
+            toxenv: py36-bst-fixed
+            dependencies: apt update -y && apt install -y git-lfs && git lfs install
+          - test-name: fixed-fedora-31
+            image-name: fedora:31
+            toxenv: py37-bst-fixed
+            dependencies: dnf install -y git-lfs
+          - test-name: fixed-python-38-debian-10
+            image-name: python:3.8-buster
+            toxenv: py38-bst-fixed
+            dependencies: apt update -y && apt install -y git-lfs
+          - test-name: fixed-nodeps-debian-10
+            image-name: debian:10
+            toxenv: py37-bst-fixed
+            dependencies: apt-get purge -y quilt ostree
+          - test-name: master-fedora-31
+            image-name: fedora:31
+            allow-failure: true
+            toxenv: py37-bst-master
+            dependencies: dnf install -y git-lfs
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+        # BuildStream requires tags to be able to find its version.
+        with:
+          fetch-depth: 0
+      # XXX: Our run command looks like a monstrosity because we need to
+      # specify `--device /dev/fuse` and there's no way to do that using the
+      # `container` directive directly.
+      # This is also why we have forward environment variables by hand.
+      # TODO: In future, we should find a way to simplify this. See some
+      # relevant discussion at:
+      # https://github.community/t/how-to-run-privileged-docker-container/16431.
+      # XXX: Value of `volume` and `workdir` must match how GitHub
+      # Actions sets up paths.
+      # TODO: Have test user pre-created in the test image.
+      - name: Run tox inside a container
+        run: |
+          docker run \
+              --privileged \
+              --device /dev/fuse \
+              --env PYTEST_ARGS \
+              --env TOXENV=${{ matrix.toxenv || env.TOXENV }} \
+              --volume /home/runner/work:/__w \
+              --workdir /__w/bst-plugins-experimental/bst-plugins-experimental \
+              "$CI_IMAGE_PREFIX"-${{ matrix.image-name || matrix.test-name }}-"$CI_IMAGE_SUFFIX" \
+              bash -c '${{ matrix.dependencies }} && useradd -Um buildstream && chown -R buildstream:buildstream . && su buildstream -c "tox -- $PYTEST_ARGS"'
+
+  lint:
+    runs-on: ubuntu-20.04
+    container: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-master-140747994
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Run tox inside a container
+        run: tox -e format-check,lint
+
+  docs:
+    runs-on: ubuntu-20.04
+    container: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-master-140747994
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Run tox inside a container
+        run: tox -e docs
