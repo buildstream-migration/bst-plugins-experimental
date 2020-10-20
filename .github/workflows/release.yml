@@ -1,0 +1,25 @@
+name: Upload Release Asset
+
+on:
+  push:
+    tags:
+    - '*.*.*'
+
+jobs:
+  release:
+    name: Upload Release Asset
+    runs-on: ubuntu-20.04
+    container: registry.gitlab.com/buildstream/buildstream-docker-images/testsuite-fedora:31-master-140747994
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+    - name: Run tox inside a container
+      run: tox -e docs
+    - name: Create docs tarball
+      run: tar -C doc/build/html -zcf docs.tgz .
+    - name: Upload release assets
+      run: |
+        tag_name="${GITHUB_REF##*/}"
+        hub release create -a "docs.tgz" -m "$tag_name" "$tag_name"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
