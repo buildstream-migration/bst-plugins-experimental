@@ -1,0 +1,4 @@
+x86image plugin
+============================================
+
+.. automodule:: elements.x86image

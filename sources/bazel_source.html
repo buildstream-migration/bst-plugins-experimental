@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bazel_source plugin &mdash; BuildStream Experimental Plugins 1.93.4 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cargo plugin" href="cargo.html" />
+    <link rel="prev" title="pip plugin" href="../elements/pip.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> BuildStream Experimental Plugins
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.93
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contained Elements</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../elements/bazel_build.html">bazel_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/bazelize.html">bazelize plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/cmake.html">cmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/dpkg_build.html">dpkg_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/dpkg_deploy.html">dpkg_deploy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/x86image.html">x86image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/flatpak_image.html">flatpak_image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/flatpak_repo.html">flatpak_repo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/collect_integration.html">collect_integration plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/collect_manifest.html">collect_manifest plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/fastboot_bootimg.html">fastboot_bootimg plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/fastboot_ext4.html">fastboot_ext4 plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/tar_element.html">tar_element plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/meson.html">meson plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/make.html">make plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/makemaker.html">makemaker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/modulebuild.html">modulebuild plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/qmake.html">qmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/distutils.html">distutils plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/oci.html">oci plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/pip.html">pip plugin</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contained Sources</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">bazel_source plugin</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#bazel-stage-bazel-external-dependencies">bazel - stage bazel external dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cargo.html">cargo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deb.html">deb plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ostree.html">ostree plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pip.html">pip plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quilt.html">quilt plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="git_tag.html">git_tag plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tar.html">tar plugin</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BuildStream Experimental Plugins</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>bazel_source plugin</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sources/bazel_source.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-sources.bazel_source">
+<span id="bazel-source-plugin"></span><h1>bazel_source plugin<a class="headerlink" href="#module-sources.bazel_source" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="bazel-stage-bazel-external-dependencies">
+<h2>bazel - stage bazel external dependencies<a class="headerlink" href="#bazel-stage-bazel-external-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>This is a Source Transform plugin that allows us to download the external
+dependencies for a bazel project. Due to the complicated nature of bazel
+fetching, this requires a manifest file generated by
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">bazel</span> <span class="pre">cquery</span> <span class="pre">--experimental_repository_resolved_file=/path/to/manifest</span> <span class="pre">$targets</span>
+<span class="pre">`</span></code></p>
+<p>This option is available for all versions of bazel documented, but for very
+early versions (&lt;0.17.1) it may not be available.</p>
+<p>If the upstream bazel project does not provide such a repository file, one may
+be introduced as a <cite>local</cite> or <cite>patch</cite> source. Failing that the plugin can be
+configured to fall back to a bazel on the host. Doing this is not recommended
+as we lose the ability to check SHAs, and also people using your project will
+have to have bazel installed. Due to this potential flakiness, using the host
+bazel will likely cause many warnings.</p>
+<p>This plugin works by parsing the repository resolved file and downloading
+any sources into a “distdir” that can be used in the build by passing the
+<cite>–distdir</cite> option to <cite>bazel build</cite>. This is done automatically by the
+BazelElement plugin (by default).</p>
+<p>The default configuration is:</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Specify the bazel kind</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">bazel_source</span>
+
+<span class="c1"># Specify the path to the workspace directory</span>
+<span class="nt">workspace-dir</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">.</span>
+
+<span class="c1"># Specify the path to the repository resolved file</span>
+<span class="nt">repo-file</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">.bst-sources</span>
+
+<span class="c1"># Whether to allow falling back to host bazel if no repository resolved</span>
+<span class="c1"># file is found</span>
+<span class="nt">allow-host-bazel</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">False</span>
+
+<span class="c1"># If host bazel is allowed as a fall back and no repository resolved</span>
+<span class="c1"># file is found, specify which targets to track</span>
+<span class="c1">#</span>
+<span class="c1"># NOTE: This option only has an effect if host bazel is allowed as a</span>
+<span class="c1">#       fallback</span>
+<span class="c1">#</span>
+<span class="nt">targets</span><span class="p">:</span> <span class="s">&#39;//...&#39;</span>
+
+<span class="c1"># The SHA256 of the repository resolved file. This is not used when</span>
+<span class="c1"># falling back to host bazel due to non-determinism.</span>
+<span class="c1">#</span>
+<span class="nt">ref</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">abcdef1234567890...</span>
+</pre></div>
+</div>
+<p>** Configurable Warnings:**</p>
+<dl class="simple">
+<dt>This plugin provides the following configurable warnings:</dt><dd><ul class="simple">
+<li><p>missing-sha256: Fail when sources don’t specify a sha256 attribute</p></li>
+</ul>
+</dd>
+</dl>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cargo.html" class="btn btn-neutral float-right" title="cargo plugin" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../elements/pip.html" class="btn btn-neutral float-left" title="pip plugin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2017, Codethink Limited
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

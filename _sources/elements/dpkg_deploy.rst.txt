@@ -1,0 +1,4 @@
+dpkg_deploy plugin
+============================================
+
+.. automodule:: elements.dpkg_deploy

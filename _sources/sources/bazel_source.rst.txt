@@ -1,0 +1,4 @@
+bazel_source plugin
+============================================
+
+.. automodule:: sources.bazel_source

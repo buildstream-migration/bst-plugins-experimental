@@ -1,0 +1,4 @@
+bazel_build plugin
+============================================
+
+.. automodule:: elements.bazel_build

@@ -1,0 +1,4 @@
+collect_manifest plugin
+============================================
+
+.. automodule:: elements.collect_manifest

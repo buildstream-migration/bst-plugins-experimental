@@ -1,0 +1,297 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pip plugin &mdash; BuildStream Experimental Plugins 1.93.4 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="quilt plugin" href="quilt.html" />
+    <link rel="prev" title="ostree plugin" href="ostree.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> BuildStream Experimental Plugins
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.93
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contained Elements</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../elements/bazel_build.html">bazel_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/bazelize.html">bazelize plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/cmake.html">cmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/dpkg_build.html">dpkg_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/dpkg_deploy.html">dpkg_deploy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/x86image.html">x86image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/flatpak_image.html">flatpak_image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/flatpak_repo.html">flatpak_repo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/collect_integration.html">collect_integration plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/collect_manifest.html">collect_manifest plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/fastboot_bootimg.html">fastboot_bootimg plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/fastboot_ext4.html">fastboot_ext4 plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/tar_element.html">tar_element plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/meson.html">meson plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/make.html">make plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/makemaker.html">makemaker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/modulebuild.html">modulebuild plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/qmake.html">qmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/distutils.html">distutils plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/oci.html">oci plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/pip.html">pip plugin</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contained Sources</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="bazel_source.html">bazel_source plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cargo.html">cargo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deb.html">deb plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ostree.html">ostree plugin</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pip plugin</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pip-stage-python-packages-using-pip">pip - stage python packages using pip</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quilt.html">quilt plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="git_tag.html">git_tag plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tar.html">tar plugin</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BuildStream Experimental Plugins</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>pip plugin</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/sources/pip.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-sources.pip">
+<span id="pip-plugin"></span><h1>pip plugin<a class="headerlink" href="#module-sources.pip" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="pip-stage-python-packages-using-pip">
+<h2>pip - stage python packages using pip<a class="headerlink" href="#pip-stage-python-packages-using-pip" title="Permalink to this headline">¶</a></h2>
+<p><strong>Host depndencies:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span></code> python module</p></li>
+</ul>
+</div></blockquote>
+<p>This plugin will download source distributions for specified packages using
+<code class="docutils literal notranslate"><span class="pre">pip</span></code> but will not install them. It is expected that the elements using this
+source will install the downloaded packages.</p>
+<p>Downloaded tarballs will be stored in a directory called “.bst_pip_downloads”.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Specify the pip source kind</span>
+<span class="nt">kind</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">pip</span>
+
+<span class="c1"># Optionally specify index url, defaults to PyPi</span>
+<span class="c1"># This url is used to discover new versions of packages and download them</span>
+<span class="c1"># Projects intending to mirror their sources to a permanent location should</span>
+<span class="c1"># use an aliased url, and declare the alias in the project configuration</span>
+<span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">https://mypypi.example.com/simple</span>
+
+<span class="c1"># Optionally specify the path to requirements files</span>
+<span class="c1"># Note that either &#39;requirements-files&#39; or &#39;packages&#39; must be defined</span>
+<span class="nt">requirements-files</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">requirements.txt</span>
+
+<span class="c1"># Optionally specify a list of additional packages</span>
+<span class="c1"># Note that either &#39;requirements-files&#39; or &#39;packages&#39; must be defined</span>
+<span class="nt">packages</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">flake8</span>
+
+<span class="c1"># Specify the ref. It is a list of strings of format</span>
+<span class="c1"># &quot;&lt;package-name&gt;==&lt;version&gt;&quot;, separated by &quot;\n&quot;.</span>
+<span class="c1"># Usually this will be contents of a requirements.txt file where all</span>
+<span class="c1"># package versions have been frozen.</span>
+<span class="nt">ref</span><span class="p">:</span> <span class="s">&quot;flake8==3.5.0\nmccabe==0.6.1\npkg-resources==0.0.0\npycodestyle==2.3.1\npyflakes==1.6.0&quot;</span>
+</pre></div>
+</div>
+<p>See <a class="reference external" href="https://docs.buildstream.build/master/buildstream.source.html#core-source-builtins">built-in functionality doumentation</a> for
+details on common configuration options for sources.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">pip</span></code> plugin is available since <a class="reference external" href="https://docs.buildstream.build/master/format_project.html#project-format-version">format version 16</a></p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="quilt.html" class="btn btn-neutral float-right" title="quilt plugin" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="ostree.html" class="btn btn-neutral float-left" title="ostree plugin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2017, Codethink Limited
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

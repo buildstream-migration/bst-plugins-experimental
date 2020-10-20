@@ -1,0 +1,4 @@
+quilt plugin
+============================================
+
+.. automodule:: sources.quilt

@@ -1,0 +1,4 @@
+bazelize plugin
+============================================
+
+.. automodule:: elements.bazelize

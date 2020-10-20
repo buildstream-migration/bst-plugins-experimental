@@ -1,0 +1,403 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>x86image plugin &mdash; BuildStream Experimental Plugins 1.93.4 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="flatpak_image plugin" href="flatpak_image.html" />
+    <link rel="prev" title="dpkg_deploy plugin" href="dpkg_deploy.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> BuildStream Experimental Plugins
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.93
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contained Elements</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="bazel_build.html">bazel_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bazelize.html">bazelize plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmake.html">cmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dpkg_build.html">dpkg_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dpkg_deploy.html">dpkg_deploy plugin</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">x86image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flatpak_image.html">flatpak_image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flatpak_repo.html">flatpak_repo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collect_integration.html">collect_integration plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collect_manifest.html">collect_manifest plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fastboot_bootimg.html">fastboot_bootimg plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fastboot_ext4.html">fastboot_ext4 plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tar_element.html">tar_element plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meson.html">meson plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="make.html">make plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="makemaker.html">makemaker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modulebuild.html">modulebuild plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qmake.html">qmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="distutils.html">distutils plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oci.html">oci plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pip.html">pip plugin</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contained Sources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sources/bazel_source.html">bazel_source plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/cargo.html">cargo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/deb.html">deb plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/ostree.html">ostree plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/pip.html">pip plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/quilt.html">quilt plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/git_tag.html">git_tag plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/tar.html">tar plugin</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BuildStream Experimental Plugins</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>x86image plugin</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/elements/x86image.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-elements.x86image">
+<span id="x86image-plugin"></span><h1>x86image plugin<a class="headerlink" href="#module-elements.x86image" title="Permalink to this headline">¶</a></h1>
+<p>x86 image build element</p>
+<p>A <a class="reference external" href="https://docs.buildstream.build/master/buildstream.scriptelement.html#module-buildstream.scriptelement">ScriptElement</a>
+implementation for creating x86 disk images</p>
+<dl>
+<dt>The x86image default configuration:</dt><dd><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1">#x86 image default configuration</span>
+
+<span class="c1"># When specifying dependencies, one needs to specify</span>
+<span class="c1"># which dependencies are a part of the &#39;input&#39; for</span>
+<span class="c1"># the image, other dependencies are assumed to be tooling</span>
+<span class="c1"># required to build the image and will be staged in &quot;/&quot;</span>
+<span class="c1">#</span>
+<span class="c1"># E.g.:</span>
+<span class="c1">#</span>
+<span class="c1"># build-depends:</span>
+<span class="c1"># - base.bst</span>
+<span class="c1"># - filename: input1.bst</span>
+<span class="c1">#   config:</span>
+<span class="c1">#     input: True</span>
+<span class="c1"># - filename: input2.bst</span>
+<span class="c1">#   config:</span>
+<span class="c1">#     input: True</span>
+<span class="c1">#</span>
+
+<span class="nt">variables</span><span class="p">:</span>
+  <span class="c1"># Size of the disk to create</span>
+  <span class="c1">#</span>
+  <span class="c1"># Should be able to calculate this based on the space</span>
+  <span class="c1"># used, however it must be a multiple of (63 * 512) bytes</span>
+  <span class="c1"># as mtools wants a size that is devisable by sectors (512 bytes)</span>
+  <span class="c1"># per track (63).</span>
+  <span class="nt">boot-size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">252000K</span>
+  <span class="nt">rootfs-size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">4G</span>
+  <span class="nt">swap-size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1G</span>
+  <span class="nt">sector-size</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">512</span>
+
+  <span class="nt">kernel-args</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root=/dev/sda2 rootfstype=ext4 rootdelay=20 init=/sbin/init</span>
+
+<span class="nt">config</span><span class="p">:</span>
+
+  <span class="nt">filesystem-tree-setup-commands</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no"># XXX Split up the boot directory and the other</span>
+    <span class="no">#</span>
+    <span class="no"># This should be changed so that the /boot directory</span>
+    <span class="no"># is created separately.</span>
+  
+    <span class="no">cd /buildstream</span>
+    <span class="no">mkdir -p /buildstream/boot</span>
+    <span class="no">mv %{build-root}/boot/* /buildstream/boot</span>
+  
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no"># Generate an fstab</span>
+    <span class="no">cat &gt; %{build-root}/etc/fstab &lt;&lt; EOF</span>
+    <span class="no">/dev/sda2   /       ext4   defaults,rw,noatime   0 1</span>
+    <span class="no">/dev/sda1   /boot   vfat   defaults              0 2</span>
+    <span class="no">/dev/sda3   none    swap   defaults              0 0</span>
+    <span class="no">EOF</span>
+  
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no"># Create the syslinux config</span>
+    <span class="no">mkdir -p /buildstream/boot/syslinux</span>
+    <span class="no">cat &gt; /buildstream/boot/syslinux/syslinux.cfg &lt;&lt; EOF</span>
+    <span class="no">PROMPT 0</span>
+    <span class="no">TIMEOUT 5</span>
+  
+    <span class="no">ALLOWOPTIONS 1</span>
+    <span class="no">SERIAL 0 115200</span>
+  
+    <span class="no">DEFAULT boot</span>
+    <span class="no">LABEL boot</span>
+  
+    <span class="no">KERNEL /vmlinuz</span>
+    <span class="no">INITRD /initramfs.gz</span>
+  
+    <span class="no">APPEND %{kernel-args}</span>
+    <span class="no">EOF</span>
+  <span class="nt">filesystem-image-creation-commands</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no"># Create the vfat image</span>
+    <span class="no">truncate -s %{boot-size} /buildstream/sda1.img</span>
+    <span class="no">mkdosfs /buildstream/sda1.img</span>
+
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no"># Copy all that stuff into the image</span>
+    <span class="no">mcopy -D s -i /buildstream/sda1.img -s /buildstream/boot/* ::/</span>
+
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no"># Install the bootloader on the image, it should get the config file</span>
+    <span class="no"># from inside the vfat image, I think</span>
+    <span class="no">syslinux --directory /syslinux/ /buildstream/sda1.img</span>
+
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no"># Now create the root filesys on sda2</span>
+    <span class="no">truncate -s %{rootfs-size} /buildstream/sda2.img</span>
+    <span class="no">mkfs.ext4 -F -i 8192 -L root -d %{build-root} /buildstream/sda2.img</span>
+
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no"># Create swap</span>
+    <span class="no">truncate -s %{swap-size} /buildstream/sda3.img</span>
+    <span class="no">mkswap -L swap /buildstream/sda3.img</span>
+
+  <span class="nt">partition-commands</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no">########################################</span>
+    <span class="no">#         Partition the disk           #</span>
+    <span class="no">########################################</span>
+
+    <span class="no"># First get the size in bytes</span>
+    <span class="no">sda1size=$(stat -c &quot;%s&quot; /buildstream/sda1.img | head -c -1)</span>
+    <span class="no">sda2size=$(stat -c &quot;%s&quot; /buildstream/sda2.img | head -c -1)</span>
+    <span class="no">sda3size=$(stat -c &quot;%s&quot; /buildstream/sda3.img | head -c -1)</span>
+
+    <span class="no"># Now convert to sectors</span>
+    <span class="no">sda1sec=$(( ${sda1size} / %{sector-size} ))</span>
+    <span class="no">sda2sec=$(( ${sda2size} / %{sector-size} ))</span>
+    <span class="no">sda3sec=$(( ${sda3size} / %{sector-size} ))</span>
+
+    <span class="no"># Now get the offsets in sectors, first sector is MBR</span>
+    <span class="no">sda1offset=1</span>
+    <span class="no">sda2offset=$(( ${sda1offset} + ${sda1sec} ))</span>
+    <span class="no">sda3offset=$(( ${sda2offset} + ${sda2sec} ))</span>
+
+    <span class="no"># Get total disk size in sectors and bytes</span>
+    <span class="no">sdasectors=$(( ${sda3offset} + ${sda3sec} ))</span>
+    <span class="no">sdabytes=$(( ${sdasectors} * %{sector-size} ))</span>
+
+    <span class="no"># Create the main disk and do the partitioning</span>
+    <span class="no">truncate -s ${sdabytes} %{install-root}/sda.img</span>
+    <span class="no">parted -s %{install-root}/sda.img mklabel msdos</span>
+    <span class="no">parted -s %{install-root}/sda.img unit s mkpart primary fat32 ${sda1offset} $(( ${sda1offset} + ${sda1sec} - 1 ))</span>
+    <span class="no">parted -s %{install-root}/sda.img unit s mkpart primary ext2 ${sda2offset} $(( ${sda2offset} + ${sda2sec} - 1 ))</span>
+    <span class="no">parted -s %{install-root}/sda.img unit s mkpart primary linux-swap ${sda3offset} $(( ${sda3offset} + ${sda3sec} - 1 ))</span>
+
+    <span class="no"># Make partition 1 the boot partition</span>
+    <span class="no">parted -s %{install-root}/sda.img set 1 boot on</span>
+
+    <span class="no"># Now splice the existing filesystems directly into the image</span>
+    <span class="no">dd if=/buildstream/sda1.img of=%{install-root}/sda.img \</span>
+        <span class="no">ibs=%{sector-size} obs=%{sector-size} conv=notrunc \</span>
+        <span class="no">count=${sda1sec} seek=${sda1offset}</span>
+
+    <span class="no">dd if=/buildstream/sda2.img of=%{install-root}/sda.img \</span>
+        <span class="no">ibs=%{sector-size} obs=%{sector-size} conv=notrunc \</span>
+        <span class="no">count=${sda2sec} seek=${sda2offset}</span>
+
+    <span class="no">dd if=/buildstream/sda3.img of=%{install-root}/sda.img \</span>
+        <span class="no">ibs=%{sector-size} obs=%{sector-size} conv=notrunc \</span>
+        <span class="no">count=${sda3sec} seek=${sda3offset}</span>
+  <span class="nt">final-commands</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no">chmod 0644 %{install-root}/sda.img</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="flatpak_image.html" class="btn btn-neutral float-right" title="flatpak_image plugin" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="dpkg_deploy.html" class="btn btn-neutral float-left" title="dpkg_deploy plugin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2017, Codethink Limited
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

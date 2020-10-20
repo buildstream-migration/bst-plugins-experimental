@@ -1,0 +1,388 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dpkg_deploy plugin &mdash; BuildStream Experimental Plugins 1.93.4 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="x86image plugin" href="x86image.html" />
+    <link rel="prev" title="dpkg_build plugin" href="dpkg_build.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> BuildStream Experimental Plugins
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.93
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contained Elements</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="bazel_build.html">bazel_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bazelize.html">bazelize plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmake.html">cmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dpkg_build.html">dpkg_build plugin</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">dpkg_deploy plugin</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#default-configuration">Default Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#public-data">Public Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#split-rules">split-rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dpkg-data">dpkg-data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#control">control</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#name">name</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#package-scripts">package-scripts</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="x86image.html">x86image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flatpak_image.html">flatpak_image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flatpak_repo.html">flatpak_repo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collect_integration.html">collect_integration plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collect_manifest.html">collect_manifest plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fastboot_bootimg.html">fastboot_bootimg plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fastboot_ext4.html">fastboot_ext4 plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tar_element.html">tar_element plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meson.html">meson plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="make.html">make plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="makemaker.html">makemaker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modulebuild.html">modulebuild plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qmake.html">qmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="distutils.html">distutils plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oci.html">oci plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pip.html">pip plugin</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contained Sources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sources/bazel_source.html">bazel_source plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/cargo.html">cargo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/deb.html">deb plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/ostree.html">ostree plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/pip.html">pip plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/quilt.html">quilt plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/git_tag.html">git_tag plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/tar.html">tar plugin</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BuildStream Experimental Plugins</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>dpkg_deploy plugin</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/elements/dpkg_deploy.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-elements.dpkg_deploy">
+<span id="dpkg-deploy-plugin"></span><h1>dpkg_deploy plugin<a class="headerlink" href="#module-elements.dpkg_deploy" title="Permalink to this headline">¶</a></h1>
+<p>Dpkg deployment element</p>
+<p>A <a class="reference external" href="https://docs.buildstream.build/master/buildstream.scriptelement.html#module-buildstream.scriptelement">ScriptElement</a>
+implementation for creating debian packages</p>
+<div class="section" id="default-configuration">
+<h2>Default Configuration<a class="headerlink" href="#default-configuration" title="Permalink to this headline">¶</a></h2>
+<dl>
+<dt>The dpkg_deploy default configuration:</dt><dd><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1">#dpkg_deploy default configuration</span>
+
+<span class="c1"># When specifying dependencies, one needs to specify one of the</span>
+<span class="c1"># dependencies as the &#39;input&#39; element.</span>
+<span class="c1">#</span>
+<span class="c1"># The &#39;input&#39; should be a debian package structure which should have</span>
+<span class="c1"># the &#39;dpkg-data&#39; public data describing how they can be packaged.</span>
+<span class="c1">#</span>
+<span class="c1"># E.g.:</span>
+<span class="c1">#</span>
+<span class="c1"># build-depends:</span>
+<span class="c1"># - filename: base-tooling.bst</span>
+<span class="c1"># - filename: input.bst</span>
+<span class="c1">#   config:</span>
+<span class="c1">#     input: True</span>
+<span class="c1">#</span>
+
+<span class="nt">variables</span><span class="p">:</span>
+  <span class="c1"># packages&#39; default value will be automatically replaced with</span>
+  <span class="c1"># defaults calculated from the input&#39;s split-rules. Replace this</span>
+  <span class="c1"># with a space-separated list of packages to have more control</span>
+  <span class="c1"># over what gets generated.</span>
+  <span class="c1">#</span>
+  <span class="nt">packages</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;PACKAGES&gt;</span>
+  <span class="nt">buildpkg</span><span class="p">:</span> <span class="p p-Indicator">|</span>
+            <span class="no">for package in %{packages}; do</span>
+              <span class="no">/bin/chmod 0755 %{build-root}/$package/DEBIAN</span>
+              <span class="no">dpkg-deb --build %{build-root}/$package %{install-root}</span>
+            <span class="no">done</span>
+
+<span class="nt">config</span><span class="p">:</span>
+
+  <span class="nt">build-commands</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no">%{buildpkg}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</div>
+<div class="section" id="public-data">
+<h2>Public Data<a class="headerlink" href="#public-data" title="Permalink to this headline">¶</a></h2>
+<p>This plugin uses the public data of the element indicated by <cite>config.input</cite>
+to generate debian packages.</p>
+<div class="section" id="split-rules">
+<h3>split-rules<a class="headerlink" href="#split-rules" title="Permalink to this headline">¶</a></h3>
+<p>This plugin consumes the input element’s split-rules to identify which file
+goes in which package, e.g.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">public</span><span class="p">:</span>
+  <span class="nt">bst</span><span class="p">:</span>
+    <span class="nt">split-rules</span><span class="p">:</span>
+      <span class="nt">foo</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">/sbin/foo</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">/usr/bin/bar</span>
+      <span class="nt">bar</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">/etc/quux</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dpkg-data">
+<h3>dpkg-data<a class="headerlink" href="#dpkg-data" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="control">
+<h4>control<a class="headerlink" href="#control" title="Permalink to this headline">¶</a></h4>
+<p>The control field is used to generate the control file for each package, e.g.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">public</span><span class="p">:</span>
+  <span class="nt">bst</span><span class="p">:</span>
+    <span class="nt">dpkg-data</span><span class="p">:</span>
+      <span class="nt">foo</span><span class="p">:</span>
+        <span class="nt">control</span><span class="p">:</span> <span class="p p-Indicator">|</span>
+          <span class="no">Source: foo</span>
+          <span class="no">Section: blah</span>
+          <span class="no">Build-depends: bar (&gt;= 1337), baz</span>
+          <span class="no">...</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="name">
+<h4>name<a class="headerlink" href="#name" title="Permalink to this headline">¶</a></h4>
+<p>If the “name” field is present, the generated package will use that field to
+determine its name.
+If “name” is not present, the generated package will be named
+&lt;element_name&gt;-&lt;package_name&gt;</p>
+<p>i.e. in an element named foo:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">public</span><span class="p">:</span>
+  <span class="nt">bst</span><span class="p">:</span>
+    <span class="nt">dpkg-data</span><span class="p">:</span>
+      <span class="nt">bar</span><span class="p">:</span>
+        <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">foobar</span>
+</pre></div>
+</div>
+<p>will be named “foobar”, while the following data:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">public</span><span class="p">:</span>
+  <span class="nt">bst</span><span class="p">:</span>
+    <span class="nt">dpkg-data</span><span class="p">:</span>
+      <span class="nt">bar</span><span class="p">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">...</span>
+</pre></div>
+</div>
+<p>will create a package named “foo-bar”</p>
+</div>
+</div>
+<div class="section" id="package-scripts">
+<h3>package-scripts<a class="headerlink" href="#package-scripts" title="Permalink to this headline">¶</a></h3>
+<p>preinst, postinst, prerm and postrm scripts will be generated
+based on data in pacakge-scripts, if it exists. The scripts are formatted as
+raw text, e.g.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">public</span><span class="p">:</span>
+  <span class="nt">bst</span><span class="p">:</span>
+    <span class="nt">package-scripts</span><span class="p">:</span>
+      <span class="nt">foo</span><span class="p">:</span>
+        <span class="nt">preinst</span><span class="p">:</span> <span class="p p-Indicator">|</span>
+          <span class="no">#!/usr/bin/bash</span>
+          <span class="no">/sbin/ldconfig</span>
+      <span class="nt">bar</span><span class="p">:</span>
+        <span class="nt">postinst</span><span class="p">:</span> <span class="p p-Indicator">|</span>
+          <span class="no">#!/usr/bin/bash</span>
+          <span class="no">/usr/share/fonts/generate_fonts.sh</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="x86image.html" class="btn btn-neutral float-right" title="x86image plugin" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="dpkg_build.html" class="btn btn-neutral float-left" title="dpkg_build plugin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2017, Codethink Limited
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

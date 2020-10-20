@@ -1,0 +1,4 @@
+git_tag plugin
+============================================
+
+.. automodule:: sources.git_tag

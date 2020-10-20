@@ -1,0 +1,4 @@
+collect_integration plugin
+============================================
+
+.. automodule:: elements.collect_integration

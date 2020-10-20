@@ -1,0 +1,4 @@
+flatpak_repo plugin
+============================================
+
+.. automodule:: elements.flatpak_repo

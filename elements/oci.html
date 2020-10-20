@@ -1,0 +1,401 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>oci plugin &mdash; BuildStream Experimental Plugins 1.93.4 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pip plugin" href="pip.html" />
+    <link rel="prev" title="distutils plugin" href="distutils.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> BuildStream Experimental Plugins
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.93
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contained Elements</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="bazel_build.html">bazel_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bazelize.html">bazelize plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmake.html">cmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dpkg_build.html">dpkg_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dpkg_deploy.html">dpkg_deploy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="x86image.html">x86image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flatpak_image.html">flatpak_image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flatpak_repo.html">flatpak_repo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collect_integration.html">collect_integration plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collect_manifest.html">collect_manifest plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fastboot_bootimg.html">fastboot_bootimg plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fastboot_ext4.html">fastboot_ext4 plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tar_element.html">tar_element plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meson.html">meson plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="make.html">make plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="makemaker.html">makemaker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modulebuild.html">modulebuild plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qmake.html">qmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="distutils.html">distutils plugin</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">oci plugin</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#image-configuration">Image configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#container-configuration">Container configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pip.html">pip plugin</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contained Sources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sources/bazel_source.html">bazel_source plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/cargo.html">cargo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/deb.html">deb plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/ostree.html">ostree plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/pip.html">pip plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/quilt.html">quilt plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/git_tag.html">git_tag plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/tar.html">tar plugin</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BuildStream Experimental Plugins</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>oci plugin</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/elements/oci.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-elements.oci">
+<span id="oci-plugin"></span><h1>oci plugin<a class="headerlink" href="#module-elements.oci" title="Permalink to this headline">¶</a></h1>
+<p>Builds a OCI or Docker image files</p>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mode</span><span class="p">:</span> <span class="n">docker</span>
+</pre></div>
+</div>
+<p>Valid <code class="docutils literal notranslate"><span class="pre">mode</span></code> values are <code class="docutils literal notranslate"><span class="pre">oci</span></code> or <code class="docutils literal notranslate"><span class="pre">docker</span></code>. <code class="docutils literal notranslate"><span class="pre">oci</span></code> will output
+an OCI image according to the “Image Format Specification”<a class="footnote-reference brackets" href="#id3" id="id1">1</a> at the
+time of this plugin was made. <cite>docker</cite> will output Docker images
+according to “Docker Image Specification v1.2.0”<a class="footnote-reference brackets" href="#id4" id="id2">2</a>.</p>
+<dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p><a class="reference external" href="https://github.com/opencontainers/image-spec/blob/master/spec.md">https://github.com/opencontainers/image-spec/blob/master/spec.md</a></p>
+</dd>
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p><a class="reference external" href="https://github.com/moby/moby/blob/master/image/spec/v1.2.md">https://github.com/moby/moby/blob/master/image/spec/v1.2.md</a></p>
+</dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">annotations</span><span class="p">:</span>
+  <span class="n">key1</span><span class="p">:</span> <span class="n">value1</span>
+</pre></div>
+</div>
+<p>Optional. Only for OCI.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">images</span><span class="p">:</span>
+<span class="o">-</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>Contains a series of images. Not to mix up with layers. Images do not
+need to share layers. For example there may be an image for each
+architecture.</p>
+<p>The configuration of an image contains the following fields:</p>
+<div class="section" id="image-configuration">
+<h3>Image configuration<a class="headerlink" href="#image-configuration" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parent</span><span class="p">:</span>
+  <span class="n">element</span><span class="p">:</span> <span class="n">other</span><span class="o">-</span><span class="n">image</span><span class="o">.</span><span class="n">bst</span>
+  <span class="n">image</span><span class="p">:</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">parent</span></code> is optional. If not provided, we are building an image with only
+one layer. <code class="docutils literal notranslate"><span class="pre">element</span></code> is the build dependency of type <code class="docutils literal notranslate"><span class="pre">oci</span></code> which contains
+the layers we want to import. <code class="docutils literal notranslate"><span class="pre">image</span></code> is the image index number. Default
+value for <code class="docutils literal notranslate"><span class="pre">image</span></code> is 0.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">layer</span><span class="p">:</span> <span class="n">mylayer</span><span class="o">.</span><span class="n">bst</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">layer</span></code> is a build dependency which provides the top
+layer. Integration commands are not run. So you may want to use depend
+on <code class="docutils literal notranslate"><span class="pre">compose</span></code> element to run those. <cite>layer</cite> is optional. If not
+provided, parent layers will be just used and new configuration will
+be set on an empty layer.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">architecture</span><span class="p">:</span> <span class="n">amd64</span>
+</pre></div>
+</div>
+<p>Must be provided. Must be a “<code class="docutils literal notranslate"><span class="pre">GOARCH</span></code>” value.
+<a class="reference external" href="https://github.com/golang/go/blob/master/src/go/build/syslist.go">https://github.com/golang/go/blob/master/src/go/build/syslist.go</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">os</span><span class="p">:</span> <span class="n">linux</span>
+</pre></div>
+</div>
+<p>Must be provided. Must be a “<code class="docutils literal notranslate"><span class="pre">GOOS</span></code>” value.
+<a class="reference external" href="https://github.com/golang/go/blob/master/src/go/build/syslist.go">https://github.com/golang/go/blob/master/src/go/build/syslist.go</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">variant</span><span class="p">:</span> <span class="n">v8</span>
+<span class="n">os</span><span class="o">.</span><span class="n">version</span><span class="p">:</span> <span class="mi">1</span>
+<span class="n">os</span><span class="o">.</span><span class="n">features</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>OCI only. Optional. Only used in image index for selection of the
+right image. <code class="docutils literal notranslate"><span class="pre">os.version</span></code> and <code class="docutils literal notranslate"><span class="pre">os.features</span></code> are Windows related.
+<code class="docutils literal notranslate"><span class="pre">variant</span></code> are for selection of processor variants. For example ARM
+version.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">author</span><span class="p">:</span> <span class="n">John</span> <span class="n">Doe</span> <span class="o">&lt;</span><span class="n">john</span><span class="o">.</span><span class="n">doe</span><span class="nd">@example</span><span class="o">.</span><span class="n">com</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Author of the layer/image. Optional.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">comment</span><span class="p">:</span> <span class="n">Add</span> <span class="n">my</span> <span class="n">awesome</span> <span class="n">app</span>
+</pre></div>
+</div>
+<p>Commit message for the layer/image. Optional.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">annotations</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;key1&#39;</span><span class="p">:</span> <span class="s1">&#39;value1&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Optional. Only for OCI.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tags</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;myapp:latest&#39;</span><span class="p">,</span> <span class="s1">&#39;myapp:1.0&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Tags for the images. Only for Docker.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">config</span><span class="p">:</span>
+  <span class="o">...</span>
+</pre></div>
+</div>
+<p>Optional container config for the image.</p>
+</div>
+<div class="section" id="container-configuration">
+<h3>Container configuration<a class="headerlink" href="#container-configuration" title="Permalink to this headline">¶</a></h3>
+<p>All configurations here are optional.</p>
+<p>Examples common for OCI and Docker:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">User</span><span class="p">:</span> <span class="s2">&quot;webadmin&quot;</span>
+<span class="n">ExposedPorts</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;80/tcp&quot;</span><span class="p">,</span> <span class="s2">&quot;8080&quot;</span><span class="p">]</span>
+<span class="n">Env</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;A=value&quot;</span><span class="p">,</span> <span class="s2">&quot;B=value&quot;</span><span class="p">]</span>
+<span class="n">Entrypoint</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;/bin/myapp&quot;</span><span class="p">]</span>
+<span class="n">Cmd</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;--default-param&quot;</span><span class="p">]</span>
+<span class="n">Volumes</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;/var/lib/myapp&quot;</span><span class="p">]</span>
+<span class="n">WorkingDir</span><span class="p">:</span> <span class="s2">&quot;/home/myuser&quot;</span>
+</pre></div>
+</div>
+<p>OCI specific:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Labels</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="s2">&quot;b&quot;</span><span class="p">}</span>
+<span class="n">StopSignal</span><span class="p">:</span> <span class="s2">&quot;SIGKILL&quot;</span>
+</pre></div>
+</div>
+<p>Docker specific:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Memory</span><span class="p">:</span> <span class="mi">2048</span>
+<span class="n">MemorySwap</span><span class="p">:</span> <span class="mi">4096</span>
+<span class="n">CpuShares</span><span class="p">:</span> <span class="mi">2</span>
+<span class="n">Healthcheck</span><span class="p">:</span>
+  <span class="n">Test</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CMD&quot;</span><span class="p">,</span> <span class="s2">&quot;/bin/test&quot;</span><span class="p">,</span> <span class="s2">&quot;param&quot;</span><span class="p">]</span>
+  <span class="n">Interval</span><span class="p">:</span> <span class="mi">50000000000</span>
+  <span class="n">Timeout</span><span class="p">:</span> <span class="mi">10000000000</span>
+  <span class="n">Retries</span><span class="p">:</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>The artifact generated is an un-tared image and need to be composed
+into at tar file. This can be done with <code class="docutils literal notranslate"><span class="pre">--tar</span></code> of <code class="docutils literal notranslate"><span class="pre">bst</span> <span class="pre">checkout</span></code>.</p>
+<p>The image can be loaded by either <code class="docutils literal notranslate"><span class="pre">podman</span> <span class="pre">load</span> <span class="pre">-i</span></code> or <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">load</span> <span class="pre">-i</span></code>.</p>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bst</span> <span class="n">checkout</span> <span class="n">element</span><span class="o">.</span><span class="n">bst</span> <span class="o">--</span><span class="n">tar</span> <span class="n">element</span><span class="o">.</span><span class="n">tar</span>
+<span class="n">podman</span> <span class="n">load</span> <span class="o">-</span><span class="n">i</span> <span class="n">element</span><span class="o">.</span><span class="n">tar</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The element will compute the layering on top of its parents. So the
+layer should be provided complete with all the files of the result.</p>
+<p>There is no creation dates added to the images to avoid problems with
+reproducibility.</p>
+<p>Each <code class="docutils literal notranslate"><span class="pre">oci</span></code> element can only add one layer. So if you need to build
+multiple layers, you must provide an <code class="docutils literal notranslate"><span class="pre">oci</span></code> element for each. Remember
+that only <code class="docutils literal notranslate"><span class="pre">os</span></code> and <code class="docutils literal notranslate"><span class="pre">architecture</span></code> are required, so you can make
+relatively concise elements.</p>
+<p>You can layer OCI on top of Docker images or Docker images on top of
+OCI.  So no need to create both versions for images you use for
+creating intermediate layers that do not need to be exported.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pip.html" class="btn btn-neutral float-right" title="pip plugin" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="distutils.html" class="btn btn-neutral float-left" title="distutils plugin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2017, Codethink Limited
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

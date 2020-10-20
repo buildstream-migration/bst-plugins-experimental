@@ -1,0 +1,360 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>meson plugin &mdash; BuildStream Experimental Plugins 1.93.4 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="make plugin" href="make.html" />
+    <link rel="prev" title="tar_element plugin" href="tar_element.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> BuildStream Experimental Plugins
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.93
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contained Elements</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="bazel_build.html">bazel_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bazelize.html">bazelize plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmake.html">cmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dpkg_build.html">dpkg_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dpkg_deploy.html">dpkg_deploy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="x86image.html">x86image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flatpak_image.html">flatpak_image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flatpak_repo.html">flatpak_repo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collect_integration.html">collect_integration plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collect_manifest.html">collect_manifest plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fastboot_bootimg.html">fastboot_bootimg plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fastboot_ext4.html">fastboot_ext4 plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tar_element.html">tar_element plugin</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">meson plugin</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#meson-meson-build-element">meson - Meson build element</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="make.html">make plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="makemaker.html">makemaker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modulebuild.html">modulebuild plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qmake.html">qmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="distutils.html">distutils plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oci.html">oci plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pip.html">pip plugin</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contained Sources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sources/bazel_source.html">bazel_source plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/cargo.html">cargo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/deb.html">deb plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/ostree.html">ostree plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/pip.html">pip plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/quilt.html">quilt plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/git_tag.html">git_tag plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/tar.html">tar plugin</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BuildStream Experimental Plugins</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>meson plugin</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/elements/meson.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-elements.meson">
+<span id="meson-plugin"></span><h1>meson plugin<a class="headerlink" href="#module-elements.meson" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="meson-meson-build-element">
+<h2>meson - Meson build element<a class="headerlink" href="#meson-meson-build-element" title="Permalink to this headline">¶</a></h2>
+<p>This is a <a class="reference external" href="https://docs.buildstream.build/master/buildstream.buildelement.html#module-buildstream.buildelement">BuildElement</a>
+implementation for using <a class="reference external" href="http://mesonbuild.com/">Meson</a> build scripts.</p>
+<p>You will often want to pass additional arguments to <code class="docutils literal notranslate"><span class="pre">meson</span></code>. This should
+be done on a per-element basis by setting the <code class="docutils literal notranslate"><span class="pre">meson-local</span></code> variable.  Here is
+an example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">variables</span><span class="p">:</span>
+  <span class="nt">meson-local</span><span class="p">:</span> <span class="p p-Indicator">|</span>
+    <span class="no">-Dmonkeys=yes</span>
+</pre></div>
+</div>
+<p>If you want to pass extra options to <code class="docutils literal notranslate"><span class="pre">meson</span></code> for every element in your
+project, set the <code class="docutils literal notranslate"><span class="pre">meson-global</span></code> variable in your project.conf file. Here is
+an example of that:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">elements</span><span class="p">:</span>
+  <span class="nt">meson</span><span class="p">:</span>
+    <span class="nt">variables</span><span class="p">:</span>
+      <span class="nt">meson-global</span><span class="p">:</span> <span class="p p-Indicator">|</span>
+        <span class="no">-Dmonkeys=always</span>
+</pre></div>
+</div>
+<p>Here is the default configuration for the <code class="docutils literal notranslate"><span class="pre">meson</span></code> element in full:</p>
+<blockquote>
+<div><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Meson default configuration</span>
+
+<span class="nt">variables</span><span class="p">:</span>
+
+  <span class="nt">build-dir</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">_builddir</span>
+
+  <span class="c1"># Project-wide extra arguments to be passed to `meson`</span>
+  <span class="nt">meson-global</span><span class="p">:</span> <span class="s">&#39;&#39;</span>
+
+  <span class="c1"># Element-specific extra arguments to be passed to `meson`.</span>
+  <span class="nt">meson-local</span><span class="p">:</span> <span class="s">&#39;&#39;</span>
+
+  <span class="c1"># For backwards compatibility only, do not use.</span>
+  <span class="nt">meson-extra</span><span class="p">:</span> <span class="s">&#39;&#39;</span>
+
+  <span class="nt">meson-args</span><span class="p">:</span> <span class="p p-Indicator">|</span>
+
+    <span class="no">--prefix=%{prefix} \</span>
+    <span class="no">--bindir=%{bindir} \</span>
+    <span class="no">--sbindir=%{sbindir} \</span>
+    <span class="no">--sysconfdir=%{sysconfdir} \</span>
+    <span class="no">--datadir=%{datadir} \</span>
+    <span class="no">--includedir=%{includedir} \</span>
+    <span class="no">--libdir=%{libdir} \</span>
+    <span class="no">--libexecdir=%{libexecdir} \</span>
+    <span class="no">--localstatedir=%{localstatedir} \</span>
+    <span class="no">--sharedstatedir=%{sharedstatedir} \</span>
+    <span class="no">--mandir=%{mandir} \</span>
+    <span class="no">--infodir=%{infodir} %{meson-extra} %{meson-global} %{meson-local}</span>
+
+  <span class="nt">meson</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">meson %{conf-root} %{build-dir} %{meson-args}</span>
+
+  <span class="nt">ninja</span><span class="p">:</span> <span class="p p-Indicator">|</span>
+    <span class="no">ninja -j ${NINJAJOBS} -C %{build-dir}</span>
+
+  <span class="nt">ninja-install</span><span class="p">:</span> <span class="p p-Indicator">|</span>
+    <span class="no">env DESTDIR=&quot;%{install-root}&quot; ninja -C %{build-dir} install</span>
+
+  <span class="c1"># Set this if the sources cannot handle parallelization.</span>
+  <span class="c1">#</span>
+  <span class="c1"># notparallel: True</span>
+
+<span class="nt">config</span><span class="p">:</span>
+
+  <span class="c1"># Commands for configuring the software</span>
+  <span class="c1">#</span>
+  <span class="nt">configure-commands</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no">%{meson}</span>
+
+  <span class="c1"># Commands for building the software</span>
+  <span class="c1">#</span>
+  <span class="nt">build-commands</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no">%{ninja}</span>
+
+  <span class="c1"># Commands for installing the software into a</span>
+  <span class="c1"># destination folder</span>
+  <span class="c1">#</span>
+  <span class="nt">install-commands</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no">%{ninja-install}</span>
+
+  <span class="c1"># Commands for stripping debugging information out of</span>
+  <span class="c1"># installed binaries</span>
+  <span class="c1">#</span>
+  <span class="nt">strip-commands</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+    <span class="no">%{strip-binaries}</span>
+
+<span class="c1"># Use max-jobs CPUs for building</span>
+<span class="nt">environment</span><span class="p">:</span>
+  <span class="nt">NINJAJOBS</span><span class="p">:</span> <span class="p p-Indicator">|</span>
+    <span class="no">%{max-jobs}</span>
+
+<span class="c1"># And dont consider NINJAJOBS as something which may</span>
+<span class="c1"># affect build output.</span>
+<span class="nt">environment-nocache</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">NINJAJOBS</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>See <a class="reference external" href="https://docs.buildstream.build/master/buildstream.buildelement.html#core-buildelement-builtins">built-in functionality documentation</a> for
+details on common configuration options for build elements.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="make.html" class="btn btn-neutral float-right" title="make plugin" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tar_element.html" class="btn btn-neutral float-left" title="tar_element plugin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2017, Codethink Limited
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>flatpak_repo plugin &mdash; BuildStream Experimental Plugins 1.93.4 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="collect_integration plugin" href="collect_integration.html" />
+    <link rel="prev" title="flatpak_image plugin" href="flatpak_image.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> BuildStream Experimental Plugins
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.93
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contained Elements</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="bazel_build.html">bazel_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bazelize.html">bazelize plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cmake.html">cmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dpkg_build.html">dpkg_build plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dpkg_deploy.html">dpkg_deploy plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="x86image.html">x86image plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flatpak_image.html">flatpak_image plugin</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">flatpak_repo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collect_integration.html">collect_integration plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collect_manifest.html">collect_manifest plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fastboot_bootimg.html">fastboot_bootimg plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fastboot_ext4.html">fastboot_ext4 plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tar_element.html">tar_element plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="meson.html">meson plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="make.html">make plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="makemaker.html">makemaker plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modulebuild.html">modulebuild plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qmake.html">qmake plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="distutils.html">distutils plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oci.html">oci plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pip.html">pip plugin</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contained Sources</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../sources/bazel_source.html">bazel_source plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/cargo.html">cargo plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/deb.html">deb plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/ostree.html">ostree plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/pip.html">pip plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/quilt.html">quilt plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/git_tag.html">git_tag plugin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sources/tar.html">tar plugin</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BuildStream Experimental Plugins</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>flatpak_repo plugin</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/elements/flatpak_repo.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-elements.flatpak_repo">
+<span id="flatpak-repo-plugin"></span><h1>flatpak_repo plugin<a class="headerlink" href="#module-elements.flatpak_repo" title="Permalink to this headline">¶</a></h1>
+<p>flatpak repository element</p>
+<p>A <a class="reference external" href="https://docs.buildstream.build/master/buildstream.scriptelement.html#module-buildstream.scriptelement">ScriptElement</a>
+implementation for exporting a flatpak repository from a set of <a class="reference internal" href="flatpak_image.html#flatpak-image"><span class="std std-ref">flatpack images</span></a>.</p>
+<dl>
+<dt>The flatpak_repo default configuration:</dt><dd><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1">#</span>
+<span class="c1"># This element requires flatpak and ostree to be provided in the build dependencies,</span>
+<span class="c1"># and uses these tools to create a flatpak repo as output.</span>
+<span class="c1">#</span>
+<span class="c1"># When specifying dependencies, one needs to specify which dependencies</span>
+<span class="c1"># are to be wrapped up into the repo, these artifacts are expected to have</span>
+<span class="c1"># the structure generated by the `flatpak_image` plugin.</span>
+<span class="c1">#</span>
+<span class="c1"># You can specify the images explicitly using the `flatpak-image` configuration,</span>
+<span class="c1"># or you can specify a whole stack of images by specifying the `flatpak-stack`</span>
+<span class="c1"># configuration, in which case the stack is expected to be a `stack` element</span>
+<span class="c1"># with only `flatpak_image` dependencies.</span>
+<span class="c1">#</span>
+<span class="c1"># E.g.:</span>
+<span class="c1">#</span>
+<span class="c1"># build-depends:</span>
+<span class="c1"># - base-with-flatpak-and-ostree.bst</span>
+<span class="c1"># - filename: flatpak-image.bst</span>
+<span class="c1">#   config:</span>
+<span class="c1">#     flatpak-image: True</span>
+<span class="c1"># - filename: flatpak-stack.bst</span>
+<span class="c1">#   config:</span>
+<span class="c1">#     flatpak-stack: True</span>
+<span class="c1">#</span>
+
+<span class="nt">config</span><span class="p">:</span>
+  <span class="c1"># refs of which a copy is to be made using flatpak build-commit-from</span>
+  <span class="c1"># a list of mappings containing keys `src` and `dest`</span>
+  <span class="nt">copy-refs</span><span class="p">:</span> <span class="p p-Indicator">[]</span>
+
+  <span class="c1"># the mode of the ostree repo (one of archive, bare, bare-user, bare-user-only)</span>
+  <span class="nt">repo-mode</span><span class="p">:</span> <span class="s">&#39;archive&#39;</span>
+
+  <span class="c1"># Used to specify the architecture and branch name in the resulting flatpak repo</span>
+  <span class="nt">arch</span><span class="p">:</span> <span class="s">&#39;%{arch}&#39;</span>
+  <span class="nt">branch</span><span class="p">:</span> <span class="s">&#39;%{branch}&#39;</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="collect_integration.html" class="btn btn-neutral float-right" title="collect_integration plugin" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="flatpak_image.html" class="btn btn-neutral float-left" title="flatpak_image plugin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2017, Codethink Limited
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
