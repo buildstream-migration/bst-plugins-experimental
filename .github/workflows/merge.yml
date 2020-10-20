@@ -17,12 +17,11 @@ jobs:
       run: tox -e docs
     - name: Create docs tarball
       run: tar -C doc/build/html -zcf docs.tgz .
-    - name: Upload release assets
-      run: |
-        tag_name="${GITHUB_REF##*/}"
-        hub release create -a "docs.tgz" -m "$tag_name" "$tag_name"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: docs
+        path: doc/build/html
 
   publish:
     name: Publish documentation to pages
